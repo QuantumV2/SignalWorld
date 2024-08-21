@@ -30,15 +30,6 @@ func create_tilemap_array(tilemap: TileMapLayer, colormap: TileMapLayer) -> Arra
 @onready var curr_grid: Array = create_tilemap_array(%CellMap, %ColorMap)
 @onready var next_grid: Array = curr_grid.duplicate(true)
 
-func update_tiles(tilemap: TileMapLayer, colormap: TileMapLayer, arr : Array):
-	for x in arr.size():
-		for y in arr[0].size():
-			var curr_cell = arr[x][y]
-			if(curr_cell['type'] != -1):
-				var atlas_coords = Global.CellTypesAtlCoords[curr_cell["type"]]
-				tilemap.set_cell(curr_cell['position'], 2, atlas_coords, Global.RotationDict[curr_cell['rotation']])
-				colormap.set_cell(curr_cell['position'], 0, Global.PowerTypesAtl[curr_cell['powered']])
-
 func do_wire_cell(curr_cell,x,y):
 	if not curr_cell['powered']:
 		return []
@@ -61,19 +52,54 @@ func do_generator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 		if is_valid_cell(nx, ny, curr_grid):
 			next_grid[nx][ny]['powered'] = 1
 
-func update_gamestate():
+func update_tiles(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Array):
+	var width = arr.size()
+	var height = arr[0].size()
+	var half_width = width / 2
+	var half_height = height / 2
 
-	update_tiles(%CellMap,%ColorMap, curr_grid)
-	for x in curr_grid.size():
-		for y in curr_grid[0].size():
-			var curr_cell = curr_grid[x][y]
-			match curr_cell["type"]:
-				Global.CellTypes.Wire:
-					do_wire_cell(curr_cell,x,y)
-				Global.CellTypes.Generator:
-					curr_cell['powered'] = 1
-					do_generator_cell(curr_cell,x,y)
+	for i in range(max(half_width, half_height)):
+		for x in [i, width - 1 - i]:
+			for y in range(height):
+				process_cell(tilemap, colormap, arr, x, y)
+		for y in [i, height - 1 - i]:
+			for x in range(width):
+				process_cell(tilemap, colormap, arr, x, y)
+
+func process_cell(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Array, x: int, y: int):
+	var curr_cell = arr[x][y]
+	if curr_cell['type'] != -1:
+		var atlas_coords = Global.CellTypesAtlCoords[curr_cell["type"]]
+		tilemap.set_cell(curr_cell['position'], 2, atlas_coords, Global.RotationDict[curr_cell['rotation']])
+		colormap.set_cell(curr_cell['position'], 0, Global.PowerTypesAtl[curr_cell['powered']])
+
+func update_gamestate():
+	update_tiles(%CellMap, %ColorMap, curr_grid)
+	var width = curr_grid.size()
+	var height = curr_grid[0].size()
+	var half_width = width / 2
+	var half_height = height / 2
+
+	for i in range(max(half_width, half_height)):
+		for x in [i, width - 1 - i]:
+			for y in range(height):
+				process_game_cell(x, y)
+		for y in [i, height - 1 - i]:
+			for x in range(width):
+				process_game_cell(x, y)
+
 	curr_grid = next_grid.duplicate(true)
+
+func process_game_cell(x: int, y: int):
+	var curr_cell = curr_grid[x][y]
+	match curr_cell["type"]:
+		Global.CellTypes.Wire:
+			do_wire_cell(curr_cell, x, y)
+		Global.CellTypes.Generator:
+			curr_cell['powered'] = 1
+			update_tiles(%CellMap, %ColorMap, curr_grid)
+			do_generator_cell(curr_cell, x, y)
+
 
 
 # Called when the node enters the scene tree for the first time.
@@ -84,4 +110,5 @@ func _ready() -> void:
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
+	
 	pass
