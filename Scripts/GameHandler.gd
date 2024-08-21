@@ -74,6 +74,8 @@ func do_generator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 	for dir in [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]:
 		var nx = x + dir.x
 		var ny = y + dir.y
+		if (curr_grid[nx][ny]['rotation'] != 180 and dir == Vector2i.DOWN) or (curr_grid[nx][ny]['rotation'] != 270 and dir == Vector2i.LEFT) or (curr_grid[nx][ny]['rotation'] != 0 and dir == Vector2i.UP) or (curr_grid[nx][ny]['rotation'] != 90 and dir == Vector2i.RIGHT):
+			continue;
 		if is_valid_cell(nx, ny, curr_grid):
 			next_grid[nx][ny]['powered'] = 1
 			
@@ -83,6 +85,8 @@ func do_randgenerator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 	for dir in [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]:
 		var nx = x + dir.x
 		var ny = y + dir.y
+		if (curr_grid[nx][ny]['rotation'] != 180 and dir == Vector2i.DOWN) or (curr_grid[nx][ny]['rotation'] != 270 and dir == Vector2i.LEFT) or (curr_grid[nx][ny]['rotation'] != 0 and dir == Vector2i.UP) or (curr_grid[nx][ny]['rotation'] != 90 and dir == Vector2i.RIGHT):
+			continue;
 		if is_valid_cell(nx, ny, curr_grid):
 			next_grid[nx][ny]['powered'] = randi_range(0,1)
 
@@ -135,12 +139,17 @@ func do_detector_cell(curr_cell, x, y):
 func do_blocker_cell(curr_cell, x, y):
 	if not curr_cell['powered']:
 		return
+	#next_grid[x][y]['powered'] = 0
 	var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
 	var dir = dirs[curr_cell['rotation'] / 90]
 	var nx = x + dir.x
 	var ny = y + dir.y
 	if is_valid_cell(nx, ny, curr_grid):
 		next_grid[nx][ny]['powered'] = 0
+			
+func do_switch_cell(curr_cell, x, y):
+	if not curr_cell['powered']:
+		return
 			
 
 func process_cell(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Array, x: int, y: int):
@@ -213,6 +222,8 @@ func process_game_cell(x: int, y: int):
 			do_randgenerator_cell(curr_cell, x, y)
 		Global.CellTypes.Blocker:
 			do_blocker_cell(curr_cell, x, y)
+		Global.CellTypes.Switch:
+			do_switch_cell(curr_cell, x, y)			
 	if !is_valid_cell(x,y,next_grid):
 		next_grid[x][y]['powered'] = 0
 
