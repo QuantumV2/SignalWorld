@@ -1,6 +1,17 @@
 extends Node
 
-
+var CellFuncs : Dictionary = {
+	Global.CellTypes.Wire: do_wire_cell,
+	Global.CellTypes.Generator: do_generator_cell,
+	Global.CellTypes.Buffer: do_buffer_cell,
+	Global.CellTypes.JumpPad: do_jumppad_cell,
+	Global.CellTypes.Detector: do_detector_cell,
+	Global.CellTypes.Randomizer: do_randgenerator_cell,
+	Global.CellTypes.Blocker: do_blocker_cell,
+	Global.CellTypes.Switch: do_switch_cell,
+	Global.CellTypes.AND: do_AND_cell,
+	Global.CellTypes.XOR: do_XOR_cell,
+}
 func create_tilemap_array(tilemap: TileMapLayer, colormap: TileMapLayer) -> Array:
 	var result = []
 	var usedrect: Rect2i = tilemap.get_used_rect()
@@ -80,6 +91,61 @@ func do_generator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 			next_grid[nx][ny]['powered'] = 1
 			curr_grid[nx][ny]['powered'] = 1
 			
+func do_AND_cell(curr_cell: Dictionary, x: int, y: int) -> void:
+	if not next_grid[x][y]['powered']:
+		return
+	var neighbors = 0
+	var powered_neighbors = 0
+	
+	for dir in [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]:
+		var nx = x + dir.x
+		var ny = y + dir.y
+
+		if is_valid_cell(nx, ny, curr_grid):
+			neighbors += 1;
+			if curr_grid[nx][ny]['powered']:
+				powered_neighbors  += 1;
+	if neighbors-1 == powered_neighbors:
+		var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
+		var dir = dirs[curr_cell['rotation'] / 90]
+		next_grid[x+dir.x][y+dir.y]['powered'] = 1
+		next_grid[x][y]['powered'] = 0
+		curr_grid[x][y]['powered'] = 0
+		#WHY WONT IT WORK
+		return
+	else:
+		next_grid[x][y]['powered'] = 0
+		curr_grid[x][y]['powered'] = 0
+		return
+func do_XOR_cell(curr_cell: Dictionary, x: int, y: int) -> void:
+	if not next_grid[x][y]['powered']:
+		return
+
+	var neighbors = 0
+	var powered_neighbors = 0
+	
+	for dir in [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]:
+		var nx = x + dir.x
+		var ny = y + dir.y
+
+		if is_valid_cell(nx, ny, curr_grid):
+			neighbors += 1;
+			if curr_grid[nx][ny]['powered']:
+				powered_neighbors  += 1;
+	if (neighbors-1 != powered_neighbors) and powered_neighbors > 0:
+		var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
+		var dir = dirs[curr_cell['rotation'] / 90]
+		next_grid[x+dir.x][y+dir.y]['powered'] = 1
+		next_grid[x][y]['powered'] = 0
+		curr_grid[x][y]['powered'] = 0
+		#WHY WONT IT WORK
+		return
+	else:
+		next_grid[x][y]['powered'] = 0
+		curr_grid[x][y]['powered'] = 0
+		return
+
+			
 func do_randgenerator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 	if not curr_cell['powered']:
 		return
@@ -141,12 +207,13 @@ func do_detector_cell(curr_cell, x, y):
 func do_blocker_cell(curr_cell, x, y):
 	if not curr_cell['powered']:
 		return
-	next_grid[x][y]['powered'] = 0
+	#next_grid[x][y]['powered'] = 0
 	var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
 	var dir = dirs[curr_cell['rotation'] / 90]
 	var nx = x + dir.x
 	var ny = y + dir.y
 	if is_valid_cell(nx, ny, curr_grid):
+		curr_grid[nx][ny]['powered'] = 0
 		next_grid[nx][ny]['powered'] = 0
 			
 func do_switch_cell(curr_cell, x, y):
@@ -201,31 +268,15 @@ func process_game_cell(x: int, y: int):
 	var curr_cell = curr_grid[x][y]
 	if curr_cell['powered'] == -1:
 		return
-	match curr_cell["type"]:
-		Global.CellTypes.Wire:
-			do_wire_cell(curr_cell, x, y)
-		Global.CellTypes.Generator:
+	
+	if curr_cell['type'] in CellFuncs.keys():
+		CellFuncs[curr_cell['type']].call(curr_cell, x, y)
+		if curr_cell['type'] in [Global.CellTypes.Generator, Global.CellTypes.Randomizer]:
 			if is_valid_cell(x,y,next_grid):
 				curr_cell['powered'] = 1
-				update_tiles(%CellMap, %ColorMap, curr_grid)
-			do_generator_cell(curr_cell, x, y)
-		Global.CellTypes.Buffer:
-			do_buffer_cell(curr_cell, x, y)
-		Global.CellTypes.JumpPad:
-			do_jumppad_cell(curr_cell, x, y)
-		Global.CellTypes.Detector:
-			do_detector_cell(curr_cell, x, y)
-		Global.CellTypes.Randomizer:
-			if is_valid_cell(x,y,next_grid):
-				curr_cell['powered'] = 1
-				update_tiles(%CellMap, %ColorMap, curr_grid)
-			do_randgenerator_cell(curr_cell, x, y)
-		Global.CellTypes.Blocker:
-			do_blocker_cell(curr_cell, x, y)
-		Global.CellTypes.Switch:
-			do_switch_cell(curr_cell, x, y)			
-	if !is_valid_cell(x,y,next_grid):
-		next_grid[x][y]['powered'] = 0
+				update_tiles(%CellMap, %ColorMap, curr_grid)	
+		if !is_valid_cell(x,y,next_grid):
+			next_grid[x][y]['powered'] = 0
 
 
 # Called when the node enters the scene tree for the first time.

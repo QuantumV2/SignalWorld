@@ -1,45 +1,36 @@
-[gd_scene load_steps=6 format=4 uid="uid://dpl015ydoxgno"]
+[gd_scene load_steps=5 format=4 uid="uid://dpl015ydoxgno"]
 
-[ext_resource type="TileSet" uid="uid://bknk4bw1ekaa6" path="res://Tilesets/cell_tileset.tres" id="1_hnnfn"]
-[ext_resource type="TileSet" uid="uid://un4xm21okyia" path="res://Tilesets/color_tileset.tres" id="1_mhpwr"]
-[ext_resource type="Script" path="res://Scripts/tile_map_layer_testing.gd" id="2_l6fq3"]
-[ext_resource type="Script" path="res://Scripts/GameHandler.gd" id="4_s7f23"]
-
-[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_uffs5"]
-blend_mode = 1
+[ext_resource type="Script" path="res://Scenes/cam_origin.gd" id="2_sxy5u"]
+[ext_resource type="PackedScene" uid="uid://b7j2071weldx4" path="res://Prefabs/color_map.tscn" id="3_li8la"]
+[ext_resource type="PackedScene" uid="uid://br6n2l4lqswsi" path="res://Prefabs/game_handler.tscn" id="3_uuw4e"]
+[ext_resource type="PackedScene" uid="uid://ckq1uhkvol4c1" path="res://Prefabs/cell_map.tscn" id="4_1x3vp"]
 
 [node name="Game" type="Node2D"]
 
 [node name="TileMaps" type="Node2D" parent="."]
-
-[node name="CellMap" type="TileMapLayer" parent="TileMaps"]
 unique_name_in_owner = true
-tile_map_data = PackedByteArray("AAAAAAUAAgABAAAAAAAAAAQAAgAAAAAAAAABAAUAAgAAAAAAAFD//wUAAgAAAAAAAGAAAAYAAgAAAAAAADACAAUAAgAAAAAAAFADAAUAAgAAAAAAAFAEAAUAAgAAAAAAAFAFAAUAAgAAAAAAAFD+/wUAAgAAAAAAAGD9/wUAAgAAAAAAAGD8/wUAAgAAAAAAAGD7/wUAAgAAAAAAAGD6/wUAAgAAAAAAAGD5/wUAAgAAAAAAAGD4/wUAAgAAAAAAAGA=")
-tile_set = ExtResource("1_hnnfn")
-script = ExtResource("2_l6fq3")
 
-[node name="ColorMap" type="TileMapLayer" parent="TileMaps/CellMap"]
+[node name="CellMap" parent="TileMaps" instance=ExtResource("4_1x3vp")]
 unique_name_in_owner = true
-material = SubResource("CanvasItemMaterial_uffs5")
-scale = Vector2(8, 8)
-tile_map_data = PackedByteArray("AADu/wUAAAAAAAAAAADu/wMAAAAAAAAAAAA=")
-tile_set = ExtResource("1_mhpwr")
+tile_map_data = PackedByteArray("AAAAAAUAAgAAAAAAAAAAAAQAAgAAAAAAAAAAAAMAAgAAAAAAAAAAAAIAAgAAAAAAAAAAAAEAAgAAAAAAAFACAAUAAgAAAAAAAAACAAQAAgAAAAAAAAACAAMAAgAAAAAAAAACAAIAAgAAAAAAAAACAAEAAgAAAAAAAGABAAEAAgAAAAAAAAABAAAAAgAAAAAAAAABAP//AgAAAAAAAAABAP7/AgAAAAAAAAABAP3/AgAAAAAAAAABAPz/AgAAAAAAAAABAPv/AgAAAAAAAAABAPr/AgAAAAAAAAA=")
+
+[node name="ColorMap" parent="TileMaps" instance=ExtResource("3_li8la")]
+unique_name_in_owner = true
+tile_map_data = PackedByteArray("AAAAAAUAAAAAAAAAAAACAAUAAAAAAAAAAAA=")
+
+[node name="GameHandler" parent="." instance=ExtResource("3_uuw4e")]
+unique_name_in_owner = true
 
 [node name="CamOrigin" type="Node2D" parent="."]
+script = ExtResource("2_sxy5u")
 
 [node name="ColorRect" type="ColorRect" parent="CamOrigin"]
 offset_left = -3259.0
 offset_top = -1875.0
 offset_right = 3269.0
 offset_bottom = 1869.0
-color = Color(0.486275, 0.486275, 0.486275, 0.168627)
+color = Color(0.486275, 0.486275, 0.486275, 0.0941176)
 
 [node name="Camera2D" type="Camera2D" parent="CamOrigin"]
 position = Vector2(0, -1)
 zoom = Vector2(0.3, 0.3)
-
-[node name="GameHandler" type="Node" parent="."]
-unique_name_in_owner = true
-script = ExtResource("4_s7f23")
-
-[connection signal="changed" from="TileMaps/CellMap" to="TileMaps/CellMap" method="_on_changed"]

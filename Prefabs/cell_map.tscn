@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://ckq1uhkvol4c1"]
+
+[ext_resource type="TileSet" uid="uid://bknk4bw1ekaa6" path="res://Tilesets/cell_tileset.tres" id="1_gchxe"]
+
+[node name="CellMap" type="TileMapLayer"]
+position = Vector2(1, 0)
+tile_set = ExtResource("1_gchxe")
