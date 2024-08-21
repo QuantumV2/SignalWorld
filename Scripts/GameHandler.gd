@@ -7,7 +7,6 @@ func create_tilemap_array(tilemap: TileMapLayer, colormap: TileMapLayer) -> Arra
 	for x in range(usedrect.size.x):
 		var arr = []
 		arr.resize(usedrect.size.y)
-		arr.fill({})
 		result.append(arr)
 		for y in range(usedrect.size.y):
 			
@@ -74,10 +73,12 @@ func do_generator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 	for dir in [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]:
 		var nx = x + dir.x
 		var ny = y + dir.y
-		if (curr_grid[nx][ny]['rotation'] != 180 and dir == Vector2i.DOWN) or (curr_grid[nx][ny]['rotation'] != 270 and dir == Vector2i.LEFT) or (curr_grid[nx][ny]['rotation'] != 0 and dir == Vector2i.UP) or (curr_grid[nx][ny]['rotation'] != 90 and dir == Vector2i.RIGHT):
-			continue;
+
 		if is_valid_cell(nx, ny, curr_grid):
+			if (curr_grid[nx][ny]['rotation'] != 180 and dir == Vector2i.DOWN) or (curr_grid[nx][ny]['rotation'] != 270 and dir == Vector2i.LEFT) or (curr_grid[nx][ny]['rotation'] != 0 and dir == Vector2i.UP) or (curr_grid[nx][ny]['rotation'] != 90 and dir == Vector2i.RIGHT):
+				continue;
 			next_grid[nx][ny]['powered'] = 1
+			curr_grid[nx][ny]['powered'] = 1
 			
 func do_randgenerator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 	if not curr_cell['powered']:
@@ -89,6 +90,7 @@ func do_randgenerator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 			continue;
 		if is_valid_cell(nx, ny, curr_grid):
 			next_grid[nx][ny]['powered'] = randi_range(0,1)
+			curr_grid[nx][ny]['powered'] = next_grid[nx][ny]['powered']
 
 func do_buffer_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 	if not curr_cell['powered']:
@@ -139,7 +141,7 @@ func do_detector_cell(curr_cell, x, y):
 func do_blocker_cell(curr_cell, x, y):
 	if not curr_cell['powered']:
 		return
-	#next_grid[x][y]['powered'] = 0
+	next_grid[x][y]['powered'] = 0
 	var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
 	var dir = dirs[curr_cell['rotation'] / 90]
 	var nx = x + dir.x
@@ -162,8 +164,6 @@ func process_cell(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Array, x: 
 func update_tiles(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Array):
 	var width = arr.size()
 	var height = arr[0].size()
-	var half_width = width / 2
-	var half_height = height / 2
 
 	for i in range((width + 1) / 2):
 		for x in [i, width - 1 - i]:
