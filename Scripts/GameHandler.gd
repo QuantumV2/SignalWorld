@@ -40,7 +40,7 @@ func do_wire_cell(curr_cell, x, y):
 	var ny = y + dir.y
 	
 	if is_valid_cell(nx, ny, curr_grid):
-		next_grid[nx][ny]['powered'] = 1
+		next_grid[nx][ny]['powered'] = curr_cell['powered']
 	
 	# Check if there's a powered wire behind this one
 	var back_x = x - dir.x
@@ -48,9 +48,25 @@ func do_wire_cell(curr_cell, x, y):
 	if not is_valid_cell(back_x, back_y, curr_grid) or not curr_grid[back_x][back_y]['powered']:
 		next_grid[x][y]['powered'] = 0
 	else:
-		next_grid[x][y]['powered'] = 1
+		next_grid[x][y]['powered'] = curr_cell['powered']
 func is_valid_cell(x, y, grid):
-	return x >= 0 and x < grid.size() and y >= 0 and y < grid[0].size() and grid[x][y]['type'] != -1
+	if x < 0 or x >= grid.size() or y < 0 or y >= grid[0].size():
+		return false
+	if grid[x][y]['type'] == -1:
+		return false
+	# Check for active blockers
+	var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
+	for dir in dirs:
+		var bx = x + dir.x
+		var by = y + dir.y
+		if is_cell_in_grid(bx, by, grid) and grid[bx][by]['type'] == Global.CellTypes.Blocker:
+			var blocker_dir = dirs[grid[bx][by]['rotation'] / 90]
+			if blocker_dir == -dir and grid[bx][by]['powered']:
+				return false
+	return true
+
+func is_cell_in_grid(x, y, grid):
+	return x >= 0 and x < grid.size() and y >= 0 and y < grid[0].size()
 
 func do_generator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 	if not curr_cell['powered']:
@@ -60,20 +76,72 @@ func do_generator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 		var ny = y + dir.y
 		if is_valid_cell(nx, ny, curr_grid):
 			next_grid[nx][ny]['powered'] = 1
+			
+func do_randgenerator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
+	if not curr_cell['powered']:
+		return
+	for dir in [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]:
+		var nx = x + dir.x
+		var ny = y + dir.y
+		if is_valid_cell(nx, ny, curr_grid):
+			next_grid[nx][ny]['powered'] = randi_range(0,1)
 
-func update_tiles(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Array):
-	var width = arr.size()
-	var height = arr[0].size()
-	var half_width = width / 2
-	var half_height = height / 2
+func do_buffer_cell(curr_cell: Dictionary, x: int, y: int) -> void:
+	if not curr_cell['powered']:
+		return
 
-	for i in range(max(half_width, half_height)):
-		for x in [i, width - 1 - i]:
-			for y in range(height):
-				process_cell(tilemap, colormap, arr, x, y)
-		for y in [i, height - 1 - i]:
-			for x in range(width):
-				process_cell(tilemap, colormap, arr, x, y)
+	if curr_cell['powered'] == 2:
+		next_grid[x][y]['powered'] = 0;
+		var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
+		var dir = dirs[curr_cell['rotation'] / 90]
+		var nx = x + (dir.x)
+		var ny = y + (dir.y)
+		if is_valid_cell(nx,ny,curr_grid):
+			next_grid[nx][ny]['powered'] = 1
+	if curr_cell['powered'] == 1:
+		next_grid[x][y]['powered'] = 2
+		return
+
+func do_jumppad_cell(curr_cell, x, y):
+	if not curr_cell['powered']:
+		return
+
+	
+	next_grid[x][y]['powered'] = 0;
+	var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
+	var dir = dirs[curr_cell['rotation'] / 90]
+	var nx = x + (dir.x*2)
+	var ny = y + (dir.y*2)
+	if is_valid_cell(nx,ny,curr_grid):
+		next_grid[nx][ny]['powered'] = 1
+		
+func do_detector_cell(curr_cell, x, y):
+	
+	if curr_cell['powered']:
+		do_wire_cell(curr_cell, x, y)
+	
+	next_grid[x][y]['powered'] = 0;
+	var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
+	var dir = dirs[curr_cell['rotation'] / 90]
+	var nx = x + (dir.x)
+	var ny = y + (dir.y)
+	var bx = x - (dir.x)
+	var by = y - (dir.y)
+	if is_valid_cell(bx,by,curr_grid):
+		if curr_grid[bx][by]['powered']:
+			next_grid[x][y]['powered'] = 1
+			next_grid[bx][by]['powered'] = 0
+			#next_grid[nx][ny]['powered'] = 1
+func do_blocker_cell(curr_cell, x, y):
+	if not curr_cell['powered']:
+		return
+	var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
+	var dir = dirs[curr_cell['rotation'] / 90]
+	var nx = x + dir.x
+	var ny = y + dir.y
+	if is_valid_cell(nx, ny, curr_grid):
+		next_grid[nx][ny]['powered'] = 0
+			
 
 func process_cell(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Array, x: int, y: int):
 	var curr_cell = arr[x][y]
@@ -82,34 +150,71 @@ func process_cell(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Array, x: 
 		tilemap.set_cell(curr_cell['position'], 2, atlas_coords, Global.RotationDict[curr_cell['rotation']])
 		colormap.set_cell(curr_cell['position'], 0, Global.PowerTypesAtl[curr_cell['powered']])
 
+func update_tiles(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Array):
+	var width = arr.size()
+	var height = arr[0].size()
+	var half_width = width / 2
+	var half_height = height / 2
+
+	for i in range((width + 1) / 2):
+		for x in [i, width - 1 - i]:
+			if x < width:
+				for y in range(height):
+					process_cell(tilemap, colormap, arr, x, y)
+
+	for i in range((height + 1) / 2):
+		for y in [i, height - 1 - i]:
+			if y < height:
+				for x in range(width):
+					process_cell(tilemap, colormap, arr, x, y)
+
 func update_gamestate():
 	curr_grid = next_grid.duplicate(true)
 	update_tiles(%CellMap, %ColorMap, curr_grid)
 	var width = curr_grid.size()
 	var height = curr_grid[0].size()
-	var half_width = width / 2
-	var half_height = height / 2
 
-	for i in range(max(half_width, half_height)):
+	for i in range((width + 1) / 2):
 		for x in [i, width - 1 - i]:
-			for y in range(height):
-				process_game_cell(x, y)
+			if x < width:
+				for y in range(height):
+					process_game_cell(x, y)
+
+	for i in range((height + 1) / 2):
 		for y in [i, height - 1 - i]:
-			for x in range(width):
-				process_game_cell(x, y)
+			if y < height:
+				for x in range(width):
+					process_game_cell(x, y)
 
 
 
 func process_game_cell(x: int, y: int):
 	var curr_cell = curr_grid[x][y]
+	if curr_cell['powered'] == -1:
+		return
 	match curr_cell["type"]:
 		Global.CellTypes.Wire:
 			do_wire_cell(curr_cell, x, y)
 		Global.CellTypes.Generator:
-			curr_cell['powered'] = 1
-			update_tiles(%CellMap, %ColorMap, curr_grid)
+			if is_valid_cell(x,y,next_grid):
+				curr_cell['powered'] = 1
+				update_tiles(%CellMap, %ColorMap, curr_grid)
 			do_generator_cell(curr_cell, x, y)
-
+		Global.CellTypes.Buffer:
+			do_buffer_cell(curr_cell, x, y)
+		Global.CellTypes.JumpPad:
+			do_jumppad_cell(curr_cell, x, y)
+		Global.CellTypes.Detector:
+			do_detector_cell(curr_cell, x, y)
+		Global.CellTypes.Randomizer:
+			if is_valid_cell(x,y,next_grid):
+				curr_cell['powered'] = 1
+				update_tiles(%CellMap, %ColorMap, curr_grid)
+			do_randgenerator_cell(curr_cell, x, y)
+		Global.CellTypes.Blocker:
+			do_blocker_cell(curr_cell, x, y)
+	if !is_valid_cell(x,y,next_grid):
+		next_grid[x][y]['powered'] = 0
 
 
 # Called when the node enters the scene tree for the first time.
