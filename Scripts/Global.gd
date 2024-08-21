@@ -9,6 +9,12 @@ enum TileTransform {
 	ROTATE_180 = TileSetAtlasSource.TRANSFORM_FLIP_H | TileSetAtlasSource.TRANSFORM_FLIP_V,
 	ROTATE_270 = TileSetAtlasSource.TRANSFORM_TRANSPOSE | TileSetAtlasSource.TRANSFORM_FLIP_V,
 }
+const RotationDict : Dictionary = {
+	0: 0,
+	90: TileTransform.ROTATE_90,
+	180: TileTransform.ROTATE_180,
+	270: TileTransform.ROTATE_270,
+}
 const CellTypes : Dictionary = {
 	&"Wire":0,
 	&"Generator":1,
@@ -21,10 +27,28 @@ const CellTypes : Dictionary = {
 	&"Blocker":8,
 	&"Randomizer":9,
 }
-var PowerTypes : Dictionary = {
+const CellTypesAtlCoords : Dictionary = {
+	-1:Vector2i(-1,-1),
+	0:Vector2i(0,0),
+	1:Vector2i(1,0),
+	2:Vector2i(2,0),
+	3:Vector2i(3,0),
+	4:Vector2i(0,1),
+	5:Vector2i(1,1),
+	6:Vector2i(2,1),
+	7:Vector2i(3,1),
+	8:Vector2i(0,2),
+	9:Vector2i(1,2),
+}
+const PowerTypes : Dictionary = {
 	Vector2i(-1,-1):0,
 	Vector2i(0,0):1,
 	Vector2i(1,0):2,
+}
+const PowerTypesAtl : Dictionary = {
+	0:Vector2i(-1,-1),
+	1:Vector2i(0,0),
+	2:Vector2i(1,0),
 }
 func get_tile_data_rotation(alt_tile : int):
 	match alt_tile:

@@ -13,5 +13,5 @@ func _process(delta: float) -> void:
 
 
 func _on_changed() -> void:
-	%GameHandler.create_tilemap_array(%CellMap, %ColorMap)
+	#%GameHandler.create_tilemap_array(%CellMap, %ColorMap)
 	pass # Replace with function body.
