@@ -40,37 +40,26 @@ func update_tiles(tilemap: TileMapLayer, colormap: TileMapLayer, arr : Array):
 				colormap.set_cell(curr_cell['position'], 0, Global.PowerTypesAtl[curr_cell['powered']])
 
 func do_wire_cell(curr_cell,x,y):
-	if curr_cell['powered']:
-		next_grid[x][y]["powered"] = 0
-		match curr_cell['rotation']:
-			0:
-				if y > 0:
-					next_grid[x][y - 1]['powered'] = 1
-			90:
-				if x < curr_grid.size()-1:
-					next_grid[x + 1][y]['powered'] = 1
-			180:
-				if y < curr_grid[0].size()-1:
-					next_grid[x][y+1]['powered'] = 1
-			270:
-				if x > 0:
-					next_grid[x-1][y]['powered'] = 1
+	if not curr_cell['powered']:
+		return []
+	next_grid[x][y]['powered'] = 0;
+	var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
+	var dir = dirs[curr_cell['rotation'] / 90]
+	var nx = x + dir.x
+	var ny = y + dir.y
+	if is_valid_cell(nx, ny, curr_grid):
+		next_grid[nx][ny]['powered'] = 1
+func is_valid_cell(x, y, grid):
+	return x >= 0 and x < grid.size() and y >= 0 and y < grid[0].size() and grid[x][y]['type'] != -1
 
 func do_generator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
-	if not curr_cell.get('powered', false):
+	if not curr_cell['powered']:
 		return
-
-	var grid_size = Vector2i(len(next_grid), len(next_grid[0]))
-	var directions = [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]
-
-	for dir in directions:
-		var nx = (x + dir.x + grid_size.x) % grid_size.x
-		var ny = (y + dir.y + grid_size.y) % grid_size.y
-		#print(nx, " ", ny)
-
-		if next_grid[nx][ny].get('type', -1) != -1:
+	for dir in [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]:
+		var nx = x + dir.x
+		var ny = y + dir.y
+		if is_valid_cell(nx, ny, curr_grid):
 			next_grid[nx][ny]['powered'] = 1
-	return
 
 func update_gamestate():
 
