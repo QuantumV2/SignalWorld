@@ -24,22 +24,31 @@ func create_tilemap_array(tilemap: TileMapLayer, colormap: TileMapLayer) -> Arra
 				"rotation": Global.get_tile_data_rotation(tile_alt),
 				"position": currentpos,
 			}
-	print(result)
+	#print(result)
 	return result
 
 @onready var curr_grid: Array = create_tilemap_array(%CellMap, %ColorMap)
 @onready var next_grid: Array = curr_grid.duplicate(true)
 
-func do_wire_cell(curr_cell,x,y):
+func do_wire_cell(curr_cell, x, y):
 	if not curr_cell['powered']:
 		return []
-	next_grid[x][y]['powered'] = 0;
+	
 	var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
 	var dir = dirs[curr_cell['rotation'] / 90]
 	var nx = x + dir.x
 	var ny = y + dir.y
+	
 	if is_valid_cell(nx, ny, curr_grid):
 		next_grid[nx][ny]['powered'] = 1
+	
+	# Check if there's a powered wire behind this one
+	var back_x = x - dir.x
+	var back_y = y - dir.y
+	if not is_valid_cell(back_x, back_y, curr_grid) or not curr_grid[back_x][back_y]['powered']:
+		next_grid[x][y]['powered'] = 0
+	else:
+		next_grid[x][y]['powered'] = 1
 func is_valid_cell(x, y, grid):
 	return x >= 0 and x < grid.size() and y >= 0 and y < grid[0].size() and grid[x][y]['type'] != -1
 
@@ -74,6 +83,7 @@ func process_cell(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Array, x: 
 		colormap.set_cell(curr_cell['position'], 0, Global.PowerTypesAtl[curr_cell['powered']])
 
 func update_gamestate():
+	curr_grid = next_grid.duplicate(true)
 	update_tiles(%CellMap, %ColorMap, curr_grid)
 	var width = curr_grid.size()
 	var height = curr_grid[0].size()
@@ -88,7 +98,7 @@ func update_gamestate():
 			for x in range(width):
 				process_game_cell(x, y)
 
-	curr_grid = next_grid.duplicate(true)
+
 
 func process_game_cell(x: int, y: int):
 	var curr_cell = curr_grid[x][y]
