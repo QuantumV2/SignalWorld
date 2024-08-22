@@ -15,39 +15,56 @@ var CellFuncs : Dictionary = {
 
 var paused = false;
 
-func user_place_tile_tilemap(tilemap: TileMapLayer, event: InputEvent, atlas_coords : Vector2i, alt_tile: int, source_id:int = 2):
+func user_place_tile_tilemap(tilemap: TileMapLayer, event: InputEvent, atlas_coords: Vector2i, alt_tile: int, source_id: int = 2):
 	var camera_zoom = %Camera2D.zoom
-	var pos = tilemap.local_to_map(tilemap.to_local(
-	(event.position / camera_zoom) + %CamOrigin.position - (get_viewport().get_visible_rect().size / (2 * camera_zoom))
-	))
+	var event_position = event.position / camera_zoom + %CamOrigin.position - get_viewport().get_visible_rect().size / (2 * camera_zoom)
+	var pos = tilemap.local_to_map(tilemap.to_local(event_position))
+	
 	tilemap.set_cell(pos, source_id, atlas_coords, alt_tile)
+	
+	# Optimized grid handling
 	curr_grid = create_tilemap_array(%CellMap, %ColorMap)
 	next_grid = curr_grid.duplicate(true)
+func clear_tilemap():
+	curr_grid = [[]]
+	next_grid = [[]]
+	var rct = %CellMap.get_used_rect()
+	for x in rct.size.x:
+		for y in rct.size.y:
+			%CellMap.set_cell(Vector2i(x,y)+rct.position)
+			%ColorMap.set_cell(Vector2i(x,y)+rct.position)
+
+func change_tick_rate(value: float):
+	Global.tick_speed = value*60
 
 func create_tilemap_array(tilemap: TileMapLayer, colormap: TileMapLayer) -> Array:
-	var result = []
-	var usedrect: Rect2i = tilemap.get_used_rect()
-	for x in range(usedrect.size.x):
-		var arr = []
-		arr.resize(usedrect.size.y)
-		result.append(arr)
-		for y in range(usedrect.size.y):
-			
-			var currentpos = usedrect.position + Vector2i(x,y)
-			var tile_atlas_coords = tilemap.get_cell_atlas_coords(currentpos)
-			var tile_data = tilemap.get_cell_tile_data(currentpos)
-			var tile_alt = tilemap.get_cell_alternative_tile(currentpos)
-			var color_tile_atlas_coords = colormap.get_cell_atlas_coords(currentpos)
-			#if tile_atlas_coords != Vector2i(-1,-1):
-			var is_powered:int = Global.PowerTypes[color_tile_atlas_coords]
+	var used_rect: Rect2i = tilemap.get_used_rect()
+	var result = Array()
+	result.resize(used_rect.size.x)
+	
+	for x in range(used_rect.size.x):
+		result[x] = Array()
+		result[x].resize(used_rect.size.y)
+		
+		for y in range(used_rect.size.y):
+			var current_pos = used_rect.position + Vector2i(x, y)
+			var tile_atlas_coords = tilemap.get_cell_atlas_coords(current_pos)
+			var tile_data = tilemap.get_cell_tile_data(current_pos)
+			var tile_alt = tilemap.get_cell_alternative_tile(current_pos)
+			var color_tile_atlas_coords = colormap.get_cell_atlas_coords(current_pos)
+			var is_powered: int = Global.PowerTypes[color_tile_atlas_coords]
+
+			var cell_type = Global.CellTypes[tile_data.get_custom_data("CellTypes")] if tile_atlas_coords != Vector2i(-1, -1) else -1
+
 			result[x][y] = {
-				"type": Global.CellTypes[tile_data.get_custom_data("CellTypes")] if tile_atlas_coords != Vector2i(-1,-1) else -1,
+				"type": cell_type,
 				"powered": is_powered,
 				"rotation": Global.get_tile_data_rotation(tile_alt),
-				"position": currentpos,
+				"position": current_pos,
 			}
-	#print(result)
+	
 	return result
+
 
 @onready var curr_grid: Array = create_tilemap_array(%CellMap, %ColorMap)
 @onready var next_grid: Array = curr_grid.duplicate(true)
@@ -168,8 +185,10 @@ func do_randgenerator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 		if is_valid_cell(nx, ny, curr_grid):
 			if (curr_grid[nx][ny]['rotation'] != 180 and dir == Vector2i.DOWN) or (curr_grid[nx][ny]['rotation'] != 270 and dir == Vector2i.LEFT) or (curr_grid[nx][ny]['rotation'] != 0 and dir == Vector2i.UP) or (curr_grid[nx][ny]['rotation'] != 90 and dir == Vector2i.RIGHT):
 				continue;
-			next_grid[nx][ny]['powered'] = randi_range(0,1)
-			curr_grid[nx][ny]['powered'] = next_grid[nx][ny]['powered']
+			var rand = randi_range(0,1)
+			
+			next_grid[nx][ny]['powered'] = rand
+			curr_grid[nx][ny]['powered'] = rand
 
 func do_buffer_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 	if not curr_cell['powered']:
@@ -235,9 +254,9 @@ func do_switch_cell(curr_cell, _x, _y):
 func process_cell(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Array, x: int, y: int):
 	var curr_cell = arr[x][y]
 	if curr_cell['type'] != -1:
-		var atlas_coords = Global.CellTypesAtlCoords[curr_cell["type"]]
-		tilemap.set_cell(curr_cell['position'], 2, atlas_coords, Global.RotationDict[curr_cell['rotation']])
-		colormap.set_cell(curr_cell['position'], 0, Global.PowerTypesAtl[curr_cell['powered']])
+		var atlas_coords = Global.CellTypesAtlCoords[int(curr_cell["type"])]
+		tilemap.set_cell(curr_cell['position'], 2, atlas_coords, Global.RotationDict[int(curr_cell['rotation'])])
+		colormap.set_cell(curr_cell['position'], 0, Global.PowerTypesAtl[int(curr_cell['powered'])])
 
 func update_tiles(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Array):
 	var width = arr.size()
@@ -291,7 +310,7 @@ func process_game_cell(x: int, y: int):
 		if curr_cell['type'] in [Global.CellTypes.Generator, Global.CellTypes.Randomizer]:
 			if is_valid_cell(x,y,next_grid):
 				curr_cell['powered'] = 1
-				update_tiles(%CellMap, %ColorMap, curr_grid)	
+				update_tiles(%CellMap, %ColorMap, curr_grid)
 		if !is_valid_cell(x,y,next_grid):
 			next_grid[x][y]['powered'] = 0
 
@@ -306,3 +325,46 @@ func _input(event: InputEvent) -> void:
 		paused = !paused
 	if event.is_action_pressed("fullscreen"):
 		Global.swap_fullscreen_mode()
+
+
+func _on_save_dialog_file_selected(path: String) -> void:
+	if !curr_grid or curr_grid == []:
+		return
+	var compresseddata = {"size":[curr_grid.size(), curr_grid[0].size()],"data":[]}
+	for x in range(curr_grid.size()):
+		for y in range(curr_grid[0].size()):
+			compresseddata['data'].append([[x,y], curr_grid[x][y]])
+
+	var compressedstring = JSON.stringify(compresseddata)
+	var file = FileAccess.open(path, FileAccess.WRITE)
+	file.store_string(compressedstring)
+	file.close()
+
+
+func _on_open_dialog_file_selected(path: String) -> void:
+	var file = FileAccess.open(path, FileAccess.READ)
+	if file:
+		var content = file.get_as_text()
+		file.close()
+
+		var json = JSON.new()
+		var error = json.parse(content)
+
+		if error == OK:
+			var data = json.data
+			var json_size = data['size']
+			curr_grid = []
+			curr_grid.resize(json_size[0])
+		
+			for i in range(curr_grid.size()):
+				curr_grid[i] = []
+				curr_grid[i].resize(json_size[1])
+		
+			for i in data['data']:
+				curr_grid[i[0][0]][i[0][1]] = i[1]
+				curr_grid[i[0][0]][i[0][1]]['position'] = StringHelper.string_to_vector2i(curr_grid[i[0][0]][i[0][1]]['position'])
+
+			next_grid = curr_grid.duplicate(true)
+			update_tiles(%CellMap, %ColorMap, next_grid)
+		else:
+			print("JSON Parse Error: ", json.get_error_message(), " in ", content, " at line ", json.get_error_line())

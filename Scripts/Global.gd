@@ -58,6 +58,15 @@ const PowerTypesAtl : Dictionary = {
 	1:Vector2i(0,0),
 	2:Vector2i(1,0),
 }
+func array_to_dict_recursive(array):
+	var dict = {}
+	for index in range(len(array)):
+		if array[index] is Array:
+			dict[index] = array_to_dict_recursive(array[index])
+		else:
+			dict[index] = array[index]
+	return dict
+
 func get_tile_data_rotation(alt_tile : int):
 	match alt_tile:
 		TileTransform.ROTATE_0:

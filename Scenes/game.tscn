@@ -54,6 +54,7 @@ atlas = ExtResource("6_58r07")
 region = Rect2(0, 0, 16, 16)
 
 [node name="Game" type="Node2D"]
+position = Vector2(1, 0)
 
 [node name="TileMaps" type="Node2D" parent="."]
 unique_name_in_owner = true
@@ -76,10 +77,10 @@ unique_name_in_owner = true
 script = ExtResource("5_n4cru")
 
 [node name="ColorRect" type="ColorRect" parent="UI"]
-offset_left = 1565.0
+offset_left = 1454.0
 offset_top = -44.0
 offset_right = 1923.0
-offset_bottom = 250.0
+offset_bottom = 402.0
 color = Color(0, 0, 0, 0.282353)
 
 [node name="Control" type="Control" parent="UI"]
@@ -94,9 +95,11 @@ grow_horizontal = 0
 [node name="CellOptions" type="OptionButton" parent="UI/Control"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = -202.0
-offset_right = 42.0
-offset_bottom = 136.0
+offset_left = -318.0
+offset_top = -1.0
+offset_right = 44.0
+offset_bottom = 135.0
+theme_override_font_sizes/font_size = 37
 selected = 0
 item_count = 10
 popup/item_0/text = "Wire"
@@ -132,11 +135,11 @@ popup/item_9/id = 3
 [node name="ColorOptions" type="OptionButton" parent="UI/Control"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = -169.0
-offset_top = 136.0
-offset_right = -64.0
-offset_bottom = 189.44
-scale = Vector2(2, 2)
+offset_left = -168.0
+offset_top = 135.0
+offset_right = 41.0
+offset_bottom = 197.0
+theme_override_font_sizes/font_size = 39
 selected = 0
 item_count = 2
 popup/item_0/text = "No Signal"
@@ -147,10 +150,11 @@ popup/item_1/id = 1
 [node name="RotationOptions" type="OptionButton" parent="UI/Control"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = -306.0
-offset_top = 1.0
-offset_right = -201.0
-offset_bottom = 54.44
+offset_left = -317.0
+offset_top = 135.0
+offset_right = -182.0
+offset_bottom = 197.0
+theme_override_font_sizes/font_size = 37
 selected = 0
 item_count = 4
 popup/item_0/text = "Up"
@@ -160,6 +164,52 @@ popup/item_2/text = "Down"
 popup/item_2/id = 2
 popup/item_3/text = "Left"
 popup/item_3/id = 3
+
+[node name="ClearGrid" type="Button" parent="UI/Control"]
+layout_mode = 0
+offset_left = -426.0
+offset_right = -318.0
+offset_bottom = 118.0
+theme_override_font_sizes/font_size = 40
+text = "Clear 
+Grid"
+
+[node name="HSlider" type="HSlider" parent="UI/Control"]
+layout_mode = 0
+offset_left = -424.0
+offset_top = 232.0
+offset_right = 39.0
+offset_bottom = 248.0
+max_value = 60.0
+value = 15.0
+
+[node name="Label" type="Label" parent="UI/Control"]
+layout_mode = 0
+offset_left = -424.0
+offset_top = 211.0
+offset_right = -250.0
+offset_bottom = 266.0
+scale = Vector2(0.4, 0.4)
+theme_override_font_sizes/font_size = 40
+text = "Tick Rate"
+
+[node name="Save" type="Button" parent="UI/Control"]
+layout_mode = 0
+offset_left = -426.0
+offset_top = 265.0
+offset_right = 40.0
+offset_bottom = 328.0
+theme_override_font_sizes/font_size = 40
+text = "Save"
+
+[node name="Load" type="Button" parent="UI/Control"]
+layout_mode = 0
+offset_left = -426.0
+offset_top = 338.0
+offset_right = 40.0
+offset_bottom = 401.0
+theme_override_font_sizes/font_size = 40
+text = "Load"
 
 [node name="CamOrigin" type="Node2D" parent="."]
 unique_name_in_owner = true
@@ -178,6 +228,25 @@ unique_name_in_owner = true
 position = Vector2(0, -1)
 zoom = Vector2(0.3, 0.3)
 
+[node name="OpenDialog" type="FileDialog" parent="."]
+unique_name_in_owner = true
+title = "Open a File"
+position = Vector2i(0, 36)
+size = Vector2i(303, 180)
+ok_button_text = "Open"
+file_mode = 0
+access = 1
+filters = PackedStringArray("*.lvl")
+
+[node name="SaveDialog" type="FileDialog" parent="."]
+unique_name_in_owner = true
+auto_translate_mode = 1
+position = Vector2i(0, 36)
+size = Vector2i(303, 180)
+ok_button_text = "Save"
+access = 1
+filters = PackedStringArray("*.lvl")
+
 [connection signal="mouse_entered" from="UI/ColorRect" to="UI" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="UI/ColorRect" to="UI" method="_on_mouse_exited"]
 [connection signal="mouse_entered" from="UI/Control/CellOptions" to="UI" method="_on_mouse_entered"]
@@ -186,3 +255,17 @@ zoom = Vector2(0.3, 0.3)
 [connection signal="mouse_exited" from="UI/Control/ColorOptions" to="UI" method="_on_mouse_exited"]
 [connection signal="mouse_entered" from="UI/Control/RotationOptions" to="UI" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="UI/Control/RotationOptions" to="UI" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="UI/Control/ClearGrid" to="UI" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="UI/Control/ClearGrid" to="UI" method="_on_mouse_exited"]
+[connection signal="pressed" from="UI/Control/ClearGrid" to="GameHandler" method="clear_tilemap"]
+[connection signal="mouse_entered" from="UI/Control/HSlider" to="UI" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="UI/Control/HSlider" to="UI" method="_on_mouse_exited"]
+[connection signal="value_changed" from="UI/Control/HSlider" to="GameHandler" method="change_tick_rate"]
+[connection signal="mouse_entered" from="UI/Control/Save" to="UI" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="UI/Control/Save" to="UI" method="_on_mouse_exited"]
+[connection signal="pressed" from="UI/Control/Save" to="UI" method="_on_save_pressed"]
+[connection signal="mouse_entered" from="UI/Control/Load" to="UI" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="UI/Control/Load" to="UI" method="_on_mouse_exited"]
+[connection signal="pressed" from="UI/Control/Load" to="UI" method="_on_load_pressed"]
+[connection signal="file_selected" from="OpenDialog" to="GameHandler" method="_on_open_dialog_file_selected"]
+[connection signal="file_selected" from="SaveDialog" to="GameHandler" method="_on_save_dialog_file_selected"]
