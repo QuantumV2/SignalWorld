@@ -15,6 +15,12 @@ const RotationDict : Dictionary = {
 	180: TileTransform.ROTATE_180,
 	270: TileTransform.ROTATE_270,
 }
+const RotationInd:Dictionary  ={
+	0: 0,
+	1: TileTransform.ROTATE_90,
+	2: TileTransform.ROTATE_180,
+	3: TileTransform.ROTATE_270,
+}
 const CellTypes : Dictionary = {
 	&"Wire":0,
 	&"Generator":1,
@@ -69,7 +75,7 @@ func _ready() -> void:
 	pass # Replace with function body.
 
 
-func _physics_process(delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	tick_counter += 1*60
 	if tick_counter >= tick_speed:
 		tick.emit()

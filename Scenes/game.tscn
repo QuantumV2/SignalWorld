@@ -1,9 +1,60 @@
-[gd_scene load_steps=5 format=4 uid="uid://dpl015ydoxgno"]
+[gd_scene load_steps=21 format=3 uid="uid://dpl015ydoxgno"]
 
-[ext_resource type="Script" path="res://Scenes/cam_origin.gd" id="2_sxy5u"]
+[ext_resource type="Script" path="res://Scripts/cam_origin.gd" id="2_sxy5u"]
 [ext_resource type="PackedScene" uid="uid://b7j2071weldx4" path="res://Prefabs/color_map.tscn" id="3_li8la"]
 [ext_resource type="PackedScene" uid="uid://br6n2l4lqswsi" path="res://Prefabs/game_handler.tscn" id="3_uuw4e"]
 [ext_resource type="PackedScene" uid="uid://ckq1uhkvol4c1" path="res://Prefabs/cell_map.tscn" id="4_1x3vp"]
+[ext_resource type="Script" path="res://Scripts/GridVisual.gd" id="5_6wk3m"]
+[ext_resource type="Script" path="res://Scripts/ui.gd" id="5_n4cru"]
+[ext_resource type="Texture2D" uid="uid://dnxyf2sdaijof" path="res://Images/tileset.svg" id="6_4k7gr"]
+[ext_resource type="Texture2D" uid="uid://b5sg0v8mg8dnk" path="res://Images/colors.png" id="6_58r07"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8bnvh"]
+atlas = ExtResource("6_4k7gr")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pci65"]
+atlas = ExtResource("6_4k7gr")
+region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dyt1i"]
+atlas = ExtResource("6_4k7gr")
+region = Rect2(256, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_no3ep"]
+atlas = ExtResource("6_4k7gr")
+region = Rect2(384, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ly7sy"]
+atlas = ExtResource("6_4k7gr")
+region = Rect2(0, 128, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k3gjb"]
+atlas = ExtResource("6_4k7gr")
+region = Rect2(128, 128, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0j62p"]
+atlas = ExtResource("6_4k7gr")
+region = Rect2(256, 128, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p8y05"]
+atlas = ExtResource("6_4k7gr")
+region = Rect2(384, 128, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gsolr"]
+atlas = ExtResource("6_4k7gr")
+region = Rect2(0, 256, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qkdr8"]
+atlas = ExtResource("6_4k7gr")
+region = Rect2(128, 256, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bel8f"]
+atlas = ExtResource("6_58r07")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_k5e2k"]
+size = Vector2(559, 1078)
 
 [node name="Game" type="Node2D"]
 
@@ -12,25 +63,123 @@ unique_name_in_owner = true
 
 [node name="CellMap" parent="TileMaps" instance=ExtResource("4_1x3vp")]
 unique_name_in_owner = true
-tile_map_data = PackedByteArray("AAAAAAUAAgAAAAAAAAAAAAQAAgAAAAAAAAAAAAMAAgAAAAAAAAAAAAIAAgAAAAAAAAAAAAEAAgAAAAAAAFACAAUAAgAAAAAAAAACAAQAAgAAAAAAAAACAAMAAgAAAAAAAAACAAIAAgAAAAAAAAACAAEAAgAAAAAAAGABAAEAAgAAAAAAAAABAAAAAgAAAAAAAAABAP//AgAAAAAAAAABAP7/AgAAAAAAAAABAP3/AgAAAAAAAAABAPz/AgAAAAAAAAABAPv/AgAAAAAAAAABAPr/AgAAAAAAAAA=")
 
 [node name="ColorMap" parent="TileMaps" instance=ExtResource("3_li8la")]
 unique_name_in_owner = true
-tile_map_data = PackedByteArray("AAAAAAUAAAAAAAAAAAACAAUAAAAAAAAAAAA=")
 
 [node name="GameHandler" parent="." instance=ExtResource("3_uuw4e")]
 unique_name_in_owner = true
 
+[node name="Grid" type="Node2D" parent="."]
+position = Vector2(-63, -64)
+script = ExtResource("5_6wk3m")
+
+[node name="UI" type="CanvasLayer" parent="."]
+unique_name_in_owner = true
+script = ExtResource("5_n4cru")
+
+[node name="Panel" type="Panel" parent="UI"]
+offset_left = 1361.0
+offset_right = 1401.0
+offset_bottom = 40.0
+scale = Vector2(14.093, 27.8065)
+
+[node name="Control" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="CellOptions" type="OptionButton" parent="UI"]
+unique_name_in_owner = true
+offset_left = 1676.0
+offset_right = 1920.0
+offset_bottom = 136.0
+selected = 0
+item_count = 10
+popup/item_0/text = "Wire"
+popup/item_0/icon = SubResource("AtlasTexture_8bnvh")
+popup/item_1/text = "Generator"
+popup/item_1/icon = SubResource("AtlasTexture_pci65")
+popup/item_1/id = 2
+popup/item_2/text = "AND"
+popup/item_2/icon = SubResource("AtlasTexture_dyt1i")
+popup/item_2/id = 4
+popup/item_3/text = "Buffer"
+popup/item_3/icon = SubResource("AtlasTexture_no3ep")
+popup/item_3/id = 6
+popup/item_4/text = "Detector"
+popup/item_4/icon = SubResource("AtlasTexture_ly7sy")
+popup/item_4/id = 1
+popup/item_5/text = "Switch"
+popup/item_5/icon = SubResource("AtlasTexture_k3gjb")
+popup/item_5/id = 7
+popup/item_6/text = "XOR"
+popup/item_6/icon = SubResource("AtlasTexture_0j62p")
+popup/item_6/id = 5
+popup/item_7/text = "Jump Pad"
+popup/item_7/icon = SubResource("AtlasTexture_p8y05")
+popup/item_7/id = 8
+popup/item_8/text = "Blocker"
+popup/item_8/icon = SubResource("AtlasTexture_gsolr")
+popup/item_8/id = 9
+popup/item_9/text = "RNG"
+popup/item_9/icon = SubResource("AtlasTexture_qkdr8")
+popup/item_9/id = 3
+
+[node name="ColorOptions" type="OptionButton" parent="UI"]
+unique_name_in_owner = true
+offset_left = 1466.0
+offset_right = 1571.0
+offset_bottom = 53.44
+scale = Vector2(2, 2)
+selected = 0
+item_count = 2
+popup/item_0/text = "No Signal"
+popup/item_1/text = "Signal"
+popup/item_1/icon = SubResource("AtlasTexture_bel8f")
+popup/item_1/id = 1
+
+[node name="RotationOptions" type="OptionButton" parent="UI"]
+unique_name_in_owner = true
+offset_left = 1361.0
+offset_top = 1.0
+offset_right = 1466.0
+offset_bottom = 54.44
+selected = 0
+item_count = 4
+popup/item_0/text = "0"
+popup/item_1/text = "90"
+popup/item_1/id = 1
+popup/item_2/text = "180"
+popup/item_2/id = 2
+popup/item_3/text = "270"
+popup/item_3/id = 3
+
+[node name="Area2D" type="Area2D" parent="UI"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="UI/Area2D"]
+position = Vector2(1640.5, 539)
+shape = SubResource("RectangleShape2D_k5e2k")
+
 [node name="CamOrigin" type="Node2D" parent="."]
+unique_name_in_owner = true
 script = ExtResource("2_sxy5u")
 
 [node name="ColorRect" type="ColorRect" parent="CamOrigin"]
-offset_left = -3259.0
-offset_top = -1875.0
-offset_right = 3269.0
-offset_bottom = 1869.0
+visible = false
+offset_left = -20905.0
+offset_top = -11847.0
+offset_right = 22207.0
+offset_bottom = 17669.0
 color = Color(0.486275, 0.486275, 0.486275, 0.0941176)
 
 [node name="Camera2D" type="Camera2D" parent="CamOrigin"]
+unique_name_in_owner = true
 position = Vector2(0, -1)
 zoom = Vector2(0.3, 0.3)
+
+[connection signal="mouse_entered" from="UI/Area2D" to="UI" method="_on_area_2d_mouse_entered"]
+[connection signal="mouse_exited" from="UI/Area2D" to="UI" method="_on_area_2d_mouse_exited"]
+[connection signal="mouse_shape_entered" from="UI/Area2D" to="UI" method="_on_area_2d_mouse_shape_entered"]
+[connection signal="mouse_shape_exited" from="UI/Area2D" to="UI" method="_on_area_2d_mouse_shape_exited"]

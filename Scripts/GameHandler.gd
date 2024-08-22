@@ -12,6 +12,18 @@ var CellFuncs : Dictionary = {
 	Global.CellTypes.AND: do_AND_cell,
 	Global.CellTypes.XOR: do_XOR_cell,
 }
+
+var paused = false;
+
+func user_place_tile_tilemap(tilemap: TileMapLayer, event: InputEvent, atlas_coords : Vector2i, alt_tile: int):
+	var camera_zoom = %Camera2D.zoom
+	var pos = tilemap.local_to_map(tilemap.to_local(
+	(event.position / camera_zoom) + %CamOrigin.position - (get_viewport().get_visible_rect().size / (2 * camera_zoom))
+	))
+	tilemap.set_cell(pos, 2, atlas_coords, alt_tile)
+	curr_grid = create_tilemap_array(%CellMap, %ColorMap)
+	next_grid = curr_grid.duplicate(true)
+
 func create_tilemap_array(tilemap: TileMapLayer, colormap: TileMapLayer) -> Array:
 	var result = []
 	var usedrect: Rect2i = tilemap.get_used_rect()
@@ -195,8 +207,6 @@ func do_detector_cell(curr_cell, x, y):
 	next_grid[x][y]['powered'] = 0;
 	var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
 	var dir = dirs[curr_cell['rotation'] / 90]
-	var nx = x + (dir.x)
-	var ny = y + (dir.y)
 	var bx = x - (dir.x)
 	var by = y - (dir.y)
 	if is_valid_cell(bx,by,curr_grid):
@@ -216,7 +226,7 @@ func do_blocker_cell(curr_cell, x, y):
 		curr_grid[nx][ny]['powered'] = 0
 		next_grid[nx][ny]['powered'] = 0
 			
-func do_switch_cell(curr_cell, x, y):
+func do_switch_cell(curr_cell, _x, _y):
 	if not curr_cell['powered']:
 		return
 			
@@ -236,15 +246,19 @@ func update_tiles(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Array):
 		for x in [i, width - 1 - i]:
 			if x < width:
 				for y in range(height):
-					process_cell(tilemap, colormap, arr, x, y)
+					if curr_grid[x][y]['type'] != -1:
+						process_cell(tilemap, colormap, arr, x, y)
 
 	for i in range((height + 1) / 2):
 		for y in [i, height - 1 - i]:
 			if y < height:
 				for x in range(width):
-					process_cell(tilemap, colormap, arr, x, y)
+					if curr_grid[x][y]['type'] != -1:
+						process_cell(tilemap, colormap, arr, x, y)
 
 func update_gamestate():
+	if paused or curr_grid.size() < 1:
+		return
 	curr_grid = next_grid.duplicate(true)
 	update_tiles(%CellMap, %ColorMap, curr_grid)
 	var width = curr_grid.size()
@@ -254,19 +268,21 @@ func update_gamestate():
 		for x in [i, width - 1 - i]:
 			if x < width:
 				for y in range(height):
-					process_game_cell(x, y)
+					if curr_grid[x][y]['type'] != -1:
+						process_game_cell(x, y)
 
 	for i in range((height + 1) / 2):
 		for y in [i, height - 1 - i]:
 			if y < height:
 				for x in range(width):
-					process_game_cell(x, y)
+					if curr_grid[x][y]['type'] != -1:
+						process_game_cell(x, y)
 
 
 
 func process_game_cell(x: int, y: int):
 	var curr_cell = curr_grid[x][y]
-	if curr_cell['powered'] == -1:
+	if curr_cell['powered'] == -1 :
 		return
 	
 	if curr_cell['type'] in CellFuncs.keys():
@@ -284,8 +300,6 @@ func _ready() -> void:
 	Global.connect("tick", update_gamestate)
 	pass # Replace with function body.
 
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	
-	pass
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_accept"):
+		paused = !paused
