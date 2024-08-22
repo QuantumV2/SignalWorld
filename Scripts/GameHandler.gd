@@ -15,12 +15,12 @@ var CellFuncs : Dictionary = {
 
 var paused = false;
 
-func user_place_tile_tilemap(tilemap: TileMapLayer, event: InputEvent, atlas_coords : Vector2i, alt_tile: int):
+func user_place_tile_tilemap(tilemap: TileMapLayer, event: InputEvent, atlas_coords : Vector2i, alt_tile: int, source_id:int = 2):
 	var camera_zoom = %Camera2D.zoom
 	var pos = tilemap.local_to_map(tilemap.to_local(
 	(event.position / camera_zoom) + %CamOrigin.position - (get_viewport().get_visible_rect().size / (2 * camera_zoom))
 	))
-	tilemap.set_cell(pos, 2, atlas_coords, alt_tile)
+	tilemap.set_cell(pos, source_id, atlas_coords, alt_tile)
 	curr_grid = create_tilemap_array(%CellMap, %ColorMap)
 	next_grid = curr_grid.duplicate(true)
 
@@ -164,9 +164,10 @@ func do_randgenerator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 	for dir in [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]:
 		var nx = x + dir.x
 		var ny = y + dir.y
-		if (curr_grid[nx][ny]['rotation'] != 180 and dir == Vector2i.DOWN) or (curr_grid[nx][ny]['rotation'] != 270 and dir == Vector2i.LEFT) or (curr_grid[nx][ny]['rotation'] != 0 and dir == Vector2i.UP) or (curr_grid[nx][ny]['rotation'] != 90 and dir == Vector2i.RIGHT):
-			continue;
+
 		if is_valid_cell(nx, ny, curr_grid):
+			if (curr_grid[nx][ny]['rotation'] != 180 and dir == Vector2i.DOWN) or (curr_grid[nx][ny]['rotation'] != 270 and dir == Vector2i.LEFT) or (curr_grid[nx][ny]['rotation'] != 0 and dir == Vector2i.UP) or (curr_grid[nx][ny]['rotation'] != 90 and dir == Vector2i.RIGHT):
+				continue;
 			next_grid[nx][ny]['powered'] = randi_range(0,1)
 			curr_grid[nx][ny]['powered'] = next_grid[nx][ny]['powered']
 
@@ -301,5 +302,7 @@ func _ready() -> void:
 	pass # Replace with function body.
 
 func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_accept"):
+	if event.is_action_pressed("pause"):
 		paused = !paused
+	if event.is_action_pressed("fullscreen"):
+		Global.swap_fullscreen_mode()

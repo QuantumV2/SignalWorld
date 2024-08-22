@@ -10,6 +10,7 @@ enum TileTransform {
 	ROTATE_270 = TileSetAtlasSource.TRANSFORM_TRANSPOSE | TileSetAtlasSource.TRANSFORM_FLIP_V,
 }
 const RotationDict : Dictionary = {
+	-1:0,
 	0: 0,
 	90: TileTransform.ROTATE_90,
 	180: TileTransform.ROTATE_180,
@@ -74,6 +75,12 @@ func get_tile_data_rotation(alt_tile : int):
 func _ready() -> void:
 	pass # Replace with function body.
 
+
+func swap_fullscreen_mode():
+	if DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+	else:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 
 func _physics_process(_delta: float) -> void:
 	tick_counter += 1*60

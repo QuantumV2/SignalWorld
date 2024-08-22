@@ -1,0 +1,47 @@
+[gd_scene load_steps=6 format=4 uid="uid://coug50qjfgedp"]
+
+[ext_resource type="PackedScene" uid="uid://ckq1uhkvol4c1" path="res://Prefabs/cell_map.tscn" id="1_5vgee"]
+[ext_resource type="PackedScene" uid="uid://b7j2071weldx4" path="res://Prefabs/color_map.tscn" id="2_qbqjo"]
+[ext_resource type="PackedScene" uid="uid://br6n2l4lqswsi" path="res://Prefabs/game_handler.tscn" id="3_wvuos"]
+[ext_resource type="Script" path="res://Scripts/GridVisual.gd" id="4_n8om1"]
+[ext_resource type="Script" path="res://Scenes/TitleScreen.gd" id="5_ml48p"]
+
+[node name="TitleScreen" type="Node2D"]
+
+[node name="CellMap" parent="." instance=ExtResource("1_5vgee")]
+unique_name_in_owner = true
+tile_map_data = PackedByteArray("AAD1//v/AgADAAAAAAD1//z/AgAAAAAAAAD4//v/AgAAAAAAAAD7//v/AgAAAAAAAAD7//z/AgABAAIAAAD+//v/AgAAAAAAAAD+//z/AgAAAAAAAFABAPv/AgAAAAAAAAAEAPv/AgAAAAAAAAAEAPz/AgABAAIAAAAHAPv/AgAAAAAAAAAHAPz/AgABAAIAAAAKAPv/AgAAAAAAADAKAPz/AgAAAAAAADANAPv/AgAAAAAAADANAPz/AgAAAAAAADAQAPz/AgADAAEAADDy//j/AgAAAAAAAFDy//n/AgACAAAAAADy//r/AgAAAAAAAADy//z/AgABAAIAAADz//j/AgAAAAAAAFDz//r/AgAAAAAAAGDz//z/AgAAAAAAAFD0//j/AgAAAAAAAFD0//r/AgAAAAAAAGD0//z/AgAAAAAAAFD1//j/AgAAAAAAAFD1//r/AgAAAAAAAGD4//j/AgAAAAAAAAD4//n/AgAAAAAAAAD4//r/AgAAAAAAAAD4//z/AgABAAIAAAD7//j/AgAAAAAAAFD7//n/AgAAAAAAAAD8//j/AgAAAAAAAFD8//z/AgAAAAAAAFD9//j/AgAAAAAAAFD9//r/AgAAAAAAAGD9//z/AgAAAAAAAFD+//j/AgADAAEAADD+//r/AgAAAAAAAGABAPj/AgAAAAAAAFABAPn/AgAAAAAAAAABAPr/AgAAAAAAAAABAPz/AgABAAIAAAACAPj/AgADAAEAAFADAPn/AgABAAAAAAAEAPj/AgAAAAAAAAAEAPn/AgAAAAAAAAAEAPr/AgAAAAAAAAAHAPj/AgAAAAAAAFAHAPn/AgAAAAAAAAAHAPr/AgAAAAAAAAAIAPj/AgAAAAAAAFAIAPr/AgAAAAEAAFAJAPj/AgAAAAAAAFAJAPr/AgAAAAAAAFAKAPj/AgAAAAAAADAKAPn/AgAAAAAAADAKAPr/AgAAAAAAADANAPj/AgABAAIAAAANAPn/AgAAAAAAADANAPr/AgAAAAAAADAOAPz/AgAAAAEAAFAPAPz/AgAAAAAAAFDz/wIAAgAAAAAAAFD1/wEAAgABAAAAAAD4//7/AgABAAIAAAD5//7/AgAAAAAAAFD5/wIAAgAAAAAAAAD6//7/AgAAAAAAAFD6/wIAAgAAAAAAAGD7//7/AgAAAAAAAFD7/wIAAgAAAAAAAGD///7/AgAAAAAAAHD//wAAAgAAAAAAAAAAAP7/AgADAAAAAFAAAAAAAgAAAAEAAFABAP7/AgAAAAAAAFAFAAIAAgAAAAAAADAGAAIAAgAAAAEAAFAHAAIAAgAAAAAAAFAKAP7/AgAAAAAAADAKAAIAAgAAAAAAAFALAP7/AgAAAAAAAGALAAIAAgAAAAAAAFDz//7/AgABAAIAAADz////AgAAAAAAADDz/wAAAgAAAAAAADDz/wEAAgAAAAAAADD0/wIAAgADAAEAAFD2//7/AgAAAAAAAAD2////AgAAAAAAAAD2/wAAAgAAAAAAAAD2/wEAAgAAAAAAAAD2/wIAAgAAAAAAAAD5////AgAAAAAAAAD5/wAAAgAAAAAAAAD5/wEAAgAAAAAAAAD8//7/AgAAAAAAADD8////AgAAAAAAADD8/wAAAgAAAAAAADD8/wEAAgAAAAAAADD8/wIAAgAAAAAAAGD/////AgAAAAAAAAD//wEAAgADAAAAAAD//wIAAgABAAIAAAABAAAAAgAAAAAAAFACAP7/AgAAAAAAADACAP//AgADAAEAADACAAEAAgAAAAAAAAACAAIAAgAAAAAAAAAFAP7/AgABAAIAAAAFAP//AgAAAAAAADAFAAAAAgAAAAAAADAFAAEAAgAAAAAAADAIAAIAAgADAAEAADAKAP//AgAAAAAAADAKAAAAAgAAAAAAADAKAAEAAgAAAAAAADAMAP7/AgAAAAAAAGAMAAIAAgAAAAAAAFANAP//AgAAAAAAAAANAAAAAgAAAAAAAAANAAEAAgAAAAAAAAAMAAAAAgAAAAEAAGAMAP//AgAAAAEAAAANAAIAAgAAAAAAAAAQAP7/AgADAAEAAGAOAP7/AgADAAEAAGD7//r/AgAAAAAAAAA=")
+
+[node name="ColorMap" parent="." instance=ExtResource("2_qbqjo")]
+unique_name_in_owner = true
+
+[node name="Camera2D" type="Camera2D" parent="."]
+unique_name_in_owner = true
+position = Vector2(0, -1)
+zoom = Vector2(0.3, 0.3)
+
+[node name="GameHandler" parent="." instance=ExtResource("3_wvuos")]
+
+[node name="Grid" type="Node2D" parent="."]
+position = Vector2(-63, -64)
+script = ExtResource("4_n8om1")
+
+[node name="RichTextLabel" type="RichTextLabel" parent="."]
+modulate = Color(0, 0, 0, 1)
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -557.0
+offset_top = 463.0
+offset_right = -441.0
+offset_bottom = 519.0
+grow_horizontal = 2
+grow_vertical = 0
+scale = Vector2(10, 10)
+bbcode_enabled = true
+text = "[center] PRESS ENTER [/center]"
+
+[node name="Node" type="Node" parent="."]
+script = ExtResource("5_ml48p")

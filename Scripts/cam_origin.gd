@@ -21,7 +21,7 @@ func _input(event: InputEvent) -> void:
 		if not %UI.mouse_over:
 			if event.button_mask == MOUSE_BUTTON_LEFT:
 				%GameHandler.user_place_tile_tilemap(%CellMap, event, Global.CellTypesAtlCoords[%CellOptions.selected], Global.RotationInd[%RotationOptions.selected])
-				%GameHandler.user_place_tile_tilemap(%ColorMap, event, Global.PowerTypesAtl[%ColorOptions.selected], 0)
+				%GameHandler.user_place_tile_tilemap(%ColorMap, event, Global.PowerTypesAtl[%ColorOptions.selected], 0,0)
 			if event.button_mask == MOUSE_BUTTON_RIGHT:
 				%GameHandler.user_place_tile_tilemap(%CellMap, event, Vector2i(-1,-1),0)
 				%GameHandler.user_place_tile_tilemap(%ColorMap, event, Vector2i(-1,-1),0)
@@ -34,7 +34,7 @@ func _input(event: InputEvent) -> void:
 			if not %UI.mouse_over:
 				if event.button_index == MOUSE_BUTTON_LEFT:
 					%GameHandler.user_place_tile_tilemap(%CellMap, event, Global.CellTypesAtlCoords[%CellOptions.selected], Global.RotationInd[%RotationOptions.selected])
-					%GameHandler.user_place_tile_tilemap(%ColorMap, event, Global.PowerTypesAtl[%ColorOptions.selected], 0)
+					%GameHandler.user_place_tile_tilemap(%ColorMap, event, Global.PowerTypesAtl[%ColorOptions.selected], 0,0)
 				if event.button_index == MOUSE_BUTTON_RIGHT:
 					%GameHandler.user_place_tile_tilemap(%CellMap, event, Vector2i(-1,-1),0)
 					%GameHandler.user_place_tile_tilemap(%ColorMap, event, Vector2i(-1,-1),0)
