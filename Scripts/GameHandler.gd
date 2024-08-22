@@ -353,6 +353,7 @@ func _on_open_dialog_file_selected(path: String) -> void:
 		if error == OK:
 			var data = json.data
 			var json_size = data['size']
+			clear_tilemap()
 			curr_grid = []
 			curr_grid.resize(json_size[0])
 		
