@@ -34,3 +34,8 @@ func _on_save_close_pressed() -> void:
 func _on_load_close_pressed() -> void:
 	%OpenDialog.visible = false
 	pass # Replace with function body.
+
+
+func _on_pause_pressed() -> void:
+	%GameHandler.paused = !%GameHandler.paused
+	pass # Replace with function body.

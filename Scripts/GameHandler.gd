@@ -323,8 +323,6 @@ func _ready() -> void:
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("pause"):
 		paused = !paused
-	if event.is_action_pressed("fullscreen"):
-		Global.swap_fullscreen_mode()
 
 
 func _on_save() -> String:

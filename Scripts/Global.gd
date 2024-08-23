@@ -84,6 +84,9 @@ func get_tile_data_rotation(alt_tile : int):
 func _ready() -> void:
 	pass # Replace with function body.
 
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("fullscreen"):
+		Global.swap_fullscreen_mode()
 
 func swap_fullscreen_mode():
 	if DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN:

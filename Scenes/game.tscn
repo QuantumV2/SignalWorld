@@ -76,13 +76,6 @@ script = ExtResource("5_6wk3m")
 unique_name_in_owner = true
 script = ExtResource("5_n4cru")
 
-[node name="ColorRect" type="ColorRect" parent="UI"]
-offset_left = 1454.0
-offset_top = -44.0
-offset_right = 1923.0
-offset_bottom = 402.0
-color = Color(0, 0, 0, 0.282353)
-
 [node name="Control" type="Control" parent="UI"]
 layout_mode = 3
 anchors_preset = 1
@@ -91,6 +84,13 @@ anchor_right = 1.0
 offset_left = -40.0
 offset_bottom = 40.0
 grow_horizontal = 0
+
+[node name="ColorRect" type="ColorRect" parent="UI/Control"]
+offset_left = -426.0
+offset_top = -44.0
+offset_right = 43.0
+offset_bottom = 480.0
+color = Color(0, 0, 0, 0.282353)
 
 [node name="CellOptions" type="OptionButton" parent="UI/Control"]
 unique_name_in_owner = true
@@ -202,6 +202,15 @@ offset_bottom = 328.0
 theme_override_font_sizes/font_size = 40
 text = "Save"
 
+[node name="Pause" type="Button" parent="UI/Control"]
+layout_mode = 0
+offset_left = -427.0
+offset_top = 413.0
+offset_right = 39.0
+offset_bottom = 476.0
+theme_override_font_sizes/font_size = 40
+text = "Pause"
+
 [node name="Load" type="Button" parent="UI/Control"]
 layout_mode = 0
 offset_left = -426.0
@@ -216,7 +225,6 @@ unique_name_in_owner = true
 script = ExtResource("2_sxy5u")
 
 [node name="ColorRect" type="ColorRect" parent="CamOrigin"]
-visible = false
 offset_left = -20905.0
 offset_top = -11847.0
 offset_right = 22207.0
@@ -241,6 +249,7 @@ offset_right = 781.0
 offset_bottom = 276.0
 
 [node name="TextEdit" type="TextEdit" parent="SaveDialog/Control"]
+layout_mode = 0
 offset_left = 4.0
 offset_top = 4.0
 offset_right = 781.0
@@ -274,6 +283,7 @@ offset_right = 781.0
 offset_bottom = 261.0
 
 [node name="TextEdit" type="TextEdit" parent="OpenDialog/Control"]
+layout_mode = 0
 offset_left = 4.0
 offset_top = 4.0
 offset_right = 781.0
@@ -305,8 +315,8 @@ offset_bottom = 3.47
 grow_vertical = 0
 text = "Close"
 
-[connection signal="mouse_entered" from="UI/ColorRect" to="UI" method="_on_mouse_entered"]
-[connection signal="mouse_exited" from="UI/ColorRect" to="UI" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="UI/Control/ColorRect" to="UI" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="UI/Control/ColorRect" to="UI" method="_on_mouse_exited"]
 [connection signal="mouse_entered" from="UI/Control/CellOptions" to="UI" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="UI/Control/CellOptions" to="UI" method="_on_mouse_exited"]
 [connection signal="mouse_entered" from="UI/Control/ColorOptions" to="UI" method="_on_mouse_entered"]
@@ -322,6 +332,9 @@ text = "Close"
 [connection signal="mouse_entered" from="UI/Control/Save" to="UI" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="UI/Control/Save" to="UI" method="_on_mouse_exited"]
 [connection signal="pressed" from="UI/Control/Save" to="UI" method="_on_save_pressed"]
+[connection signal="mouse_entered" from="UI/Control/Pause" to="UI" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="UI/Control/Pause" to="UI" method="_on_mouse_exited"]
+[connection signal="pressed" from="UI/Control/Pause" to="UI" method="_on_pause_pressed"]
 [connection signal="mouse_entered" from="UI/Control/Load" to="UI" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="UI/Control/Load" to="UI" method="_on_mouse_exited"]
 [connection signal="pressed" from="UI/Control/Load" to="UI" method="_on_load_pressed"]

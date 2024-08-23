@@ -26,7 +26,24 @@ zoom = Vector2(0.3, 0.3)
 position = Vector2(-63, -64)
 script = ExtResource("4_n8om1")
 
+[node name="Start" type="Button" parent="."]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -322.0
+offset_top = 871.0
+offset_right = -105.0
+offset_bottom = 975.0
+grow_horizontal = 2
+grow_vertical = 0
+scale = Vector2(3, 3)
+theme_override_font_sizes/font_size = 70
+text = "	START"
+
 [node name="RichTextLabel" type="RichTextLabel" parent="."]
+visible = false
 modulate = Color(0, 0, 0, 1)
 anchors_preset = 7
 anchor_left = 0.5
@@ -61,3 +78,5 @@ text = "[center] QuantumV presents [/center]"
 
 [node name="Node" type="Node" parent="."]
 script = ExtResource("5_ml48p")
+
+[connection signal="pressed" from="Start" to="Node" method="_on_start_pressed"]

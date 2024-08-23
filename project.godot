@@ -44,7 +44,12 @@ enter={
 ]
 }
 
+[input_devices]
+
+pointing/android/enable_pan_and_scale_gestures=true
+
 [rendering]
 
 textures/canvas_textures/default_texture_filter=2
+renderer/rendering_method="mobile"
 environment/defaults/default_clear_color=Color(1, 1, 1, 1)
