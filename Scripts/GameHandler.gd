@@ -22,7 +22,6 @@ func user_place_tile_tilemap(tilemap: TileMapLayer, event: InputEvent, atlas_coo
 	
 	tilemap.set_cell(pos, source_id, atlas_coords, alt_tile)
 	
-	# Optimized grid handling
 	curr_grid = create_tilemap_array(%CellMap, %ColorMap)
 	next_grid = curr_grid.duplicate(true)
 func clear_tilemap():
