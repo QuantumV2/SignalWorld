@@ -327,45 +327,46 @@ func _input(event: InputEvent) -> void:
 		Global.swap_fullscreen_mode()
 
 
-func _on_save_dialog_file_selected(path: String) -> void:
+func _on_save() -> String:
 	if !curr_grid or curr_grid == []:
-		return
-	var compresseddata = {"size":[curr_grid.size(), curr_grid[0].size()],"data":[]}
+		return ""
+	var compresseddata = {"s":[curr_grid.size(), curr_grid[0].size()],"d":[]}
 	for x in range(curr_grid.size()):
 		for y in range(curr_grid[0].size()):
-			compresseddata['data'].append([[x,y], curr_grid[x][y]])
+			if curr_grid[x][y]['type'] != -1:
+				compresseddata['d'].append([[x,y], curr_grid[x][y]])
+			#else:
+				#compresseddata['e'].append([[x,y],curr_grid[x][y]['position']])
 
 	var compressedstring = JSON.stringify(compresseddata)
-	var file = FileAccess.open(path, FileAccess.WRITE)
-	file.store_string(compressedstring)
-	file.close()
+	return Marshalls.raw_to_base64(StringHelper.gzip_encode(compressedstring))
 
+func _on_open(str) -> void:
+	var content = StringHelper.gzip_decode(Marshalls.base64_to_raw(str))
 
-func _on_open_dialog_file_selected(path: String) -> void:
-	var file = FileAccess.open(path, FileAccess.READ)
-	if file:
-		var content = file.get_as_text()
-		file.close()
+	var json = JSON.new()
+	var error = json.parse(content)
 
-		var json = JSON.new()
-		var error = json.parse(content)
+	if error == OK:
+		var data = json.data
+		var json_size = data['s']
+		clear_tilemap()
+		curr_grid = []
+		curr_grid.resize(json_size[0])
+	
+		for i in range(curr_grid.size()):
+			curr_grid[i] = []
+			curr_grid[i].resize(json_size[1])
+			
+	
+		for i in data['d']:
+			var cell = i[1]
+			cell['position'] = StringHelper.string_to_vector2i(curr_grid[i[0][0]][i[0][1]]['position'])
+			%CellMap.set_cell(cell['position'], 2, Global.CellTypesAtlCoords[int(cell['type'])], Global.RotationDict[int(cell['rotation'])])
+			%ColorMap.set_cell(cell['position'], 2, Global.PowerTypesAtl[int(cell['powered'])], 0)
 
-		if error == OK:
-			var data = json.data
-			var json_size = data['size']
-			clear_tilemap()
-			curr_grid = []
-			curr_grid.resize(json_size[0])
-		
-			for i in range(curr_grid.size()):
-				curr_grid[i] = []
-				curr_grid[i].resize(json_size[1])
-		
-			for i in data['data']:
-				curr_grid[i[0][0]][i[0][1]] = i[1]
-				curr_grid[i[0][0]][i[0][1]]['position'] = StringHelper.string_to_vector2i(curr_grid[i[0][0]][i[0][1]]['position'])
-
-			next_grid = curr_grid.duplicate(true)
-			update_tiles(%CellMap, %ColorMap, next_grid)
-		else:
-			print("JSON Parse Error: ", json.get_error_message(), " in ", content, " at line ", json.get_error_line())
+		curr_grid = create_tilemap_array(%CellMap, %ColorMap)
+		next_grid = curr_grid.duplicate(true)
+		update_tiles(%CellMap, %ColorMap, next_grid)
+	else:
+		print("JSON Parse Error: ", json.get_error_message(), " in ", content, " at line ", json.get_error_line())

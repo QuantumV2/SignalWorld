@@ -228,24 +228,82 @@ unique_name_in_owner = true
 position = Vector2(0, -1)
 zoom = Vector2(0.3, 0.3)
 
-[node name="OpenDialog" type="FileDialog" parent="."]
+[node name="SaveDialog" type="PopupPanel" parent="."]
 unique_name_in_owner = true
-title = "Open a File"
-position = Vector2i(0, 36)
-size = Vector2i(303, 180)
-ok_button_text = "Open"
-file_mode = 0
-access = 1
-filters = PackedStringArray("*.lvl")
+size = Vector2i(785, 280)
 
-[node name="SaveDialog" type="FileDialog" parent="."]
+[node name="Control" type="Control" parent="SaveDialog"]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 781.0
+offset_bottom = 276.0
+
+[node name="TextEdit" type="TextEdit" parent="SaveDialog/Control"]
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 781.0
+offset_bottom = 186.46
+theme_override_font_sizes/font_size = 40
+editable = false
+
+[node name="SaveClose" type="Button" parent="SaveDialog/Control"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = -1.39
+offset_top = -57.435
+offset_right = 147.14
+offset_bottom = -0.934998
+grow_vertical = 0
+text = "Close"
+
+[node name="OpenDialog" type="PopupPanel" parent="."]
 unique_name_in_owner = true
 auto_translate_mode = 1
-position = Vector2i(0, 36)
-size = Vector2i(303, 180)
-ok_button_text = "Save"
-access = 1
-filters = PackedStringArray("*.lvl")
+size = Vector2i(785, 265)
+
+[node name="Control" type="Control" parent="OpenDialog"]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 781.0
+offset_bottom = 261.0
+
+[node name="TextEdit" type="TextEdit" parent="OpenDialog/Control"]
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 781.0
+offset_bottom = 134.455
+theme_override_font_sizes/font_size = 40
+
+[node name="LoadButtonDialog" type="Button" parent="OpenDialog/Control"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -98.99
+offset_top = 158.945
+offset_right = 3.01001
+offset_bottom = 258.945
+grow_horizontal = 0
+theme_override_font_sizes/font_size = 40
+text = "Load"
+
+[node name="LoadClose" type="Button" parent="OpenDialog/Control"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = -1.72
+offset_top = -96.53
+offset_right = 98.28
+offset_bottom = 3.47
+grow_vertical = 0
+text = "Close"
 
 [connection signal="mouse_entered" from="UI/ColorRect" to="UI" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="UI/ColorRect" to="UI" method="_on_mouse_exited"]
@@ -267,5 +325,6 @@ filters = PackedStringArray("*.lvl")
 [connection signal="mouse_entered" from="UI/Control/Load" to="UI" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="UI/Control/Load" to="UI" method="_on_mouse_exited"]
 [connection signal="pressed" from="UI/Control/Load" to="UI" method="_on_load_pressed"]
-[connection signal="file_selected" from="OpenDialog" to="GameHandler" method="_on_open_dialog_file_selected"]
-[connection signal="file_selected" from="SaveDialog" to="GameHandler" method="_on_save_dialog_file_selected"]
+[connection signal="pressed" from="SaveDialog/Control/SaveClose" to="UI" method="_on_save_close_pressed"]
+[connection signal="pressed" from="OpenDialog/Control/LoadButtonDialog" to="UI" method="_on_load_button_dialog_pressed"]
+[connection signal="pressed" from="OpenDialog/Control/LoadClose" to="UI" method="_on_load_close_pressed"]
