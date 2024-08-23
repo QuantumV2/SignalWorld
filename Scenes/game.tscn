@@ -86,6 +86,7 @@ offset_bottom = 40.0
 grow_horizontal = 0
 
 [node name="ColorRect" type="ColorRect" parent="UI/Control"]
+layout_mode = 0
 offset_left = -426.0
 offset_top = -44.0
 offset_right = 43.0
@@ -248,12 +249,37 @@ offset_top = 4.0
 offset_right = 781.0
 offset_bottom = 276.0
 
-[node name="TextEdit" type="TextEdit" parent="SaveDialog/Control"]
+[node name="Label" type="Label" parent="SaveDialog/Control"]
 layout_mode = 0
 offset_left = 4.0
-offset_top = 4.0
-offset_right = 781.0
-offset_bottom = 186.46
+offset_top = -2.0
+offset_right = 214.0
+offset_bottom = 28.0
+theme_override_font_sizes/font_size = 21
+text = "Signal Word scheme:"
+
+[node name="TextEdit" type="TextEdit" parent="SaveDialog/Control/Label"]
+layout_mode = 0
+offset_top = 28.78
+offset_right = 777.0
+offset_bottom = 96.625
+theme_override_font_sizes/font_size = 40
+editable = false
+
+[node name="Label2" type="Label" parent="SaveDialog/Control"]
+layout_mode = 0
+offset_left = 4.0
+offset_top = 95.23
+offset_right = 214.0
+offset_bottom = 125.23
+theme_override_font_sizes/font_size = 21
+text = "Logic Arrows scheme:"
+
+[node name="TextEdit" type="TextEdit" parent="SaveDialog/Control/Label2"]
+layout_mode = 0
+offset_top = 28.78
+offset_right = 777.0
+offset_bottom = 96.625
 theme_override_font_sizes/font_size = 40
 editable = false
 
@@ -314,6 +340,14 @@ offset_right = 98.28
 offset_bottom = 3.47
 grow_vertical = 0
 text = "Close"
+
+[node name="CheckBox" type="CheckBox" parent="OpenDialog/Control"]
+layout_mode = 0
+offset_left = 300.0
+offset_top = 184.355
+offset_right = 491.0
+offset_bottom = 215.355
+text = "Logic Arrows scheme"
 
 [connection signal="mouse_entered" from="UI/Control/ColorRect" to="UI" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="UI/Control/ColorRect" to="UI" method="_on_mouse_exited"]
