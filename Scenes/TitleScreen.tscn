@@ -18,7 +18,6 @@ unique_name_in_owner = true
 
 [node name="Camera2D" type="Camera2D" parent="."]
 unique_name_in_owner = true
-position = Vector2(0, -1)
 zoom = Vector2(0.3, 0.3)
 
 [node name="GameHandler" parent="." instance=ExtResource("3_wvuos")]
