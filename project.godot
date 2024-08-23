@@ -14,7 +14,7 @@ config/name="SignalWorldCA"
 run/main_scene="res://Scenes/TitleScreen.tscn"
 config/features=PackedStringArray("4.3", "Forward Plus")
 run/max_fps=60
-config/icon="res://icon.svg"
+config/icon="res://Images/arrow_empty.svg"
 
 [autoload]
 

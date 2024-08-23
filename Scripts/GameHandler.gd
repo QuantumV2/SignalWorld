@@ -115,8 +115,6 @@ func do_generator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 		var ny = y + dir.y
 
 		if is_valid_cell(nx, ny, curr_grid):
-			if (curr_grid[nx][ny]['rotation'] != 180 and dir == Vector2i.DOWN) or (curr_grid[nx][ny]['rotation'] != 270 and dir == Vector2i.LEFT) or (curr_grid[nx][ny]['rotation'] != 0 and dir == Vector2i.UP) or (curr_grid[nx][ny]['rotation'] != 90 and dir == Vector2i.RIGHT):
-				continue;
 			next_grid[nx][ny]['powered'] = 1
 			curr_grid[nx][ny]['powered'] = 1
 			
@@ -183,8 +181,6 @@ func do_randgenerator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 		var ny = y + dir.y
 
 		if is_valid_cell(nx, ny, curr_grid):
-			if (curr_grid[nx][ny]['rotation'] != 180 and dir == Vector2i.DOWN) or (curr_grid[nx][ny]['rotation'] != 270 and dir == Vector2i.LEFT) or (curr_grid[nx][ny]['rotation'] != 0 and dir == Vector2i.UP) or (curr_grid[nx][ny]['rotation'] != 90 and dir == Vector2i.RIGHT):
-				continue;
 			var rand = randi_range(0,1)
 			
 			next_grid[nx][ny]['powered'] = rand
@@ -237,7 +233,7 @@ func do_detector_cell(curr_cell, x, y):
 func do_blocker_cell(curr_cell, x, y):
 	if not curr_cell['powered']:
 		return
-	#next_grid[x][y]['powered'] = 0
+	next_grid[x][y]['powered'] = 0
 	var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
 	var dir = dirs[curr_cell['rotation'] / 90]
 	var nx = x + dir.x
