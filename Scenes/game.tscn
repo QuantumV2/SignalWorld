@@ -267,6 +267,7 @@ theme_override_font_sizes/font_size = 40
 editable = false
 
 [node name="Label2" type="Label" parent="SaveDialog/Control"]
+visible = false
 layout_mode = 0
 offset_left = 4.0
 offset_top = 95.23
@@ -342,6 +343,7 @@ grow_vertical = 0
 text = "Close"
 
 [node name="CheckBox" type="CheckBox" parent="OpenDialog/Control"]
+visible = false
 layout_mode = 0
 offset_left = 300.0
 offset_top = 184.355

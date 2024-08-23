@@ -12,7 +12,7 @@ func _on_mouse_exited() -> void:
 
 func _on_save_pressed() -> void:
 	%SaveDialog.visible = true
-	%SaveDialog.get_node("Control/TextEdit").text = %GameHandler._on_save()
+	%SaveDialog.get_node("Control/Label/TextEdit").text = %GameHandler._on_save()
 	pass # Replace with function body.
 
 

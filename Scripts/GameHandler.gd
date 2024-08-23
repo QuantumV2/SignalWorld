@@ -110,14 +110,17 @@ func is_cell_in_grid(x, y, grid):
 func do_generator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 	if not curr_cell['powered']:
 		return
+	if turn_off_if_invalid(x,y):
+		return
 	for dir in [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]:
 		var nx = x + dir.x
 		var ny = y + dir.y
 
-		if is_valid_cell(nx, ny, curr_grid):
+		if is_valid_cell(nx, ny, curr_grid) and curr_grid[nx][ny]['powered'] < 1:
 			next_grid[nx][ny]['powered'] = 1
 			curr_grid[nx][ny]['powered'] = 1
-			
+	if turn_off_if_invalid(x,y):
+		return
 func do_AND_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 	if not next_grid[x][y]['powered']:
 		return
@@ -176,6 +179,8 @@ func do_XOR_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 func do_randgenerator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 	if not curr_cell['powered']:
 		return
+	if turn_off_if_invalid(x,y):
+		return
 	for dir in [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]:
 		var nx = x + dir.x
 		var ny = y + dir.y
@@ -185,6 +190,8 @@ func do_randgenerator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 			
 			next_grid[nx][ny]['powered'] = rand
 			curr_grid[nx][ny]['powered'] = rand
+	if turn_off_if_invalid(x,y):
+		return
 
 func do_buffer_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 	if not curr_cell['powered']:
@@ -220,7 +227,7 @@ func do_detector_cell(curr_cell, x, y):
 	if curr_cell['powered']:
 		do_wire_cell(curr_cell, x, y)
 	
-	next_grid[x][y]['powered'] = 0;
+	#next_grid[x][y]['powered'] = 0;
 	var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
 	var dir = dirs[curr_cell['rotation'] / 90]
 	var bx = x - (dir.x)
@@ -228,7 +235,8 @@ func do_detector_cell(curr_cell, x, y):
 	if is_valid_cell(bx,by,curr_grid):
 		if curr_grid[bx][by]['powered']:
 			next_grid[x][y]['powered'] = 1
-			next_grid[bx][by]['powered'] = 0
+			
+			#next_grid[bx][by]['powered'] = 0
 			#next_grid[nx][ny]['powered'] = 1
 func do_blocker_cell(curr_cell, x, y):
 	if not curr_cell['powered']:
@@ -294,22 +302,29 @@ func update_gamestate():
 					if curr_grid[x][y]['type'] != -1:
 						process_game_cell(x, y)
 
-
+func turn_off_if_invalid(x,y):
+	if !is_valid_cell(x,y,next_grid) or !is_valid_cell(x,y,curr_grid):
+		curr_grid[x][y]['powered'] = 0
+		next_grid[x][y]['powered'] = 0
+		return true
+	return false
 
 func process_game_cell(x: int, y: int):
 	var curr_cell = curr_grid[x][y]
 	if curr_cell['powered'] == -1 :
 		return
-	
+	if turn_off_if_invalid(x,y):
+		return
+
+
 	if curr_cell['type'] in CellFuncs.keys():
 		CellFuncs[curr_cell['type']].call(curr_cell, x, y)
 		if curr_cell['type'] in [Global.CellTypes.Generator, Global.CellTypes.Randomizer]:
 			if is_valid_cell(x,y,next_grid):
 				curr_cell['powered'] = 1
 				update_tiles(%CellMap, %ColorMap, curr_grid)
-		if !is_valid_cell(x,y,next_grid):
-			next_grid[x][y]['powered'] = 0
-
+	if turn_off_if_invalid(x,y):
+		return
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -355,7 +370,7 @@ func _on_open(str) -> void:
 	
 		for i in data['d']:
 			var cell = i[1]
-			cell['position'] = StringHelper.string_to_vector2i(curr_grid[i[0][0]][i[0][1]]['position'])
+			cell['position'] = StringHelper.string_to_vector2i(cell['position'])
 			%CellMap.set_cell(cell['position'], 2, Global.CellTypesAtlCoords[int(cell['type'])], Global.RotationDict[int(cell['rotation'])])
 			%ColorMap.set_cell(cell['position'], 2, Global.PowerTypesAtl[int(cell['powered'])], 0)
 
