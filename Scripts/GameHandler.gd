@@ -119,12 +119,11 @@ func do_generator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 		return
 	if turn_off_if_invalid(x,y):
 		return
-	var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
-	for dir in dirs:
+	for dir in [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]:
 		var nx = x + dir.x
 		var ny = y + dir.y
 
-		if is_valid_cell(nx, ny, curr_grid) and curr_grid[nx][ny]['powered'] < 1 :
+		if is_valid_cell(nx, ny, curr_grid) and curr_grid[nx][ny]['powered'] < 1:
 			next_grid[nx][ny]['powered'] = 1
 			curr_grid[nx][ny]['powered'] = 1
 	if turn_off_if_invalid(x,y):
@@ -247,29 +246,14 @@ func do_detector_cell(curr_cell, x, y):
 func do_blocker_cell(curr_cell, x, y):
 	if not curr_cell['powered']:
 		return
-	
+	next_grid[x][y]['powered'] = 0
 	var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
 	var dir = dirs[curr_cell['rotation'] / 90]
 	var nx = x + dir.x
 	var ny = y + dir.y
-	var bx = x - dir.x
-	var by = y - dir.y
-	if is_valid_cell(nx, ny, curr_grid) and is_valid_cell(bx, by, curr_grid):
-		var backdir = dirs[curr_grid[bx][by]['rotation'] / 90]
-		
-		if curr_grid[bx][by]['powered'] or next_grid[bx][by]['powered']:
-			if is_valid_cell(bx + backdir.x, by + backdir.y, curr_grid):
-				if (curr_grid[bx + backdir.x][by + backdir.y] == curr_cell) :
-					next_grid[x][y]['powered'] = 0
-				else:
-					curr_grid[nx][ny]['powered'] = 0
-					next_grid[nx][ny]['powered'] = 0
-			else:
-				curr_grid[nx][ny]['powered'] = 0
-				next_grid[nx][ny]['powered'] = 0
-		else:
-			curr_grid[nx][ny]['powered'] = 0
-			next_grid[x][y]['powered'] = 0
+	if is_valid_cell(nx, ny, curr_grid):
+		curr_grid[nx][ny]['powered'] = 0
+		next_grid[nx][ny]['powered'] = 0
 			
 func do_switch_cell(curr_cell, _x, _y):
 	if not curr_cell['powered']:
