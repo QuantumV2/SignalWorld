@@ -35,6 +35,15 @@ func _on_load_close_pressed() -> void:
 	%OpenDialog.visible = false
 	pass # Replace with function body.
 
+func _input(event: InputEvent):
+	if event.is_action_pressed("up"):
+		%RotationOptions.selected = 0
+	elif event.is_action_pressed("left"):
+		%RotationOptions.selected = 3
+	elif event.is_action_pressed("right"):
+		%RotationOptions.selected = 1
+	elif event.is_action_pressed("down"):
+		%RotationOptions.selected = 2
 
 func _on_pause_pressed() -> void:
 	%GameHandler.paused = !%GameHandler.paused
