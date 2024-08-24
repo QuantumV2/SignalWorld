@@ -145,7 +145,8 @@ func do_AND_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 	if neighbors-1 == powered_neighbors:
 		var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
 		var dir = dirs[curr_cell['rotation'] / 90]
-		next_grid[x+dir.x][y+dir.y]['powered'] = 1
+		if is_valid_cell(x+dir.x, y+dir.y, next_grid):
+			next_grid[x+dir.x][y+dir.y]['powered'] = 1
 		next_grid[x][y]['powered'] = 0
 		curr_grid[x][y]['powered'] = 0
 		#WHY WONT IT WORK
@@ -172,7 +173,8 @@ func do_XOR_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 	if (neighbors-1 != powered_neighbors) and powered_neighbors > 0:
 		var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
 		var dir = dirs[curr_cell['rotation'] / 90]
-		next_grid[x+dir.x][y+dir.y]['powered'] = 1
+		if is_valid_cell(x+dir.x, y+dir.y, next_grid):
+			next_grid[x+dir.x][y+dir.y]['powered'] = 1
 		next_grid[x][y]['powered'] = 0
 		curr_grid[x][y]['powered'] = 0
 		#WHY WONT IT WORK
