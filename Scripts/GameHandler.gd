@@ -271,35 +271,41 @@ func update_tiles(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Array):
 	var width = arr.size()
 	var height = arr[0].size()
 
-	for y in range(height):
-		for x in range(width):
-			if arr[x][y]['type'] != -1:
-				process_cell(tilemap, colormap, arr, x, y)
+	for i in range((width + 1) / 2):
+		for x in [i, width - 1 - i]:
+			if x < width:
+				for y in range(height):
+					if curr_grid[x][y]['type'] != -1:
+						process_cell(tilemap, colormap, arr, x, y)
 
-	for x in range(width):
-		for y in range(height):
-			if arr[x][y]['type'] != -1:
-				process_cell(tilemap, colormap, arr, x, y)
+	for i in range((height + 1) / 2):
+		for y in [i, height - 1 - i]:
+			if y < height:
+				for x in range(width):
+					if curr_grid[x][y]['type'] != -1:
+						process_cell(tilemap, colormap, arr, x, y)
 
 func update_gamestate():
 	if paused or curr_grid.size() < 1:
 		return
-
 	curr_grid = next_grid.duplicate(true)
 	update_tiles(%CellMap, %ColorMap, curr_grid)
-
 	var width = curr_grid.size()
 	var height = curr_grid[0].size()
 
-	for y in range(height):
-		for x in range(width):
-			if curr_grid[x][y]['type'] != -1:
-				process_game_cell(x, y)
+	for i in range((width + 1) / 2):
+		for x in [i, width - 1 - i]:
+			if x < width:
+				for y in range(height):
+					if curr_grid[x][y]['type'] != -1:
+						process_game_cell(x, y)
 
-	for x in range(width):
-		for y in range(height):
-			if curr_grid[x][y]['type'] != -1:
-				process_game_cell(x, y)
+	for i in range((height + 1) / 2):
+		for y in [i, height - 1 - i]:
+			if y < height:
+				for x in range(width):
+					if curr_grid[x][y]['type'] != -1:
+						process_game_cell(x, y)
 
 func turn_off_if_invalid(x,y):
 	if !is_valid_cell(x,y,next_grid) or !is_valid_cell(x,y,curr_grid):
