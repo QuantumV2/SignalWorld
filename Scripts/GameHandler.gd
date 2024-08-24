@@ -148,12 +148,10 @@ func do_AND_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 		if is_valid_cell(x+dir.x, y+dir.y, next_grid):
 			next_grid[x+dir.x][y+dir.y]['powered'] = 1
 		next_grid[x][y]['powered'] = 0
-		curr_grid[x][y]['powered'] = 0
 		#WHY WONT IT WORK
 		return
 	else:
 		next_grid[x][y]['powered'] = 0
-		curr_grid[x][y]['powered'] = 0
 		return
 func do_XOR_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 	if not next_grid[x][y]['powered']:
@@ -176,12 +174,10 @@ func do_XOR_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 		if is_valid_cell(x+dir.x, y+dir.y, next_grid):
 			next_grid[x+dir.x][y+dir.y]['powered'] = 1
 		next_grid[x][y]['powered'] = 0
-		curr_grid[x][y]['powered'] = 0
 		#WHY WONT IT WORK
 		return
 	else:
 		next_grid[x][y]['powered'] = 0
-		curr_grid[x][y]['powered'] = 0
 		return
 
 			
