@@ -71,22 +71,30 @@ func create_tilemap_array(tilemap: TileMapLayer, colormap: TileMapLayer) -> Arra
 func do_wire_cell(curr_cell, x, y):
 	if not curr_cell['powered']:
 		return []
-	
+
 	var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
 	var dir = dirs[curr_cell['rotation'] / 90]
 	var nx = x + dir.x
 	var ny = y + dir.y
-	
+
 	if is_valid_cell(nx, ny, curr_grid):
 		next_grid[nx][ny]['powered'] = curr_cell['powered']
-	
-	# Check if there's a powered wire behind this one
-	var back_x = x - dir.x
-	var back_y = y - dir.y
-	if not is_valid_cell(back_x, back_y, curr_grid) or not curr_grid[back_x][back_y]['powered']:
-		next_grid[x][y]['powered'] = 0
-	else:
-		next_grid[x][y]['powered'] = curr_cell['powered']
+
+	# check all directions for cells pointing to us
+	var active = false
+	for direction in dirs:
+		var check_x = x + direction.x
+		var check_y = y + direction.y
+		if is_valid_cell(check_x, check_y, curr_grid):
+			var check_cell = curr_grid[check_x][check_y]
+			if check_cell['powered']:
+				var backrot = dirs[check_cell['rotation'] / 90]
+				if x == check_x + backrot.x and y == check_y + backrot.y:
+					active = true
+					break
+
+	next_grid[x][y]['powered'] = curr_cell['powered'] if active else 0
+	return next_grid
 func is_valid_cell(x, y, grid):
 	if x < 0 or x >= grid.size() or y < 0 or y >= grid[0].size():
 		return false
