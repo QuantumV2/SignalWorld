@@ -22,7 +22,6 @@ func user_place_tile_tilemap(tilemap: TileMapLayer, event: InputEvent, atlas_coo
 	
 	tilemap.set_cell(pos, source_id, atlas_coords, alt_tile)
 	
-	# Optimized grid handling
 	curr_grid = create_tilemap_array(%CellMap, %ColorMap)
 	next_grid = curr_grid.duplicate(true)
 func clear_tilemap():
@@ -72,22 +71,30 @@ func create_tilemap_array(tilemap: TileMapLayer, colormap: TileMapLayer) -> Arra
 func do_wire_cell(curr_cell, x, y):
 	if not curr_cell['powered']:
 		return []
-	
+
 	var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
 	var dir = dirs[curr_cell['rotation'] / 90]
 	var nx = x + dir.x
 	var ny = y + dir.y
-	
+
 	if is_valid_cell(nx, ny, curr_grid):
 		next_grid[nx][ny]['powered'] = curr_cell['powered']
-	
-	# Check if there's a powered wire behind this one
-	var back_x = x - dir.x
-	var back_y = y - dir.y
-	if not is_valid_cell(back_x, back_y, curr_grid) or not curr_grid[back_x][back_y]['powered']:
-		next_grid[x][y]['powered'] = 0
-	else:
-		next_grid[x][y]['powered'] = curr_cell['powered']
+
+	# check all directions for cells pointing to us
+	var active = false
+	for direction in dirs:
+		var check_x = x + direction.x
+		var check_y = y + direction.y
+		if is_valid_cell(check_x, check_y, curr_grid):
+			var check_cell = curr_grid[check_x][check_y]
+			if check_cell['powered']:
+				var backrot = dirs[check_cell['rotation'] / 90]
+				if x == check_x + backrot.x and y == check_y + backrot.y:
+					active = true
+					break
+
+	next_grid[x][y]['powered'] = curr_cell['powered'] if active else 0
+	return next_grid
 func is_valid_cell(x, y, grid):
 	if x < 0 or x >= grid.size() or y < 0 or y >= grid[0].size():
 		return false
@@ -110,14 +117,17 @@ func is_cell_in_grid(x, y, grid):
 func do_generator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 	if not curr_cell['powered']:
 		return
+	if turn_off_if_invalid(x,y):
+		return
 	for dir in [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]:
 		var nx = x + dir.x
 		var ny = y + dir.y
 
-		if is_valid_cell(nx, ny, curr_grid):
+		if is_valid_cell(nx, ny, curr_grid) and curr_grid[nx][ny]['powered'] < 1:
 			next_grid[nx][ny]['powered'] = 1
 			curr_grid[nx][ny]['powered'] = 1
-			
+	if turn_off_if_invalid(x,y):
+		return
 func do_AND_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 	if not next_grid[x][y]['powered']:
 		return
@@ -135,14 +145,13 @@ func do_AND_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 	if neighbors-1 == powered_neighbors:
 		var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
 		var dir = dirs[curr_cell['rotation'] / 90]
-		next_grid[x+dir.x][y+dir.y]['powered'] = 1
+		if is_valid_cell(x+dir.x, y+dir.y, next_grid):
+			next_grid[x+dir.x][y+dir.y]['powered'] = 1
 		next_grid[x][y]['powered'] = 0
-		curr_grid[x][y]['powered'] = 0
 		#WHY WONT IT WORK
 		return
 	else:
 		next_grid[x][y]['powered'] = 0
-		curr_grid[x][y]['powered'] = 0
 		return
 func do_XOR_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 	if not next_grid[x][y]['powered']:
@@ -162,19 +171,20 @@ func do_XOR_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 	if (neighbors-1 != powered_neighbors) and powered_neighbors > 0:
 		var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
 		var dir = dirs[curr_cell['rotation'] / 90]
-		next_grid[x+dir.x][y+dir.y]['powered'] = 1
+		if is_valid_cell(x+dir.x, y+dir.y, next_grid):
+			next_grid[x+dir.x][y+dir.y]['powered'] = 1
 		next_grid[x][y]['powered'] = 0
-		curr_grid[x][y]['powered'] = 0
 		#WHY WONT IT WORK
 		return
 	else:
 		next_grid[x][y]['powered'] = 0
-		curr_grid[x][y]['powered'] = 0
 		return
 
 			
 func do_randgenerator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 	if not curr_cell['powered']:
+		return
+	if turn_off_if_invalid(x,y):
 		return
 	for dir in [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]:
 		var nx = x + dir.x
@@ -185,6 +195,8 @@ func do_randgenerator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 			
 			next_grid[nx][ny]['powered'] = rand
 			curr_grid[nx][ny]['powered'] = rand
+	if turn_off_if_invalid(x,y):
+		return
 
 func do_buffer_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 	if not curr_cell['powered']:
@@ -220,7 +232,7 @@ func do_detector_cell(curr_cell, x, y):
 	if curr_cell['powered']:
 		do_wire_cell(curr_cell, x, y)
 	
-	next_grid[x][y]['powered'] = 0;
+	#next_grid[x][y]['powered'] = 0;
 	var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
 	var dir = dirs[curr_cell['rotation'] / 90]
 	var bx = x - (dir.x)
@@ -228,7 +240,8 @@ func do_detector_cell(curr_cell, x, y):
 	if is_valid_cell(bx,by,curr_grid):
 		if curr_grid[bx][by]['powered']:
 			next_grid[x][y]['powered'] = 1
-			next_grid[bx][by]['powered'] = 0
+			
+			#next_grid[bx][by]['powered'] = 0
 			#next_grid[nx][ny]['powered'] = 1
 func do_blocker_cell(curr_cell, x, y):
 	if not curr_cell['powered']:
@@ -294,22 +307,29 @@ func update_gamestate():
 					if curr_grid[x][y]['type'] != -1:
 						process_game_cell(x, y)
 
-
+func turn_off_if_invalid(x,y):
+	if !is_valid_cell(x,y,next_grid) or !is_valid_cell(x,y,curr_grid):
+		curr_grid[x][y]['powered'] = 0
+		next_grid[x][y]['powered'] = 0
+		return true
+	return false
 
 func process_game_cell(x: int, y: int):
 	var curr_cell = curr_grid[x][y]
 	if curr_cell['powered'] == -1 :
 		return
-	
+	if turn_off_if_invalid(x,y):
+		return
+
+
 	if curr_cell['type'] in CellFuncs.keys():
 		CellFuncs[curr_cell['type']].call(curr_cell, x, y)
 		if curr_cell['type'] in [Global.CellTypes.Generator, Global.CellTypes.Randomizer]:
 			if is_valid_cell(x,y,next_grid):
 				curr_cell['powered'] = 1
 				update_tiles(%CellMap, %ColorMap, curr_grid)
-		if !is_valid_cell(x,y,next_grid):
-			next_grid[x][y]['powered'] = 0
-
+	if turn_off_if_invalid(x,y):
+		return
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -355,7 +375,7 @@ func _on_open(str) -> void:
 	
 		for i in data['d']:
 			var cell = i[1]
-			cell['position'] = StringHelper.string_to_vector2i(curr_grid[i[0][0]][i[0][1]]['position'])
+			cell['position'] = StringHelper.string_to_vector2i(cell['position'])
 			%CellMap.set_cell(cell['position'], 2, Global.CellTypesAtlCoords[int(cell['type'])], Global.RotationDict[int(cell['rotation'])])
 			%ColorMap.set_cell(cell['position'], 2, Global.PowerTypesAtl[int(cell['powered'])], 0)
 
