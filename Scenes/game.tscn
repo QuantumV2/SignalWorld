@@ -89,7 +89,7 @@ grow_horizontal = 0
 layout_mode = 0
 offset_left = -426.0
 offset_top = -44.0
-offset_right = 43.0
+offset_right = 92.0
 offset_bottom = 480.0
 color = Color(0, 0, 0, 0.282353)
 
@@ -226,6 +226,7 @@ unique_name_in_owner = true
 script = ExtResource("2_sxy5u")
 
 [node name="ColorRect" type="ColorRect" parent="CamOrigin"]
+visible = false
 offset_left = -20905.0
 offset_top = -11847.0
 offset_right = 22207.0

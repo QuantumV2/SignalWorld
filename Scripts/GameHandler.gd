@@ -347,10 +347,10 @@ func _on_save() -> String:
 				#compresseddata['e'].append([[x,y],curr_grid[x][y]['position']])
 
 	var compressedstring = JSON.stringify(compresseddata)
-	return Marshalls.raw_to_base64(StringHelper.gzip_encode(compressedstring))
+	return Marshalls.raw_to_base64(StringHelper.gzip_encode(compressedstring,true))
 
 func _on_open(str) -> void:
-	var content = StringHelper.gzip_decode(Marshalls.base64_to_raw(str))
+	var content = StringHelper.gzip_decode(Marshalls.base64_to_raw(str),true)
 
 	var json = JSON.new()
 	var error = json.parse(content)

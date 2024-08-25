@@ -13,9 +13,9 @@ static func string_to_vector2i(string := "") -> Vector2:
 
 	return Vector2i.ZERO
 
-static func gzip_encode(text: String):
+static func gzip_encode(text: String, deflate:bool=false):
 	var gzip = StreamPeerGZIP.new()
-	gzip.start_compression(true)
+	gzip.start_compression(deflate)
 	var data = text.to_utf8_buffer()
 	var size = 65535
 	for i in range(0, data.size(), size):
@@ -23,9 +23,9 @@ static func gzip_encode(text: String):
 	gzip.finish()
 	return gzip.get_data(gzip.get_available_bytes())[1]
 
-static func gzip_decode(data):
+static func gzip_decode(data, deflate:bool=false):
 	var gzip = StreamPeerGZIP.new()
-	gzip.start_decompression(true)
+	gzip.start_decompression(deflate)
 	var size = 65535
 	for i in range(0, data.size(), size):
 		gzip.put_data(data.slice(i, size))
