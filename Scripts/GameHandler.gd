@@ -123,7 +123,7 @@ func do_generator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 		var nx = x + dir.x
 		var ny = y + dir.y
 
-		if is_valid_cell(nx, ny, curr_grid) and curr_grid[nx][ny]['powered'] < 1:
+		if is_valid_cell(nx, ny, curr_grid) and curr_grid[nx][ny]['powered'] < 1 and curr_grid[nx][ny]['type'] != 8:
 			next_grid[nx][ny]['powered'] = 1
 			curr_grid[nx][ny]['powered'] = 1
 	if turn_off_if_invalid(x,y):
