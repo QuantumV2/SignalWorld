@@ -192,9 +192,9 @@ func do_randgenerator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 
 		if is_valid_cell(nx, ny, curr_grid):
 			var rand = randi_range(0,1)
-			
-			next_grid[nx][ny]['powered'] = rand
-			curr_grid[nx][ny]['powered'] = rand
+			if next_grid[nx][ny]['powered'] != 2:
+				next_grid[nx][ny]['powered'] = rand
+				curr_grid[nx][ny]['powered'] = rand
 	if turn_off_if_invalid(x,y):
 		return
 
