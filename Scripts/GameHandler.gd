@@ -112,8 +112,8 @@ func do_generator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 		var nx = x + dir.x
 		var ny = y + dir.y
 
-		if is_valid_cell(nx, ny, curr_grid) :
-			next_grid[nx][ny]['powered'] = 3
+		if is_valid_cell(nx, ny, curr_grid):
+			next_grid[nx][ny]['powered'] = 3 if (next_grid[nx][ny]['type'] != 8) else next_grid[nx][ny]['powered']
 	if turn_off_if_invalid(x,y):
 		return
 func do_AND_cell(curr_cell, x, y):
