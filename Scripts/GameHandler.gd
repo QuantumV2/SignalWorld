@@ -106,16 +106,13 @@ func is_cell_in_grid(x, y, grid):
 func do_generator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 	if not curr_cell['powered']:
 		return
-	if turn_off_if_invalid(x,y):
-		return
 	for dir in [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]:
 		var nx = x + dir.x
 		var ny = y + dir.y
 
-		if is_valid_cell(nx, ny, curr_grid):
-			next_grid[nx][ny]['powered'] = 3 if (next_grid[nx][ny]['type'] != 8) else next_grid[nx][ny]['powered']
-	if turn_off_if_invalid(x,y):
-		return
+		if is_valid_cell(nx, ny, curr_grid) and next_grid[nx][ny]['type'] != 8:
+			next_grid[nx][ny]['powered'] = 3 
+
 func do_AND_cell(curr_cell, x, y):
 	var powered_neighbors = 0
 	var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
@@ -287,8 +284,8 @@ func update_gamestate():
 				process_game_cell(x, y)
 
 func turn_off_if_invalid(x,y):
-	if !is_valid_cell(x,y,next_grid) or !is_valid_cell(x,y,curr_grid):
-		curr_grid[x][y]['powered'] = 0
+	if !is_valid_cell(x,y,next_grid) :
+		#curr_grid[x][y]['powered'] = 0
 		next_grid[x][y]['powered'] = 0
 		return true
 	return false
@@ -305,10 +302,8 @@ func process_game_cell(x: int, y: int):
 		CellFuncs[curr_cell['type']].call(curr_cell, x, y)
 		if curr_cell['type'] in [Global.CellTypes.Generator, Global.CellTypes.Randomizer]:
 			if is_valid_cell(x,y,next_grid):
-				curr_cell['powered'] = 1
-				update_tiles(%CellMap, %ColorMap, curr_grid)
-	if turn_off_if_invalid(x,y):
-		return
+				next_grid[x][y]['powered'] = 3
+				#update_tiles(%CellMap, %ColorMap, curr_grid)
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
