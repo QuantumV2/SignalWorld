@@ -13,21 +13,11 @@ static func string_to_vector2i(string := "") -> Vector2:
 
 	return Vector2i.ZERO
 
-static func gzip_encode(text: String, deflate:bool=false):
-	var gzip = StreamPeerGZIP.new()
-	gzip.start_compression(deflate)
+static func gzip_encode(text: String):
 	var data = text.to_utf8_buffer()
-	var size = 65535
-	for i in range(0, data.size(), size):
-		gzip.put_data(data.slice(i, size))
-	gzip.finish()
-	return gzip.get_data(gzip.get_available_bytes())[1]
+	data = data.compress(FileAccess.COMPRESSION_DEFLATE)
+	return data
 
-static func gzip_decode(data, deflate:bool=false):
-	var gzip = StreamPeerGZIP.new()
-	gzip.start_decompression(deflate)
-	var size = 65535
-	for i in range(0, data.size(), size):
-		gzip.put_data(data.slice(i, size))
-	gzip.finish()
-	return gzip.get_utf8_string(gzip.get_available_bytes())
+
+static func gzip_decode(data):
+	return data.decompress(65535, FileAccess.COMPRESSION_DEFLATE)
