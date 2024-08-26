@@ -51,12 +51,14 @@ const PowerTypes : Dictionary = {
 	Vector2i(-1,-1):0,
 	Vector2i(0,0):1,
 	Vector2i(1,0):2,
+	Vector2i(2,0):3,
 }
 const PowerTypesAtl : Dictionary = {
 	-1:Vector2i(-1,-1),
 	0:Vector2i(-1,-1),
 	1:Vector2i(0,0),
 	2:Vector2i(1,0),
+	3:Vector2i(2,0),
 }
 func array_to_dict_recursive(array):
 	var dict = {}
