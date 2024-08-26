@@ -111,7 +111,7 @@ func do_generator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 		var ny = y + dir.y
 
 		if is_valid_cell(nx, ny, curr_grid) and next_grid[nx][ny]['type'] != 8:
-			next_grid[nx][ny]['powered'] = 3 
+			next_grid[nx][ny]['powered'] = 3
 
 func do_AND_cell(curr_cell, x, y):
 	var powered_neighbors = 0
@@ -122,24 +122,23 @@ func do_AND_cell(curr_cell, x, y):
 		var dir = dirs[i]
 		var nx = x + dir.x
 		var ny = y + dir.y
-
-		# Only consider cells pointing towards this cell
 		if is_valid_cell(nx, ny, curr_grid) and curr_grid[nx][ny]['rotation'] == (i * 90 + 180) % 360:
 			total_neighbors += 1
 			if curr_grid[nx][ny]['powered'] == 1:
 				powered_neighbors += 1
 
-	var output_dir = dirs[curr_cell['rotation'] / 90]
+	var output_dir = dirs[int(curr_cell['rotation'] / 90)]
 	var ox = x + output_dir.x
 	var oy = y + output_dir.y
 
-	if is_valid_cell(ox, oy, curr_grid) and curr_grid[ox][oy]['powered'] != 1 and powered_neighbors == total_neighbors:
-		next_grid[x][y]['powered'] = 3
-		next_grid[ox][oy]['powered'] = 3
+	if is_valid_cell(ox, oy, curr_grid) and powered_neighbors == total_neighbors:
+		next_grid[x][y]['powered'] = 1
+		next_grid[ox][oy]['powered'] = 1
 	else:
 		next_grid[x][y]['powered'] = 0
 
 	return next_grid
+
 func do_XOR_cell(curr_cell, x, y):
 	var powered_neighbors = 0
 	var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
@@ -155,13 +154,13 @@ func do_XOR_cell(curr_cell, x, y):
 			if curr_grid[nx][ny]['powered'] == 1:
 				powered_neighbors += 1
 
-	var output_dir = dirs[curr_cell['rotation'] / 90]
+	var output_dir = dirs[int(curr_cell['rotation'] / 90)]
 	var ox = x + output_dir.x
 	var oy = y + output_dir.y
 
-	if is_valid_cell(ox, oy, curr_grid) and curr_grid[ox][oy]['powered'] != 1 and powered_neighbors == 1:
-		next_grid[x][y]['powered'] = 3
-		next_grid[ox][oy]['powered'] = 3
+	if is_valid_cell(ox, oy, curr_grid) and powered_neighbors == 1:
+		next_grid[x][y]['powered'] = 1
+		next_grid[ox][oy]['powered'] = 1
 	else:
 		next_grid[x][y]['powered'] = 0
 
@@ -322,14 +321,25 @@ func _on_save() -> String:
 	for x in range(curr_grid.size()):
 		for y in range(curr_grid[0].size()):
 			if curr_grid[x][y]['type'] != -1:
-				compresseddata['d'].append([[x,y], curr_grid[x][y]])
-			#else:
-				#compresseddata['e'].append([[x,y],curr_grid[x][y]['position']])
+				compresseddata['d'].append([[x,y], cell_to_array(curr_grid[x][y])])
 
 	var compressedstring = JSON.stringify(compresseddata)
 	return Marshalls.raw_to_base64(StringHelper.gzip_encode(compressedstring))
 
-func _on_open(_str) -> void:
+
+
+
+func array_to_cell(arr: Array) -> Dictionary:
+	return {
+		"position": StringHelper.string_to_vector2i(arr[0]),
+		"powered": arr[1],
+		"rotation": arr[2],
+		"type": arr[3],
+	}
+func cell_to_array(dict: Dictionary) -> Array:
+	return [dict['position'], dict['powered'], dict['rotation'], dict['type']]
+	
+func legacy_format_open(_str):
 	var content = StringHelper.gzip_decode(Marshalls.base64_to_raw(_str)).get_string_from_utf8()
 
 	var json = JSON.new()
@@ -350,6 +360,37 @@ func _on_open(_str) -> void:
 		for i in data['d']:
 			var cell = i[1]
 			cell['position'] = StringHelper.string_to_vector2i(cell['position'])
+			%CellMap.set_cell(cell['position'], 2, Global.CellTypesAtlCoords[int(cell['type'])], Global.RotationDict[int(cell['rotation'])])
+			%ColorMap.set_cell(cell['position'], 2, Global.PowerTypesAtl[int(cell['powered'])], 0)
+
+		curr_grid = create_tilemap_array(%CellMap, %ColorMap)
+		next_grid = curr_grid.duplicate(true)
+		update_tiles(%CellMap, %ColorMap, next_grid)
+	else:
+		print("JSON Parse Error: ", json.get_error_message(), " in ", content, " at line ", json.get_error_line())
+func _on_open(_str) -> void:
+	if %OpenDialog.get_node("Control/CheckBox").button_pressed:
+		legacy_format_open(_str)
+		return
+	var content = StringHelper.gzip_decode(Marshalls.base64_to_raw(_str)).get_string_from_utf8()
+
+	var json = JSON.new()
+	var error = json.parse(content)
+
+	if error == OK:
+		var data = json.data
+		var json_size = data['s']
+		clear_tilemap()
+		curr_grid = []
+		curr_grid.resize(json_size[0])
+	
+		for i in range(curr_grid.size()):
+			curr_grid[i] = []
+			curr_grid[i].resize(json_size[1])
+			
+	
+		for i in data['d']:
+			var cell = array_to_cell(i[1])
 			%CellMap.set_cell(cell['position'], 2, Global.CellTypesAtlCoords[int(cell['type'])], Global.RotationDict[int(cell['rotation'])])
 			%ColorMap.set_cell(cell['position'], 2, Global.PowerTypesAtl[int(cell['powered'])], 0)
 

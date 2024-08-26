@@ -344,13 +344,12 @@ grow_vertical = 0
 text = "Close"
 
 [node name="CheckBox" type="CheckBox" parent="OpenDialog/Control"]
-visible = false
 layout_mode = 0
 offset_left = 300.0
 offset_top = 184.355
 offset_right = 491.0
 offset_bottom = 215.355
-text = "Logic Arrows scheme"
+text = "Legacy format"
 
 [connection signal="mouse_entered" from="UI/Control/ColorRect" to="UI" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="UI/Control/ColorRect" to="UI" method="_on_mouse_exited"]
