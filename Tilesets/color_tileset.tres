@@ -6,6 +6,7 @@
 texture = ExtResource("1_wd06i")
 0:0/0 = 0
 1:0/0 = 0
+2:0/0 = 0
 
 [resource]
 sources/0 = SubResource("TileSetAtlasSource_tyhei")
