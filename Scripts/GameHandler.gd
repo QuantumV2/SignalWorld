@@ -334,8 +334,8 @@ func _on_save() -> String:
 	var compressedstring = JSON.stringify(compresseddata)
 	return Marshalls.raw_to_base64(StringHelper.gzip_encode(compressedstring))
 
-func _on_open(str) -> void:
-	var content = StringHelper.gzip_decode(Marshalls.base64_to_raw(str)).get_string_from_utf8()
+func _on_open(_str) -> void:
+	var content = StringHelper.gzip_decode(Marshalls.base64_to_raw(_str)).get_string_from_utf8()
 
 	var json = JSON.new()
 	var error = json.parse(content)
