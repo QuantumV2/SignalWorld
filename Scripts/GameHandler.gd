@@ -132,8 +132,8 @@ func do_AND_cell(curr_cell, x, y):
 	var oy = y + output_dir.y
 
 	if is_valid_cell(ox, oy, curr_grid) and powered_neighbors == total_neighbors:
-		next_grid[x][y]['powered'] = 1
-		next_grid[ox][oy]['powered'] = 1
+		next_grid[x][y]['powered'] = 3
+		next_grid[ox][oy]['powered'] = 3
 	else:
 		next_grid[x][y]['powered'] = 0
 
@@ -159,8 +159,8 @@ func do_XOR_cell(curr_cell, x, y):
 	var oy = y + output_dir.y
 
 	if is_valid_cell(ox, oy, curr_grid) and powered_neighbors == 1:
-		next_grid[x][y]['powered'] = 1
-		next_grid[ox][oy]['powered'] = 1
+		next_grid[x][y]['powered'] = 3
+		next_grid[ox][oy]['powered'] = 3
 	else:
 		next_grid[x][y]['powered'] = 0
 
