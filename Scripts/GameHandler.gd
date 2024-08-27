@@ -78,7 +78,7 @@ func do_wire_cell(curr_cell, x, y):
 	var ny = y + dir.y
 
 	if is_valid_cell(nx, ny, curr_grid):
-		next_grid[nx][ny]['powered'] = 3
+		set_grid_cell_power(next_grid, nx, ny, 3)
 
 	if next_grid[x][y]['powered'] != 3:
 		next_grid[x][y]['powered'] = 0
@@ -111,7 +111,7 @@ func do_generator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 		var ny = y + dir.y
 
 		if is_valid_cell(nx, ny, curr_grid) and next_grid[nx][ny]['type'] != 8:
-			next_grid[nx][ny]['powered'] = 3
+			set_grid_cell_power(next_grid, nx, ny, 3)
 
 func do_AND_cell(curr_cell, x, y):
 	var powered_neighbors = 0
@@ -132,8 +132,8 @@ func do_AND_cell(curr_cell, x, y):
 	var oy = y + output_dir.y
 
 	if is_valid_cell(ox, oy, curr_grid) and powered_neighbors == total_neighbors:
-		next_grid[x][y]['powered'] = 3
-		next_grid[ox][oy]['powered'] = 3
+		set_grid_cell_power(next_grid, x, y, 3)
+		set_grid_cell_power(next_grid, ox, oy, 3)
 	else:
 		next_grid[x][y]['powered'] = 0
 
@@ -159,8 +159,8 @@ func do_XOR_cell(curr_cell, x, y):
 	var oy = y + output_dir.y
 
 	if is_valid_cell(ox, oy, curr_grid) and powered_neighbors == 1:
-		next_grid[x][y]['powered'] = 3
-		next_grid[ox][oy]['powered'] = 3
+		set_grid_cell_power(next_grid, x, y, 3)
+		set_grid_cell_power(next_grid, ox, oy, 3)
 	else:
 		next_grid[x][y]['powered'] = 0
 
@@ -178,13 +178,18 @@ func do_randgenerator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 
 		if is_valid_cell(nx, ny, curr_grid) :
 			var rand = randi_range(0,1)
-			next_grid[nx][ny]['powered'] = 3 if rand else 0
+			set_grid_cell_power(next_grid, nx, ny, 3) if rand else 0
 	if turn_off_if_invalid(x,y):
 		return
+
+func set_grid_cell_power(grid: Array, x:int,y:int, power:int):
+	if grid[x][y]['powered'] != 2:
+		grid[x][y]['powered'] = power
 
 func do_buffer_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 	if not curr_cell['powered']:
 		return
+
 
 	if curr_cell['powered'] == 2:
 		next_grid[x][y]['powered'] = 0;
@@ -193,10 +198,11 @@ func do_buffer_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 		var nx = x + (dir.x)
 		var ny = y + (dir.y)
 		if is_valid_cell(nx,ny,curr_grid):
-			next_grid[nx][ny]['powered'] = 3
+			set_grid_cell_power(next_grid, nx, ny, 3)
 	if curr_cell['powered'] == 1:
 		next_grid[x][y]['powered'] = 2
-		return
+		
+
 
 func do_jumppad_cell(curr_cell, x, y):
 	if not curr_cell['powered']:
@@ -209,7 +215,7 @@ func do_jumppad_cell(curr_cell, x, y):
 	var nx = x + (dir.x*2)
 	var ny = y + (dir.y*2)
 	if is_valid_cell(nx,ny,curr_grid):
-		next_grid[nx][ny]['powered'] = 3
+		set_grid_cell_power(next_grid, nx, ny, 3)
 		
 func do_detector_cell(curr_cell, x, y):
 	
@@ -223,7 +229,7 @@ func do_detector_cell(curr_cell, x, y):
 	var by = y - (dir.y)
 	if is_valid_cell(bx,by,curr_grid):
 		if curr_grid[bx][by]['powered']:
-			next_grid[x][y]['powered'] = 3
+			set_grid_cell_power(next_grid, x, y, 3)
 			
 			#next_grid[bx][by]['powered'] = 0
 			#next_grid[nx][ny]['powered'] = 1
@@ -301,7 +307,7 @@ func process_game_cell(x: int, y: int):
 		CellFuncs[curr_cell['type']].call(curr_cell, x, y)
 		if curr_cell['type'] in [Global.CellTypes.Generator, Global.CellTypes.Randomizer]:
 			if is_valid_cell(x,y,next_grid):
-				next_grid[x][y]['powered'] = 3
+				set_grid_cell_power(next_grid, x, y, 3)
 				#update_tiles(%CellMap, %ColorMap, curr_grid)
 
 # Called when the node enters the scene tree for the first time.
