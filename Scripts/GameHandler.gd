@@ -11,6 +11,7 @@ var CellFuncs : Dictionary = {
 	Global.CellTypes.Switch: do_switch_cell,
 	Global.CellTypes.AND: do_AND_cell,
 	Global.CellTypes.XOR: do_XOR_cell,
+	Global.CellTypes.AngledWire: do_angledwire_cell,
 }
 
 var paused = false;
@@ -67,6 +68,23 @@ func create_tilemap_array(tilemap: TileMapLayer, colormap: TileMapLayer) -> Arra
 
 @onready var curr_grid: Array = create_tilemap_array(%CellMap, %ColorMap)
 @onready var next_grid: Array = curr_grid.duplicate(true)
+
+func do_angledwire_cell(curr_cell, x, y):
+	if not curr_cell['powered']:
+		return []
+
+	var dirs = [Vector2i.UP + Vector2i.RIGHT, Vector2i.RIGHT + Vector2i.DOWN, Vector2i.LEFT + Vector2i.DOWN, Vector2i.LEFT + Vector2i.UP]
+	var dir = dirs[curr_cell['rotation'] / 90]
+	var nx = x + dir.x
+	var ny = y + dir.y
+
+	if is_valid_cell(nx, ny, curr_grid):
+		set_grid_cell_power(next_grid, nx, ny, 3)
+
+	if next_grid[x][y]['powered'] != 3:
+		next_grid[x][y]['powered'] = 0
+
+	return next_grid
 
 func do_wire_cell(curr_cell, x, y):
 	if not curr_cell['powered']:
