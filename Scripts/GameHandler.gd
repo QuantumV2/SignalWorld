@@ -317,8 +317,7 @@ func process_game_cell(x: int, y: int):
 	var curr_cell = curr_grid[x][y]
 	if curr_cell['powered'] == -1 :
 		return
-	if turn_off_if_invalid(x,y):
-		return
+
 
 
 	if curr_cell['type'] in CellFuncs.keys():
@@ -327,6 +326,8 @@ func process_game_cell(x: int, y: int):
 			if is_valid_cell(x,y,next_grid):
 				set_grid_cell_power(next_grid, x, y, 3)
 				#update_tiles(%CellMap, %ColorMap, curr_grid)
+	if turn_off_if_invalid(x,y):
+		return
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
