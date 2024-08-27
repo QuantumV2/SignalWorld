@@ -25,6 +25,8 @@ texture_region_size = Vector2i(128, 128)
 0:2/0/custom_data_0 = &"Blocker"
 1:2/0 = 0
 1:2/0/custom_data_0 = &"Randomizer"
+2:2/0 = 0
+2:2/0/custom_data_0 = &"AngledWire"
 
 [resource]
 tile_size = Vector2i(128, 128)

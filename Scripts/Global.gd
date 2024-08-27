@@ -33,6 +33,7 @@ const CellTypes : Dictionary = {
 	&"JumpPad":7,
 	&"Blocker":8,
 	&"Randomizer":9,
+	&"AngledWire":10,
 }
 const CellTypesAtlCoords : Dictionary = {
 	-1:Vector2i(-1,-1),
@@ -46,17 +47,20 @@ const CellTypesAtlCoords : Dictionary = {
 	7:Vector2i(3,1),
 	8:Vector2i(0,2),
 	9:Vector2i(1,2),
+	10:Vector2i(2,2),
 }
 const PowerTypes : Dictionary = {
 	Vector2i(-1,-1):0,
 	Vector2i(0,0):1,
 	Vector2i(1,0):2,
+	Vector2i(2,0):3,
 }
 const PowerTypesAtl : Dictionary = {
 	-1:Vector2i(-1,-1),
 	0:Vector2i(-1,-1),
 	1:Vector2i(0,0),
 	2:Vector2i(1,0),
+	3:Vector2i(2,0),
 }
 func array_to_dict_recursive(array):
 	var dict = {}

@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://dpl015ydoxgno"]
+[gd_scene load_steps=21 format=3 uid="uid://dpl015ydoxgno"]
 
 [ext_resource type="Script" path="res://Scripts/cam_origin.gd" id="2_sxy5u"]
 [ext_resource type="PackedScene" uid="uid://b7j2071weldx4" path="res://Prefabs/color_map.tscn" id="3_li8la"]
@@ -49,6 +49,10 @@ region = Rect2(0, 256, 128, 128)
 atlas = ExtResource("6_4k7gr")
 region = Rect2(128, 256, 128, 128)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_c4ma4"]
+atlas = ExtResource("6_4k7gr")
+region = Rect2(256, 256, 128, 128)
+
 [sub_resource type="AtlasTexture" id="AtlasTexture_bel8f"]
 atlas = ExtResource("6_58r07")
 region = Rect2(0, 0, 16, 16)
@@ -89,7 +93,7 @@ grow_horizontal = 0
 layout_mode = 0
 offset_left = -426.0
 offset_top = -44.0
-offset_right = 43.0
+offset_right = 92.0
 offset_bottom = 480.0
 color = Color(0, 0, 0, 0.282353)
 
@@ -102,7 +106,7 @@ offset_right = 44.0
 offset_bottom = 135.0
 theme_override_font_sizes/font_size = 37
 selected = 0
-item_count = 10
+item_count = 11
 popup/item_0/text = "Wire"
 popup/item_0/icon = SubResource("AtlasTexture_8bnvh")
 popup/item_1/text = "Generator"
@@ -132,6 +136,9 @@ popup/item_8/id = 9
 popup/item_9/text = "RNG"
 popup/item_9/icon = SubResource("AtlasTexture_qkdr8")
 popup/item_9/id = 3
+popup/item_10/text = "Angled Wire"
+popup/item_10/icon = SubResource("AtlasTexture_c4ma4")
+popup/item_10/id = 10
 
 [node name="ColorOptions" type="OptionButton" parent="UI/Control"]
 unique_name_in_owner = true
@@ -226,6 +233,7 @@ unique_name_in_owner = true
 script = ExtResource("2_sxy5u")
 
 [node name="ColorRect" type="ColorRect" parent="CamOrigin"]
+visible = false
 offset_left = -20905.0
 offset_top = -11847.0
 offset_right = 22207.0
@@ -343,13 +351,12 @@ grow_vertical = 0
 text = "Close"
 
 [node name="CheckBox" type="CheckBox" parent="OpenDialog/Control"]
-visible = false
 layout_mode = 0
 offset_left = 300.0
 offset_top = 184.355
 offset_right = 491.0
 offset_bottom = 215.355
-text = "Logic Arrows scheme"
+text = "Legacy format"
 
 [connection signal="mouse_entered" from="UI/Control/ColorRect" to="UI" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="UI/Control/ColorRect" to="UI" method="_on_mouse_exited"]
