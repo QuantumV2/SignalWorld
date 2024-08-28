@@ -293,8 +293,7 @@ func update_gamestate():
 	if paused or curr_grid.size() < 1:
 		return
 
-	replace_temp_energy(next_grid)
-	curr_grid = next_grid.duplicate(true)
+
 	update_tiles(%CellMap, %ColorMap, curr_grid)
 
 	var width = curr_grid.size()
@@ -305,6 +304,8 @@ func update_gamestate():
 		for y in range(height):
 			if curr_grid[x][y]['type'] != -1:
 				process_game_cell(x, y)
+	replace_temp_energy(next_grid)
+	curr_grid = next_grid.duplicate(true)
 
 func turn_off_if_invalid(x,y):
 	if !is_valid_cell(x,y,next_grid) :

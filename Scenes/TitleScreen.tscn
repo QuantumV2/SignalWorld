@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=4 uid="uid://coug50qjfgedp"]
+[gd_scene load_steps=6 format=4 uid="uid://5xo04f21f6ix"]
 
 [ext_resource type="PackedScene" uid="uid://ckq1uhkvol4c1" path="res://Prefabs/cell_map.tscn" id="1_5vgee"]
 [ext_resource type="PackedScene" uid="uid://b7j2071weldx4" path="res://Prefabs/color_map.tscn" id="2_qbqjo"]
