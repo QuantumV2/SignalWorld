@@ -35,6 +35,16 @@ const CellTypes : Dictionary = {
 	&"Randomizer":9,
 	&"AngledWire":10,
 }
+
+func array_to_dict_recursive(array):
+	var dict = {}
+	for index in range(len(array)):
+		if typeof(array[index]) == TYPE_ARRAY:
+			dict[int(index)] = array_to_dict_recursive(array[index])
+		else:
+			dict[int(index)] = array[index]
+	return dict
+
 const CellTypesAtlCoords : Dictionary = {
 	-1:Vector2i(-1,-1),
 	0:Vector2i(0,0),
@@ -62,14 +72,7 @@ const PowerTypesAtl : Dictionary = {
 	2:Vector2i(1,0),
 	3:Vector2i(2,0),
 }
-func array_to_dict_recursive(array):
-	var dict = {}
-	for index in range(len(array)):
-		if array[index] is Array:
-			dict[index] = array_to_dict_recursive(array[index])
-		else:
-			dict[index] = array[index]
-	return dict
+
 
 func get_tile_data_rotation(alt_tile : int):
 	match alt_tile:
