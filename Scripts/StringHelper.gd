@@ -20,4 +20,4 @@ static func gzip_encode(text: String):
 
 
 static func gzip_decode(data):
-	return data.decompress(65535, FileAccess.COMPRESSION_DEFLATE)
+	return data.decompress_dynamic(-1, FileAccess.COMPRESSION_DEFLATE)

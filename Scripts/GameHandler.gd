@@ -26,8 +26,8 @@ func user_place_tile_tilemap(tilemap: TileMapLayer, event: InputEvent, atlas_coo
 	curr_grid = create_tilemap_array(%CellMap, %ColorMap)
 	next_grid = curr_grid.duplicate(true)
 func clear_tilemap():
-	curr_grid = [[]]
-	next_grid = [[]]
+	curr_grid = {}
+	next_grid = {}
 	var rct = %CellMap.get_used_rect()
 	for x in rct.size.x:
 		for y in rct.size.y:
@@ -37,7 +37,7 @@ func clear_tilemap():
 func change_tick_rate(value: float):
 	Global.tick_speed = value*60
 
-func create_tilemap_array(tilemap: TileMapLayer, colormap: TileMapLayer) -> Array:
+func create_tilemap_array(tilemap: TileMapLayer, colormap: TileMapLayer) -> Dictionary:
 	var used_rect: Rect2i = tilemap.get_used_rect()
 	var result = Array()
 	result.resize(used_rect.size.x)
@@ -63,11 +63,11 @@ func create_tilemap_array(tilemap: TileMapLayer, colormap: TileMapLayer) -> Arra
 				"position": current_pos,
 			}
 	
-	return result
+	return Global.array_to_dict_recursive(result)
 
 
-@onready var curr_grid: Array = create_tilemap_array(%CellMap, %ColorMap)
-@onready var next_grid: Array = curr_grid.duplicate(true)
+@onready var curr_grid: Dictionary = create_tilemap_array(%CellMap, %ColorMap)
+@onready var next_grid: Dictionary = curr_grid.duplicate(true)
 
 func do_angledwire_cell(curr_cell, x, y):
 	if not curr_cell['powered']:
@@ -200,7 +200,7 @@ func do_randgenerator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 	if turn_off_if_invalid(x,y):
 		return
 
-func set_grid_cell_power(grid: Array, x:int,y:int, power:int):
+func set_grid_cell_power(grid: Dictionary, x:int,y:int, power:int):
 	if grid[x][y]['powered'] != 2:
 		grid[x][y]['powered'] = power
 
@@ -267,20 +267,20 @@ func do_switch_cell(curr_cell, _x, _y):
 	if not curr_cell['powered']:
 		return
 			
-func replace_temp_energy(grid: Array):
+func replace_temp_energy(grid: Dictionary):
 	for x in range(grid.size()):
 		for y in range(grid[0].size()):
 			if grid[x][y]['powered'] == 3:
 				grid[x][y]['powered'] = 1
 
-func process_cell(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Array, x: int, y: int):
+func process_cell(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Dictionary, x: int, y: int):
 	var curr_cell = arr[x][y]
 	if curr_cell['type'] != -1:
 		var atlas_coords = Global.CellTypesAtlCoords[int(curr_cell["type"])]
 		tilemap.set_cell(curr_cell['position'], 2, atlas_coords, Global.RotationDict[int(curr_cell['rotation'])])
 		colormap.set_cell(curr_cell['position'], 0, Global.PowerTypesAtl[int(curr_cell['powered'])])
 
-func update_tiles(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Array):
+func update_tiles(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Dictionary):
 	var width = arr.size()
 	var height = arr[0].size()
 
@@ -341,7 +341,7 @@ func _input(event: InputEvent) -> void:
 
 
 func _on_save() -> String:
-	if !curr_grid or curr_grid == []:
+	if !curr_grid:
 		return ""
 	var compresseddata = {"s":[curr_grid.size(), curr_grid[0].size()],"d":[]}
 	for x in range(curr_grid.size()):
@@ -375,8 +375,8 @@ func legacy_format_open(_str):
 		var data = json.data
 		var json_size = data['s']
 		clear_tilemap()
-		curr_grid = []
-		curr_grid.resize(json_size[0])
+		curr_grid = {}
+		#curr_grid.resize(json_size[0])
 	
 		for i in range(curr_grid.size()):
 			curr_grid[i] = []
@@ -407,8 +407,8 @@ func _on_open(_str) -> void:
 		var data = json.data
 		var json_size = data['s']
 		clear_tilemap()
-		curr_grid = []
-		curr_grid.resize(json_size[0])
+		curr_grid = {}
+		#curr_grid.resize(json_size[0])
 	
 		for i in range(curr_grid.size()):
 			curr_grid[i] = []
