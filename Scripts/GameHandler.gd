@@ -34,16 +34,16 @@ func clear_tilemap():
 			%CellMap.set_cell(Vector2i(x,y)+rct.position)
 			%ColorMap.set_cell(Vector2i(x,y)+rct.position)
 
-func display_cell_preview(event: InputEvent = null):
-	if event:
-		var camera_zoom = %Camera2D.zoom
-		var origin_pos = %CamOrigin.position
-		var event_pos = event.position / camera_zoom + origin_pos - get_viewport().get_visible_rect().size / (2 * camera_zoom)
-		
-		var cell_size = Vector2(128, 128)
-		var half_cell = cell_size / 2
+func display_cell_preview():
 
-		%PreviewCell.position = (event_pos / cell_size).floor() * cell_size + half_cell
+	var camera_zoom = %Camera2D.zoom
+	var origin_pos = %CamOrigin.position
+	var event_pos = get_viewport().get_mouse_position() / camera_zoom + origin_pos - get_viewport().get_visible_rect().size / (2 * camera_zoom)
+	
+	var cell_size = Vector2(128, 128)
+	var half_cell = cell_size / 2
+
+	%PreviewCell.position = (event_pos / cell_size).floor() * cell_size + half_cell
 
 	var selected_texture = %CellOptions.get_item_icon(%CellOptions.selected)
 	if %PreviewCell.texture != selected_texture:
