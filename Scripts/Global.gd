@@ -16,6 +16,14 @@ const RotationDict : Dictionary = {
 	180: TileTransform.ROTATE_180,
 	270: TileTransform.ROTATE_270,
 }
+
+const RotToDeg:Dictionary = {
+	0:0,
+	1:90,
+	2:180,
+	3:270,
+}
+
 const RotationInd:Dictionary  ={
 	0: 0,
 	1: TileTransform.ROTATE_90,

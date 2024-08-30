@@ -44,6 +44,7 @@ func _input(event: InputEvent):
 		%RotationOptions.selected = 1
 	elif event.is_action_pressed("down"):
 		%RotationOptions.selected = 2
+	%GameHandler.display_cell_preview()
 
 func _on_pause_pressed() -> void:
 	%GameHandler.paused = !%GameHandler.paused

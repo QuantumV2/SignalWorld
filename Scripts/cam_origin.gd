@@ -16,6 +16,7 @@ func zoom_out():
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
+		%GameHandler.display_cell_preview(event)
 		if event.button_mask == MOUSE_BUTTON_MASK_MIDDLE:
 			position -= event.relative / %Camera2D.zoom
 		if not %UI.mouse_over:

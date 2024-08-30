@@ -34,6 +34,25 @@ func clear_tilemap():
 			%CellMap.set_cell(Vector2i(x,y)+rct.position)
 			%ColorMap.set_cell(Vector2i(x,y)+rct.position)
 
+func display_cell_preview(event: InputEvent = null):
+	if event:
+		var camera_zoom = %Camera2D.zoom
+		var origin_pos = %CamOrigin.position
+		var event_pos = event.position / camera_zoom + origin_pos - get_viewport().get_visible_rect().size / (2 * camera_zoom)
+		
+		var cell_size = Vector2(128, 128)
+		var half_cell = cell_size / 2
+
+		%PreviewCell.position = (event_pos / cell_size).floor() * cell_size + half_cell
+
+	var selected_texture = %CellOptions.get_item_icon(%CellOptions.selected)
+	if %PreviewCell.texture != selected_texture:
+		%PreviewCell.texture = selected_texture
+
+	var selected_rotation = Global.RotToDeg[%RotationOptions.selected]
+	if %PreviewCell.rotation_degrees != selected_rotation:
+		%PreviewCell.rotation_degrees = selected_rotation
+
 func change_tick_rate(value: float):
 	Global.tick_speed = value*60
 
@@ -55,13 +74,15 @@ func create_tilemap_array(tilemap: TileMapLayer, colormap: TileMapLayer) -> Dict
 			var is_powered: int = Global.PowerTypes[color_tile_atlas_coords]
 
 			var cell_type = Global.CellTypes[tile_data.get_custom_data("CellTypes")] if tile_atlas_coords != Vector2i(-1, -1) else -1
-
-			result[x][y] = {
-				"type": cell_type,
-				"powered": is_powered,
-				"rotation": Global.get_tile_data_rotation(tile_alt),
-				"position": current_pos,
-			}
+			if cell_type >= 0:
+				result[x][y] = {
+					"type": cell_type,
+					"powered": is_powered,
+					"rotation": Global.get_tile_data_rotation(tile_alt),
+					"position": current_pos,
+				}
+			else: 
+				result[x][y] = null
 	
 	return Global.array_to_dict_recursive(result)
 
@@ -105,14 +126,14 @@ func do_wire_cell(curr_cell, x, y):
 func is_valid_cell(x, y, grid):
 	if x < 0 or x >= grid.size() or y < 0 or y >= grid[0].size():
 		return false
-	if grid[x][y]['type'] == -1:
+	if grid[x][y] == null or grid[x][y]['type'] == -1:
 		return false
 	# Check for active blockers
 	var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
 	for dir in dirs:
 		var bx = x + dir.x
 		var by = y + dir.y
-		if is_cell_in_grid(bx, by, grid) and grid[bx][by]['type'] == Global.CellTypes.Blocker:
+		if is_cell_in_grid(bx, by, grid) and grid[bx][by] != null and grid[bx][by]['type'] == Global.CellTypes.Blocker:
 			var blocker_dir = dirs[grid[bx][by]['rotation'] / 90]
 			if blocker_dir == -dir and grid[bx][by]['powered']:
 				return false
@@ -128,7 +149,7 @@ func do_generator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 		var nx = x + dir.x
 		var ny = y + dir.y
 
-		if is_valid_cell(nx, ny, curr_grid) and next_grid[nx][ny]['type'] != 8:
+		if is_valid_cell(nx, ny, curr_grid):
 			set_grid_cell_power(next_grid, nx, ny, 3)
 
 func do_AND_cell(curr_cell, x, y):
@@ -270,12 +291,13 @@ func do_switch_cell(curr_cell, _x, _y):
 func replace_temp_energy(grid: Dictionary):
 	for x in range(grid.size()):
 		for y in range(grid[0].size()):
-			if grid[x][y]['powered'] == 3:
-				grid[x][y]['powered'] = 1
+			if grid[x][y] != null:
+				if grid[x][y]['powered'] == 3:
+					grid[x][y]['powered'] = 1
 
 func process_cell(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Dictionary, x: int, y: int):
 	var curr_cell = arr[x][y]
-	if curr_cell['type'] != -1:
+	if curr_cell != null and curr_cell['type'] != -1:
 		var atlas_coords = Global.CellTypesAtlCoords[int(curr_cell["type"])]
 		tilemap.set_cell(curr_cell['position'], 2, atlas_coords, Global.RotationDict[int(curr_cell['rotation'])])
 		colormap.set_cell(curr_cell['position'], 0, Global.PowerTypesAtl[int(curr_cell['powered'])])
@@ -286,7 +308,7 @@ func update_tiles(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Dictionary
 
 	for x in range(width):
 		for y in range(height):
-			if arr[x][y]['type'] != -1:
+			if arr[x][y] != null and arr[x][y]['type'] != -1:
 				process_cell(tilemap, colormap, arr, x, y)
 
 func update_gamestate():
@@ -302,12 +324,15 @@ func update_gamestate():
 
 	for x in range(width):
 		for y in range(height):
-			if curr_grid[x][y]['type'] != -1:
+			if curr_grid[x][y] != null and curr_grid[x][y]['type'] != -1:
+				var c = curr_grid[x][y]
 				process_game_cell(x, y)
 	replace_temp_energy(next_grid)
 	curr_grid = next_grid.duplicate(true)
 
 func turn_off_if_invalid(x,y):
+	if next_grid[x][y] == null:
+		return true
 	if !is_valid_cell(x,y,next_grid) :
 		#curr_grid[x][y]['powered'] = 0
 		next_grid[x][y]['powered'] = 0
