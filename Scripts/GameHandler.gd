@@ -371,7 +371,7 @@ func _on_save() -> String:
 	var compresseddata = {"s":[curr_grid.size(), curr_grid[0].size()],"d":[]}
 	for x in range(curr_grid.size()):
 		for y in range(curr_grid[0].size()):
-			if curr_grid[x][y]['type'] != -1:
+			if curr_grid[x][y] != null and curr_grid[x][y]['type'] != -1:
 				compresseddata['d'].append([[x,y], cell_to_array(curr_grid[x][y])])
 
 	var compressedstring = JSON.stringify(compresseddata)
