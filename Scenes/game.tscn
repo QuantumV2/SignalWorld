@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://dpl015ydoxgno"]
+[gd_scene load_steps=22 format=3 uid="uid://dpl015ydoxgno"]
 
 [ext_resource type="Script" path="res://Scripts/cam_origin.gd" id="2_sxy5u"]
 [ext_resource type="PackedScene" uid="uid://b7j2071weldx4" path="res://Prefabs/color_map.tscn" id="3_li8la"]
@@ -8,6 +8,10 @@
 [ext_resource type="Script" path="res://Scripts/ui.gd" id="5_n4cru"]
 [ext_resource type="Texture2D" uid="uid://dnxyf2sdaijof" path="res://Images/tileset.svg" id="6_4k7gr"]
 [ext_resource type="Texture2D" uid="uid://b5sg0v8mg8dnk" path="res://Images/colors.png" id="6_58r07"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tltqf"]
+atlas = ExtResource("6_4k7gr")
+region = Rect2(0, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_8bnvh"]
 atlas = ExtResource("6_4k7gr")
@@ -59,6 +63,11 @@ region = Rect2(0, 0, 16, 16)
 
 [node name="Game" type="Node2D"]
 position = Vector2(1, 0)
+
+[node name="PreviewCell" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0.180392)
+texture = SubResource("AtlasTexture_tltqf")
 
 [node name="TileMaps" type="Node2D" parent="."]
 unique_name_in_owner = true

@@ -15,7 +15,9 @@ func zoom_out():
 	set_physics_process(true)
 
 func _input(event: InputEvent) -> void:
+
 	if event is InputEventMouseMotion:
+		
 		if event.button_mask == MOUSE_BUTTON_MASK_MIDDLE:
 			position -= event.relative / %Camera2D.zoom
 		if not %UI.mouse_over:
@@ -42,4 +44,5 @@ func _input(event: InputEvent) -> void:
 			
 func _physics_process(delta: float) -> void:
 	%Camera2D.zoom = lerp(%Camera2D.zoom, _target_zoom * Vector2.ONE, ZOOM_RATE * delta)
+
 	set_physics_process(not is_equal_approx(%Camera2D.zoom.x, _target_zoom))
