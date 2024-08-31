@@ -126,7 +126,7 @@ func do_wire_cell(curr_cell, x, y):
 func is_valid_cell(x, y, grid):
 	if x < 0 or x >= grid.size() or y < 0 or y >= grid[0].size():
 		return false
-	if grid[x][y] == null or grid[x][y]['type'] == -1:
+	if grid[x][y] == null:
 		return false
 	# Check for active blockers
 	var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
@@ -297,7 +297,7 @@ func replace_temp_energy(grid: Dictionary):
 
 func process_cell(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Dictionary, x: int, y: int):
 	var curr_cell = arr[x][y]
-	if curr_cell != null and curr_cell['type'] != -1:
+	if curr_cell != null:
 		var atlas_coords = Global.CellTypesAtlCoords[int(curr_cell["type"])]
 		tilemap.set_cell(curr_cell['position'], 2, atlas_coords, Global.RotationDict[int(curr_cell['rotation'])])
 		colormap.set_cell(curr_cell['position'], 0, Global.PowerTypesAtl[int(curr_cell['powered'])])
@@ -308,7 +308,7 @@ func update_tiles(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Dictionary
 
 	for x in range(width):
 		for y in range(height):
-			if arr[x][y] != null and arr[x][y]['type'] != -1:
+			if arr[x][y] != null:
 				process_cell(tilemap, colormap, arr, x, y)
 
 func update_gamestate():
@@ -324,7 +324,7 @@ func update_gamestate():
 
 	for x in range(width):
 		for y in range(height):
-			if curr_grid[x][y] != null and curr_grid[x][y]['type'] != -1:
+			if curr_grid[x][y] != null:
 				var c = curr_grid[x][y]
 				process_game_cell(x, y)
 	replace_temp_energy(next_grid)
