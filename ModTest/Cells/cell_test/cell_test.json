@@ -1,0 +1,5 @@
+{
+	"name":"Test",
+	"image":"res://Images/arrow_empty.svg",
+	"behavior":"res://ModTest/Cells/cell_test/behavior.gd"
+}

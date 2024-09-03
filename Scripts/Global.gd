@@ -95,9 +95,15 @@ func get_tile_data_rotation(alt_tile : int):
 		_:
 			return -1  # invalid or non-90 degree rotation
 
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	pass # Replace with function body.
+
+
+	
+
+func load_custom_cells(path):
+	var folder = DirAccess.open(path)
+	var dirnames = folder.get_directories()
+	for name in dirnames:
+		var cellinfo = FileAccess.open(path + name + "/" + name + ".json", FileAccess.READ)
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("fullscreen"):

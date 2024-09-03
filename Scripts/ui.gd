@@ -46,7 +46,7 @@ func _input(event: InputEvent):
 		%RotationOptions.selected = 2
 	#%GameHandler.display_cell_preview()
 
-func _physics_process(delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	%GameHandler.display_cell_preview()
 func _on_pause_pressed() -> void:
 	%GameHandler.paused = !%GameHandler.paused

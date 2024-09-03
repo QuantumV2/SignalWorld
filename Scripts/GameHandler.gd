@@ -188,7 +188,7 @@ func do_XOR_cell(curr_cell, x, y):
 		var ny = y + dir.y
 
 		# Only consider cells pointing towards this cell
-		var input_dir = dirs[(curr_cell['rotation'] / 90 + 2) % 4]  # Opposite of output direction
+		#var input_dir = dirs[(curr_cell['rotation'] / 90 + 2) % 4]  # Opposite of output direction
 		if is_valid_cell(nx, ny, curr_grid) and curr_grid[nx][ny]['rotation'] == (i * 90 + 180) % 360:
 			if curr_grid[nx][ny]['powered'] == 1:
 				powered_neighbors += 1
@@ -217,7 +217,7 @@ func do_randgenerator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 
 		if is_valid_cell(nx, ny, curr_grid) :
 			var rand = randi_range(0,1)
-			set_grid_cell_power(next_grid, nx, ny, 3) if rand else 0
+			set_grid_cell_power(next_grid, nx, ny, 3) if rand else set_grid_cell_power(next_grid, nx, ny, 0)
 	if turn_off_if_invalid(x,y):
 		return
 
@@ -325,7 +325,6 @@ func update_gamestate():
 	for x in range(width):
 		for y in range(height):
 			if curr_grid[x][y] != null:
-				var c = curr_grid[x][y]
 				process_game_cell(x, y)
 	replace_temp_energy(next_grid)
 	curr_grid = next_grid.duplicate(true)
