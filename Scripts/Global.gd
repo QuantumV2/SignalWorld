@@ -1,8 +1,14 @@
 extends Node
+## A thing to handle everything
+
+
+## The rate at which the cells get updated, default 900
 var tick_speed = 15*60
-var tick_counter = 0
+var _tick_counter = 0
+## The tick signal, activates when cells get updated
 signal tick
 
+## Tile Rotations
 enum TileTransform {
 	ROTATE_0 = 0,
 	ROTATE_90 = TileSetAtlasSource.TRANSFORM_TRANSPOSE | TileSetAtlasSource.TRANSFORM_FLIP_H,
@@ -30,6 +36,8 @@ const RotationInd:Dictionary  ={
 	2: TileTransform.ROTATE_180,
 	3: TileTransform.ROTATE_270,
 }
+
+## Cell Types, <[StringName], [int]>
 const CellTypes : Dictionary = {
 	&"Wire":0,
 	&"Generator":1,
@@ -44,7 +52,7 @@ const CellTypes : Dictionary = {
 	&"AngledWire":10,
 }
 
-func array_to_dict_recursive(array):
+func array_to_dict_recursive(array) -> Dictionary:
 	var dict = {}
 	for index in range(len(array)):
 		if typeof(array[index]) == TYPE_ARRAY:
@@ -53,6 +61,7 @@ func array_to_dict_recursive(array):
 			dict[int(index)] = array[index]
 	return dict
 
+## Cell's atlas coords on the tilemap
 const CellTypesAtlCoords : Dictionary = {
 	-1:Vector2i(-1,-1),
 	0:Vector2i(0,0),
@@ -67,12 +76,14 @@ const CellTypesAtlCoords : Dictionary = {
 	9:Vector2i(1,2),
 	10:Vector2i(2,2),
 }
+
 const PowerTypes : Dictionary = {
 	Vector2i(-1,-1):0,
 	Vector2i(0,0):1,
 	Vector2i(1,0):2,
 	Vector2i(2,0):3,
 }
+## Power Types Atlas Coords
 const PowerTypesAtl : Dictionary = {
 	-1:Vector2i(-1,-1),
 	0:Vector2i(-1,-1),
@@ -81,8 +92,8 @@ const PowerTypesAtl : Dictionary = {
 	3:Vector2i(2,0),
 }
 
-
-func get_tile_data_rotation(alt_tile : int):
+## Get Tile rotation in degrees
+func get_tile_data_rotation(alt_tile : int)->int:
 	match alt_tile:
 		TileTransform.ROTATE_0:
 			return 0  # ROTATE_0
@@ -98,8 +109,8 @@ func get_tile_data_rotation(alt_tile : int):
 
 
 	
-
-func load_custom_cells(path):
+## @experimental
+func load_custom_cells(path) -> void :
 	var folder = DirAccess.open(path)
 	var dirnames = folder.get_directories()
 	for name in dirnames:
@@ -109,14 +120,14 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("fullscreen"):
 		Global.swap_fullscreen_mode()
 
-func swap_fullscreen_mode():
+func swap_fullscreen_mode() -> void:
 	if DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN:
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 	else:
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 
 func _physics_process(_delta: float) -> void:
-	tick_counter += 1*60
-	if tick_counter >= tick_speed:
+	_tick_counter += 1*60
+	if _tick_counter >= tick_speed:
 		tick.emit()
-		tick_counter = 0
+		_tick_counter = 0

@@ -14,6 +14,7 @@ func zoom_out():
 	_target_zoom = min(_target_zoom + ZOOM_INCREMENT, MAX_ZOOM);
 	set_physics_process(true)
 
+# Handle Mouse Movement and Tile Placement
 func _input(event: InputEvent) -> void:
 
 	if event is InputEventMouseMotion:

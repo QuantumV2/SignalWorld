@@ -1,5 +1,7 @@
-extends Node
+class_name GameHandler extends Node
+## A Game Handler, what did you expect?
 
+## A dictionary of [enum Global.CellTypes] and their [Callable]
 var CellFuncs : Dictionary = {
 	Global.CellTypes.Wire: do_wire_cell,
 	Global.CellTypes.Generator: do_generator_cell,
@@ -56,6 +58,7 @@ func display_cell_preview():
 func change_tick_rate(value: float):
 	Global.tick_speed = value*60
 
+## Create a cell array, inneficient, use only when needed
 func create_tilemap_array(tilemap: TileMapLayer, colormap: TileMapLayer) -> Dictionary:
 	var used_rect: Rect2i = tilemap.get_used_rect()
 	var result = Array()
@@ -87,12 +90,14 @@ func create_tilemap_array(tilemap: TileMapLayer, colormap: TileMapLayer) -> Dict
 	return Global.array_to_dict_recursive(result)
 
 
+## Current state of the grid
 @onready var curr_grid: Dictionary = create_tilemap_array(%CellMap, %ColorMap)
+## Next state of the grid
 @onready var next_grid: Dictionary = curr_grid.duplicate(true)
 
-func do_angledwire_cell(curr_cell, x, y):
+func do_angledwire_cell(curr_cell, x, y) -> void:
 	if not curr_cell['powered']:
-		return []
+		return
 
 	var dirs = [Vector2i.UP + Vector2i.RIGHT, Vector2i.RIGHT + Vector2i.DOWN, Vector2i.LEFT + Vector2i.DOWN, Vector2i.LEFT + Vector2i.UP]
 	var dir = dirs[curr_cell['rotation'] / 90]
@@ -105,11 +110,9 @@ func do_angledwire_cell(curr_cell, x, y):
 	if next_grid[x][y]['powered'] != 3:
 		next_grid[x][y]['powered'] = 0
 
-	return next_grid
-
-func do_wire_cell(curr_cell, x, y):
+func do_wire_cell(curr_cell, x, y) -> void:
 	if not curr_cell['powered']:
-		return []
+		return
 
 	var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
 	var dir = dirs[curr_cell['rotation'] / 90]
@@ -122,8 +125,7 @@ func do_wire_cell(curr_cell, x, y):
 	if next_grid[x][y]['powered'] != 3:
 		next_grid[x][y]['powered'] = 0
 
-	return next_grid
-func is_valid_cell(x, y, grid):
+func is_valid_cell(x, y, grid) -> bool:
 	if x < 0 or x >= grid.size() or y < 0 or y >= grid[0].size():
 		return false
 	if grid[x][y] == null:
@@ -139,7 +141,7 @@ func is_valid_cell(x, y, grid):
 				return false
 	return true
 
-func is_cell_in_grid(x, y, grid):
+func is_cell_in_grid(x, y, grid) -> bool:
 	return x >= 0 and x < grid.size() and y >= 0 and y < grid[0].size()
 
 func do_generator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
@@ -152,7 +154,7 @@ func do_generator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 		if is_valid_cell(nx, ny, curr_grid):
 			set_grid_cell_power(next_grid, nx, ny, 3)
 
-func do_AND_cell(curr_cell, x, y):
+func do_AND_cell(curr_cell, x, y) -> void:
 	var powered_neighbors = 0
 	var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
 	var total_neighbors = 0
@@ -176,9 +178,9 @@ func do_AND_cell(curr_cell, x, y):
 	else:
 		next_grid[x][y]['powered'] = 0
 
-	return next_grid
 
-func do_XOR_cell(curr_cell, x, y):
+
+func do_XOR_cell(curr_cell, x, y) -> void:
 	var powered_neighbors = 0
 	var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
 
@@ -203,7 +205,6 @@ func do_XOR_cell(curr_cell, x, y):
 	else:
 		next_grid[x][y]['powered'] = 0
 
-	return next_grid
 
 			
 func do_randgenerator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
@@ -221,7 +222,7 @@ func do_randgenerator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 	if turn_off_if_invalid(x,y):
 		return
 
-func set_grid_cell_power(grid: Dictionary, x:int,y:int, power:int):
+func set_grid_cell_power(grid: Dictionary, x:int,y:int, power:int) -> void:
 	if grid[x][y]['powered'] != 2:
 		grid[x][y]['powered'] = power
 
@@ -243,7 +244,7 @@ func do_buffer_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 		
 
 
-func do_jumppad_cell(curr_cell, x, y):
+func do_jumppad_cell(curr_cell, x, y) -> void:
 	if not curr_cell['powered']:
 		return
 
@@ -256,7 +257,7 @@ func do_jumppad_cell(curr_cell, x, y):
 	if is_valid_cell(nx,ny,curr_grid):
 		set_grid_cell_power(next_grid, nx, ny, 3)
 		
-func do_detector_cell(curr_cell, x, y):
+func do_detector_cell(curr_cell, x, y) -> void:
 	
 	if curr_cell['powered']:
 		do_wire_cell(curr_cell, x, y)
@@ -272,7 +273,7 @@ func do_detector_cell(curr_cell, x, y):
 			
 			#next_grid[bx][by]['powered'] = 0
 			#next_grid[nx][ny]['powered'] = 1
-func do_blocker_cell(curr_cell, x, y):
+func do_blocker_cell(curr_cell, x, y) -> void:
 	if not curr_cell['powered']:
 		return
 	next_grid[x][y]['powered'] = 0 if next_grid[x][y]['powered'] != 3 else next_grid[x][y]['powered'];
@@ -284,25 +285,25 @@ func do_blocker_cell(curr_cell, x, y):
 		curr_grid[nx][ny]['powered'] = 0
 		next_grid[nx][ny]['powered'] = 0
 			
-func do_switch_cell(curr_cell, _x, _y):
+func do_switch_cell(curr_cell, _x, _y) -> void:
 	if not curr_cell['powered']:
 		return
 			
-func replace_temp_energy(grid: Dictionary):
+func replace_temp_energy(grid: Dictionary) -> void:
 	for x in range(grid.size()):
 		for y in range(grid[0].size()):
 			if grid[x][y] != null:
 				if grid[x][y]['powered'] == 3:
 					grid[x][y]['powered'] = 1
 
-func process_cell(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Dictionary, x: int, y: int):
+func process_cell(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Dictionary, x: int, y: int) -> void:
 	var curr_cell = arr[x][y]
 	if curr_cell != null:
 		var atlas_coords = Global.CellTypesAtlCoords[int(curr_cell["type"])]
 		tilemap.set_cell(curr_cell['position'], 2, atlas_coords, Global.RotationDict[int(curr_cell['rotation'])])
 		colormap.set_cell(curr_cell['position'], 0, Global.PowerTypesAtl[int(curr_cell['powered'])])
 
-func update_tiles(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Dictionary):
+func update_tiles(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Dictionary) -> void:
 	var width = arr.size()
 	var height = arr[0].size()
 
@@ -311,7 +312,7 @@ func update_tiles(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Dictionary
 			if arr[x][y] != null:
 				process_cell(tilemap, colormap, arr, x, y)
 
-func update_gamestate():
+func update_gamestate() -> void:
 	if paused or curr_grid.size() < 1:
 		return
 
@@ -329,7 +330,8 @@ func update_gamestate():
 	replace_temp_energy(next_grid)
 	curr_grid = next_grid.duplicate(true)
 
-func turn_off_if_invalid(x,y):
+## Returns true if is invalid and turns off the cell, else returns false
+func turn_off_if_invalid(x,y) -> bool:
 	if next_grid[x][y] == null:
 		return true
 	if !is_valid_cell(x,y,next_grid) :
@@ -338,7 +340,7 @@ func turn_off_if_invalid(x,y):
 		return true
 	return false
 
-func process_game_cell(x: int, y: int):
+func process_game_cell(x: int, y: int) -> void:
 	var curr_cell = curr_grid[x][y]
 	if curr_cell['powered'] == -1 :
 		return
@@ -363,7 +365,7 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("pause"):
 		paused = !paused
 
-
+##Save the new File Format
 func _on_save() -> String:
 	if !curr_grid:
 		return ""
@@ -378,7 +380,7 @@ func _on_save() -> String:
 
 
 
-
+##File Format tool
 func array_to_cell(arr: Array) -> Dictionary:
 	return {
 		"position": StringHelper.string_to_vector2i(arr[0]),
@@ -386,9 +388,12 @@ func array_to_cell(arr: Array) -> Dictionary:
 		"rotation": arr[2],
 		"type": arr[3],
 	}
+##File Format tool
 func cell_to_array(dict: Dictionary) -> Array:
 	return [dict['position'], dict['powered'], dict['rotation'], dict['type']]
 	
+## @deprecated 
+## Open the old File Format
 func legacy_format_open(_str):
 	var content = StringHelper.gzip_decode(Marshalls.base64_to_raw(_str)).get_string_from_utf8()
 
@@ -418,6 +423,7 @@ func legacy_format_open(_str):
 		update_tiles(%CellMap, %ColorMap, next_grid)
 	else:
 		print("JSON Parse Error: ", json.get_error_message(), " in ", content, " at line ", json.get_error_line())
+##Open the new File Format
 func _on_open(_str) -> void:
 	if %OpenDialog.get_node("Control/CheckBox").button_pressed:
 		legacy_format_open(_str)
