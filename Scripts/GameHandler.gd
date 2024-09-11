@@ -69,11 +69,11 @@ func create_tilemap_array(tilemap: TileMapLayer, colormap: TileMapLayer) -> Dict
 		result[x].resize(used_rect.size.y)
 		
 		for y in range(used_rect.size.y):
-			var current_pos = used_rect.position + Vector2i(x, y)
-			var tile_atlas_coords = tilemap.get_cell_atlas_coords(current_pos)
-			var tile_data = tilemap.get_cell_tile_data(current_pos)
-			var tile_alt = tilemap.get_cell_alternative_tile(current_pos)
-			var color_tile_atlas_coords = colormap.get_cell_atlas_coords(current_pos)
+			var current_pos := used_rect.position + Vector2i(x, y)
+			var tile_atlas_coords := tilemap.get_cell_atlas_coords(current_pos)
+			var tile_data := tilemap.get_cell_tile_data(current_pos)
+			var tile_alt := tilemap.get_cell_alternative_tile(current_pos)
+			var color_tile_atlas_coords := colormap.get_cell_atlas_coords(current_pos)
 			var is_powered: int = Global.PowerTypes[color_tile_atlas_coords]
 
 			var cell_type = Global.CellTypes[tile_data.get_custom_data("CellTypes")] if tile_atlas_coords != Vector2i(-1, -1) else -1
@@ -85,7 +85,8 @@ func create_tilemap_array(tilemap: TileMapLayer, colormap: TileMapLayer) -> Dict
 					"position": current_pos,
 				}
 			else: 
-				result[x][y] = null
+				pass
+				#result[x][y] = null
 	
 	return Global.array_to_dict_recursive(result)
 
@@ -99,7 +100,7 @@ func do_angledwire_cell(curr_cell, x, y) -> void:
 	if not curr_cell['powered']:
 		return
 
-	var dirs = [Vector2i.UP + Vector2i.RIGHT, Vector2i.RIGHT + Vector2i.DOWN, Vector2i.LEFT + Vector2i.DOWN, Vector2i.LEFT + Vector2i.UP]
+	var dirs := [Vector2i.UP + Vector2i.RIGHT, Vector2i.RIGHT + Vector2i.DOWN, Vector2i.LEFT + Vector2i.DOWN, Vector2i.LEFT + Vector2i.UP]
 	var dir = dirs[curr_cell['rotation'] / 90]
 	var nx = x + dir.x
 	var ny = y + dir.y

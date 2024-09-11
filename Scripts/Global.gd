@@ -3,8 +3,8 @@ extends Node
 
 
 ## The rate at which the cells get updated, default 900
-var tick_speed = 15*60
-var _tick_counter = 0
+var tick_speed := 15*60
+var _tick_counter := 0
 ## The tick signal, activates when cells get updated
 signal tick
 
