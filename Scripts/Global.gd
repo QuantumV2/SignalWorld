@@ -113,8 +113,9 @@ func get_tile_data_rotation(alt_tile : int)->int:
 func load_custom_cells(path) -> void :
 	var folder = DirAccess.open(path)
 	var dirnames = folder.get_directories()
-	for name in dirnames:
-		var cellinfo = FileAccess.open(path + name + "/" + name + ".json", FileAccess.READ)
+	for _name in dirnames:
+		pass
+		#var cellinfo = FileAccess.open(path + _name + "/" + _name + ".json", FileAccess.READ)
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("fullscreen"):
