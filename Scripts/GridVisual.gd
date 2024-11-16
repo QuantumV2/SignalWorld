@@ -1,10 +1,12 @@
 extends Node2D
 
-@export var grid_color: Color = Color(.5, .5, .5, 1)
+@export var grid_color: Color = Color(.6, .6, .6, 1)
 
 var camera: Camera2D
 var tilemap: TileMapLayer
 var tile_size: Vector2
+
+
 
 func _ready():
 	camera = get_viewport().get_camera_2d()

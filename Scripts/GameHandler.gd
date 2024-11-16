@@ -1,4 +1,4 @@
-class_name GameHandler extends Node
+class_name GameHandler extends Node2D
 ## A Game Handler, what did you expect?
 
 ## A dictionary of [enum Global.CellTypes] and their [Callable]
@@ -18,12 +18,30 @@ var CellFuncs : Dictionary = {
 
 var paused = false;
 
+var selection_start: Vector2i = Vector2i(-1, -1)
+var selection_end: Vector2i = Vector2i(-1, -1)
+
+func select_area(start: Vector2i, end: Vector2i) -> void:
+	selection_start = start
+	selection_end = end
+	
+
+
 func user_place_tile_tilemap(tilemap: TileMapLayer, event: InputEvent, atlas_coords: Vector2i, alt_tile: int, source_id: int = 2):
 	var camera_zoom = %Camera2D.zoom
 	var event_position = event.position / camera_zoom + %CamOrigin.position - get_viewport().get_visible_rect().size / (2 * camera_zoom)
 	var pos = tilemap.local_to_map(tilemap.to_local(event_position))
-	
-	tilemap.set_cell(pos, source_id, atlas_coords, alt_tile)
+	var copied_data = DisplayServer.clipboard_get()
+	var isbase64 = StringHelper.is_base64(copied_data)
+	if copied_data != "" and isbase64:
+		copied_data = StringHelper.gzip_decode(Marshalls.base64_to_raw(copied_data)).get_string_from_utf8()
+		var json = JSON.new()
+		var error = json.parse(copied_data)
+
+		paste_copied_data(copied_data, pos, true, event, tilemap, source_id, atlas_coords, alt_tile)
+			
+	else:
+		tilemap.set_cell(pos, source_id, atlas_coords, alt_tile)
 	
 	curr_grid = create_tilemap_array(%CellMap, %ColorMap)
 	next_grid = curr_grid.duplicate(true)
@@ -36,8 +54,26 @@ func clear_tilemap():
 			%CellMap.set_cell(Vector2i(x,y)+rct.position)
 			%ColorMap.set_cell(Vector2i(x,y)+rct.position)
 
-func display_cell_preview():
+func display_selection():
+	var pos1 = selection_start
+	var pos2 = selection_end
+	if pos1 == Vector2i(-1,-1):
+		%SelectionStartSprite.visible = false
 
+	else:
+		%SelectionStartSprite.visible = true
+	if pos2 == Vector2i(-1,-1):
+		%SelectionEndSprite.visible = false
+	else:
+		%SelectionEndSprite.visible = true
+	var cell_size = Vector2(128, 128)
+
+	# Position the preview
+	%SelectionStartSprite.position = (Vector2(pos1).floor() * cell_size) if pos1 != Vector2i(0,0) else (Vector2(pos1).floor() + cell_size)
+	%SelectionEndSprite.position = (Vector2(pos2).floor() * cell_size) + cell_size
+
+
+func display_cell_preview(copypasteinvalid = false):
 	var camera_zoom = %Camera2D.zoom
 	var origin_pos = %CamOrigin.position
 	var event_pos = get_viewport().get_mouse_position() / camera_zoom + origin_pos - get_viewport().get_visible_rect().size / (2 * camera_zoom)
@@ -45,15 +81,54 @@ func display_cell_preview():
 	var cell_size = Vector2(128, 128)
 	var half_cell = cell_size / 2
 
-	%PreviewCell.position = (event_pos / cell_size).floor() * cell_size + half_cell
+	# Position the preview
+	%PreviewTileMap.position = (event_pos / cell_size).floor() * cell_size
 
-	var selected_texture = %CellOptions.get_item_icon(%CellOptions.selected)
-	if %PreviewCell.texture != selected_texture:
-		%PreviewCell.texture = selected_texture
+	# Check for clipboard data
+	var copied_data = DisplayServer.clipboard_get()
+	var isbase64 = StringHelper.is_base64(copied_data)
+	if copied_data != "" and isbase64 and !copypasteinvalid:
+		%PreviewTileMap.clear()
+		copied_data = StringHelper.gzip_decode(Marshalls.base64_to_raw(copied_data)).get_string_from_utf8()
+		var json = JSON.new()
+		var error = json.parse(copied_data)
 
-	var selected_rotation = Global.RotToDeg[%RotationOptions.selected]
-	if %PreviewCell.rotation_degrees != selected_rotation:
-		%PreviewCell.rotation_degrees = selected_rotation
+		if error == OK:
+			var data = json.data
+			# Verify it's a valid circuit data
+			if "s" in data and "d" in data:
+				if data['d'] == []:
+					display_cell_preview(true)
+					return
+
+				# Calculate the offset based on the first cell's position
+				var offset_x = data['d'][0][0][0]  # x-coordinate of the first cell
+				var offset_y = data['d'][0][0][1]  # y-coordinate of the first cell
+
+				for i in data['d']:
+					if not (i[1] is Array):
+						return
+					var cell = array_to_cell(i[1]) if len(i[1]) == 4 else i[1]
+					var relative_pos = Vector2i(i[0][0] - offset_x, i[0][1] - offset_y)  # Adjusting the position based on offset
+					%PreviewTileMap.set_cell(
+						relative_pos,
+						2,
+						Global.CellTypesAtlCoords[int(cell['type'])],
+						Global.RotationDict[int(cell['rotation'])]
+					)
+				return
+	else:
+		%PreviewTileMap.clear()
+		# If no valid clipboard data, use selected cell from UI
+		var selected_texture = %CellOptions.get_item_icon(%CellOptions.selected)
+		var selected_rotation = Global.RotToDeg[%RotationOptions.selected]
+		
+		%PreviewTileMap.set_cell(
+			Vector2i.ZERO,
+			2,
+			Global.CellTypesAtlCoords[%CellOptions.selected],
+			Global.RotationDict[selected_rotation]
+		)
 
 func change_tick_rate(value: float):
 	Global.tick_speed = value*60
@@ -84,7 +159,7 @@ func create_tilemap_array(tilemap: TileMapLayer, colormap: TileMapLayer) -> Dict
 					"rotation": Global.get_tile_data_rotation(tile_alt),
 					"position": current_pos,
 				}
-			else: 
+			else:
 				pass
 				#result[x][y] = null
 	
@@ -363,9 +438,119 @@ func _ready() -> void:
 	pass # Replace with function body.
 
 func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("pause"):
+	if event.is_action_pressed("selection_start"):
+		var mouse_position = get_global_mouse_position()
+		selection_start = %CellMap.local_to_map(mouse_position)
+		if selection_end == Vector2i(-1,-1):
+			selection_end = Vector2i(0,0)
+		display_selection()
+
+	elif event.is_action_pressed("selection_end"):
+		var mouse_position = get_global_mouse_position()
+		selection_end = %CellMap.local_to_map(mouse_position)
+		if selection_start == Vector2i(-1,-1):
+			selection_start = Vector2i(0,0)
+		display_selection()
+
+	elif event.is_action_pressed("copy"):
+		copy_selection()
+	elif event.is_action_pressed("del"):
+		del_selection()
+	elif event.is_action_pressed("remove_selection"):
+		selection_start = Vector2i(-1,-1)
+		selection_end = Vector2i(-1,-1)
+		display_selection()
+	elif event.is_action_pressed("clear_clipboard"):
+		DisplayServer.clipboard_set("")
+
+
+	elif event.is_action_pressed("paste"):
+		var mouse_position = get_global_mouse_position()
+		var target_position = %CellMap.local_to_map(mouse_position)
+		paste_selection(target_position)
+
+	elif event.is_action_pressed("pause"):
 		paused = !paused
 
+func copy_selection() -> void:
+	if selection_start != Vector2i(-1, -1) and selection_end != Vector2i(-1, -1):
+		var xsize = abs(selection_end.x - selection_start.x) + 1
+		var ysize = abs(selection_end.y - selection_start.y) + 1
+		var data_to_copy = {"s": [xsize, ysize], "d": []}
+		
+		for x in range(selection_start.x, selection_end.x+1):
+			for y in range(selection_start.y, selection_end.y+1):
+				var pos := Vector2i(x,y)
+				var tile_atlas_coords = %CellMap.get_cell_atlas_coords(pos)
+				var tile_data = %CellMap.get_cell_tile_data(pos)
+				var tile_alt = %CellMap.get_cell_alternative_tile(pos)
+				var color_tile_atlas_coords = %ColorMap.get_cell_atlas_coords(pos)
+				var is_powered: int = Global.PowerTypes[color_tile_atlas_coords]
+				var cell_type = Global.CellTypes[tile_data.get_custom_data("CellTypes")] if tile_atlas_coords != Vector2i(-1, -1) else -1
+				if cell_type == -1:
+					continue
+				var cell = {"powered":is_powered, "position":Vector2i(x,y), "rotation":Global.get_tile_data_rotation(tile_alt), "type":cell_type}
+				data_to_copy['d'].append([[x, y], cell_to_array(cell)])
+		var compressedstring = JSON.stringify(data_to_copy)
+		compressedstring = Marshalls.raw_to_base64(StringHelper.gzip_encode(compressedstring))
+		DisplayServer.clipboard_set(compressedstring)
+func del_selection() -> void:
+
+	if !(selection_start == Vector2i(-1, -1) and selection_end == Vector2i(-1, -1)):
+		var xsize = abs(selection_end.x - selection_start.x) + 1
+		var ysize = abs(selection_end.y - selection_start.y) + 1
+		for x in range(selection_start.x, selection_end.x+1):
+			for y in range(selection_start.y, selection_end.y+1):
+				%CellMap.set_cell(Vector2i(x,y), 2, Vector2i(-1,-1), 0)
+				%ColorMap.set_cell(Vector2i(x,y), 2, Vector2i(-1,-1), 0)
+				curr_grid = create_tilemap_array(%CellMap, %ColorMap)
+				next_grid = curr_grid.duplicate(true)
+				
+func paste_selection(target_position: Vector2i) -> void:
+	var copied_data = DisplayServer.clipboard_get()
+	copied_data = StringHelper.gzip_decode(Marshalls.base64_to_raw(copied_data)).get_string_from_utf8()
+	if copied_data == "":
+		return
+
+	paste_copied_data(copied_data, target_position)
+func paste_copied_data(copied_data, target_position, user_placing=false, event=null, tilemap=null, source_id=null, atlas_coords=null, alt_tile=null):
+	var json = JSON.new()
+	var error = json.parse(copied_data)
+
+	if error == OK:
+		var data = json.data
+		var json_size = data['s']
+		
+		# Calculate the offset based on the first cell's position
+		var offset_x = data['d'][0][0][0]  # x-coordinate of the first cell
+		var offset_y = data['d'][0][0][1]  # y-coordinate of the first cell
+		
+		for i in data['d']:
+			var cell = i[1]
+			var new_position = target_position + Vector2i(i[0][0] - offset_x, i[0][1] - offset_y)
+			if user_placing:
+				if not (cell is Array):
+					tilemap.set_cell(target_position, source_id, atlas_coords, alt_tile)
+					curr_grid = create_tilemap_array(%CellMap, %ColorMap)
+					next_grid = curr_grid.duplicate(true)
+					return
+				if event.get("button_index")== MOUSE_BUTTON_LEFT or event.get("button_mask")== MOUSE_BUTTON_LEFT:
+					%CellMap.set_cell(new_position, 2, Global.CellTypesAtlCoords[int(cell[3])], Global.RotationDict[int(cell[2])])
+					%ColorMap.set_cell(new_position, 2, Global.PowerTypesAtl[int(cell[1])], 0)
+				else:
+					%CellMap.set_cell(new_position, 2, Vector2i(-1,-1), 0)
+					%ColorMap.set_cell(new_position, 2, Vector2i(-1,-1), 0)	
+			else:
+				# Adjust the position based on the offset
+
+				%CellMap.set_cell(new_position, 2, Global.CellTypesAtlCoords[int(cell[3])], Global.RotationDict[int(cell[2])])
+				%ColorMap.set_cell(new_position, 2, Global.PowerTypesAtl[int(cell[1])], 0)
+
+		curr_grid = create_tilemap_array(%CellMap, %ColorMap)
+		next_grid = curr_grid.duplicate(true)
+	else:
+		print("JSON Parse Error: ", json.get_error_message(), " in ", copied_data, " at line ", json.get_error_line())
+		
 ##Save the new File Format
 func _on_save() -> String:
 	if !curr_grid:
@@ -456,3 +641,8 @@ func _on_open(_str) -> void:
 		update_tiles(%CellMap, %ColorMap, next_grid)
 	else:
 		print("JSON Parse Error: ", json.get_error_message(), " in ", content, " at line ", json.get_error_line())
+
+
+func _on_selection_start_sprite_ready() -> void:
+	display_selection()
+	pass # Replace with function body.

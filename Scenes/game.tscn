@@ -1,17 +1,16 @@
-[gd_scene load_steps=22 format=3 uid="uid://dpl015ydoxgno"]
+[gd_scene load_steps=24 format=3 uid="uid://dpl015ydoxgno"]
 
 [ext_resource type="Script" path="res://Scripts/cam_origin.gd" id="2_sxy5u"]
 [ext_resource type="PackedScene" uid="uid://b7j2071weldx4" path="res://Prefabs/color_map.tscn" id="3_li8la"]
 [ext_resource type="PackedScene" uid="uid://br6n2l4lqswsi" path="res://Prefabs/game_handler.tscn" id="3_uuw4e"]
 [ext_resource type="PackedScene" uid="uid://ckq1uhkvol4c1" path="res://Prefabs/cell_map.tscn" id="4_1x3vp"]
-[ext_resource type="Script" path="res://Scripts/GridVisual.gd" id="5_6wk3m"]
 [ext_resource type="Script" path="res://Scripts/ui.gd" id="5_n4cru"]
 [ext_resource type="Texture2D" uid="uid://dnxyf2sdaijof" path="res://Images/tileset.svg" id="6_4k7gr"]
 [ext_resource type="Texture2D" uid="uid://b5sg0v8mg8dnk" path="res://Images/colors.png" id="6_58r07"]
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_tltqf"]
-atlas = ExtResource("6_4k7gr")
-region = Rect2(0, 0, 128, 128)
+[ext_resource type="Theme" uid="uid://dnixri72mn2bw" path="res://UI/gui_theme.tres" id="7_mosdc"]
+[ext_resource type="PackedScene" uid="uid://b0pjv63xsnn1v" path="res://Prefabs/grid.tscn" id="9_nta1r"]
+[ext_resource type="TileSet" uid="uid://bknk4bw1ekaa6" path="res://Tilesets/cell_tileset.tres" id="10_jwree"]
+[ext_resource type="Texture2D" uid="uid://tg4qnge641eg" path="res://Images/circle.svg" id="11_adeqb"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_8bnvh"]
 atlas = ExtResource("6_4k7gr")
@@ -64,11 +63,6 @@ region = Rect2(0, 0, 16, 16)
 [node name="Game" type="Node2D"]
 position = Vector2(1, 0)
 
-[node name="PreviewCell" type="Sprite2D" parent="."]
-unique_name_in_owner = true
-modulate = Color(1, 1, 1, 0.180392)
-texture = SubResource("AtlasTexture_tltqf")
-
 [node name="TileMaps" type="Node2D" parent="."]
 unique_name_in_owner = true
 
@@ -80,10 +74,6 @@ unique_name_in_owner = true
 
 [node name="GameHandler" parent="." instance=ExtResource("3_uuw4e")]
 unique_name_in_owner = true
-
-[node name="Grid" type="Node2D" parent="."]
-position = Vector2(-63, -64)
-script = ExtResource("5_6wk3m")
 
 [node name="UI" type="CanvasLayer" parent="."]
 unique_name_in_owner = true
@@ -100,19 +90,19 @@ grow_horizontal = 0
 
 [node name="ColorRect" type="ColorRect" parent="UI/Control"]
 layout_mode = 0
-offset_left = -426.0
-offset_top = -44.0
-offset_right = 92.0
+offset_left = -472.0
+offset_right = 40.0
 offset_bottom = 480.0
-color = Color(0, 0, 0, 0.282353)
+color = Color(0, 0, 0, 0.658824)
 
 [node name="CellOptions" type="OptionButton" parent="UI/Control"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = -318.0
+offset_left = -353.0
 offset_top = -1.0
-offset_right = 44.0
+offset_right = 40.0
 offset_bottom = 135.0
+theme = ExtResource("7_mosdc")
 theme_override_font_sizes/font_size = 37
 selected = 0
 item_count = 11
@@ -152,10 +142,11 @@ popup/item_10/id = 10
 [node name="ColorOptions" type="OptionButton" parent="UI/Control"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = -168.0
+offset_left = -180.0
 offset_top = 135.0
-offset_right = 41.0
-offset_bottom = 197.0
+offset_right = 39.0
+offset_bottom = 198.0
+theme = ExtResource("7_mosdc")
 theme_override_font_sizes/font_size = 39
 selected = 0
 item_count = 2
@@ -167,10 +158,11 @@ popup/item_1/id = 1
 [node name="RotationOptions" type="OptionButton" parent="UI/Control"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = -317.0
+offset_left = -338.0
 offset_top = 135.0
-offset_right = -182.0
+offset_right = -200.0
 offset_bottom = 197.0
+theme = ExtResource("7_mosdc")
 theme_override_font_sizes/font_size = 37
 selected = 0
 item_count = 4
@@ -184,56 +176,61 @@ popup/item_3/id = 3
 
 [node name="ClearGrid" type="Button" parent="UI/Control"]
 layout_mode = 0
-offset_left = -426.0
-offset_right = -318.0
-offset_bottom = 118.0
+offset_left = -471.0
+offset_right = -353.0
+offset_bottom = 120.0
+theme = ExtResource("7_mosdc")
 theme_override_font_sizes/font_size = 40
 text = "Clear 
 Grid"
 
 [node name="HSlider" type="HSlider" parent="UI/Control"]
 layout_mode = 0
-offset_left = -424.0
-offset_top = 232.0
-offset_right = 39.0
-offset_bottom = 248.0
+offset_left = -472.0
+offset_top = 234.0
+offset_right = 40.0
+offset_bottom = 250.0
 max_value = 60.0
 value = 15.0
 
 [node name="Label" type="Label" parent="UI/Control"]
 layout_mode = 0
-offset_left = -424.0
-offset_top = 211.0
-offset_right = -250.0
-offset_bottom = 266.0
+offset_left = -472.0
+offset_top = 206.0
+offset_right = -218.0
+offset_bottom = 284.0
 scale = Vector2(0.4, 0.4)
-theme_override_font_sizes/font_size = 40
+theme = ExtResource("7_mosdc")
+theme_override_font_sizes/font_size = 55
 text = "Tick Rate"
 
 [node name="Save" type="Button" parent="UI/Control"]
 layout_mode = 0
-offset_left = -426.0
+offset_left = -472.0
 offset_top = 265.0
 offset_right = 40.0
-offset_bottom = 328.0
+offset_bottom = 329.0
+theme = ExtResource("7_mosdc")
 theme_override_font_sizes/font_size = 40
 text = "Save"
 
 [node name="Pause" type="Button" parent="UI/Control"]
 layout_mode = 0
-offset_left = -427.0
+offset_left = -473.0
 offset_top = 413.0
 offset_right = 39.0
-offset_bottom = 476.0
+offset_bottom = 477.0
+theme = ExtResource("7_mosdc")
 theme_override_font_sizes/font_size = 40
 text = "Pause"
 
 [node name="Load" type="Button" parent="UI/Control"]
 layout_mode = 0
-offset_left = -426.0
+offset_left = -472.0
 offset_top = 338.0
 offset_right = 40.0
-offset_bottom = 401.0
+offset_bottom = 402.0
+theme = ExtResource("7_mosdc")
 theme_override_font_sizes/font_size = 40
 text = "Load"
 
@@ -367,6 +364,29 @@ offset_right = 491.0
 offset_bottom = 215.355
 text = "Legacy format"
 
+[node name="Grid" parent="." instance=ExtResource("9_nta1r")]
+
+[node name="PreviewTileMap" type="TileMapLayer" parent="."]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0.501961)
+tile_set = ExtResource("10_jwree")
+
+[node name="SelectionIcons" type="Node" parent="."]
+
+[node name="SelectionStartSprite" type="Sprite2D" parent="SelectionIcons"]
+unique_name_in_owner = true
+visible = false
+modulate = Color(0, 0.788235, 1, 1)
+scale = Vector2(0.03, 0.03)
+texture = ExtResource("11_adeqb")
+
+[node name="SelectionEndSprite" type="Sprite2D" parent="SelectionIcons"]
+unique_name_in_owner = true
+visible = false
+modulate = Color(1, 0.788235, 0, 1)
+scale = Vector2(0.03, 0.03)
+texture = ExtResource("11_adeqb")
+
 [connection signal="mouse_entered" from="UI/Control/ColorRect" to="UI" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="UI/Control/ColorRect" to="UI" method="_on_mouse_exited"]
 [connection signal="mouse_entered" from="UI/Control/CellOptions" to="UI" method="_on_mouse_entered"]
@@ -393,3 +413,4 @@ text = "Legacy format"
 [connection signal="pressed" from="SaveDialog/Control/SaveClose" to="UI" method="_on_save_close_pressed"]
 [connection signal="pressed" from="OpenDialog/Control/LoadButtonDialog" to="UI" method="_on_load_button_dialog_pressed"]
 [connection signal="pressed" from="OpenDialog/Control/LoadClose" to="UI" method="_on_load_close_pressed"]
+[connection signal="ready" from="SelectionIcons/SelectionStartSprite" to="GameHandler" method="_on_selection_start_sprite_ready"]
