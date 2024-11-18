@@ -8,6 +8,47 @@ var _tick_counter := 0
 ## The tick signal, activates when cells get updated
 signal tick
 
+func create_bitmask(num_bits: int) -> int:
+	return (1 << num_bits) - 1
+
+func bits_required(value: int) -> int:
+	if value == 0:
+		return 1  # Special case: 0 requires 1 bit to represent
+	
+	# Use logarithm base 2 and ceil to get the minimum number of bits
+	return int(ceil(log(abs(value) + 1) / log(2)))
+
+## A class to pack and unpack bits
+class BitPacker:
+	var fields = []
+	var total_bits = 0
+
+	func add_field(name: String, bits: int, signed: bool = false):
+		fields.append({"name": name, "bits": bits, "shift": total_bits, "signed": signed})
+		total_bits += bits
+
+	func pack(values: Dictionary) -> int:
+		var result = 0
+		for field in fields:
+			var value = values[field.name]
+			var mask = (1 << field.bits) - 1
+			if field.signed and value < 0:
+				# Handle negative values for signed fields
+				value = (1 << field.bits) + value
+			result |= (value & mask) << field.shift
+		return result
+
+	func unpack(packed: int) -> Dictionary:
+		var result = {}
+		for field in fields:
+			var mask = (1 << field.bits) - 1
+			var value = (packed >> field.shift) & mask
+			if field.signed and (value & (1 << (field.bits - 1))):
+				# Sign extend for negative values in signed fields
+				value -= (1 << field.bits)
+			result[field.name] = value
+		return result
+
 ## Tile Rotations
 enum TileTransform {
 	ROTATE_0 = 0,
@@ -28,6 +69,12 @@ const RotToDeg:Dictionary = {
 	1:90,
 	2:180,
 	3:270,
+}
+const DegToRot:Dictionary = {
+	0:0,
+	90:1,
+	180:2,
+	270:3,
 }
 
 const RotationInd:Dictionary  ={

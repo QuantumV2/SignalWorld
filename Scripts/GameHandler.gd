@@ -519,8 +519,6 @@ func paste_copied_data(copied_data, target_position, user_placing=false, event=n
 
 	if error == OK:
 		var data = json.data
-		var json_size = data['s']
-		
 		# Calculate the offset based on the first cell's position
 		var offset_x = data['d'][0][0][0]  # x-coordinate of the first cell
 		var offset_y = data['d'][0][0][1]  # y-coordinate of the first cell
@@ -539,7 +537,7 @@ func paste_copied_data(copied_data, target_position, user_placing=false, event=n
 					%ColorMap.set_cell(new_position, 2, Global.PowerTypesAtl[int(cell[1])], 0)
 				else:
 					%CellMap.set_cell(new_position, 2, Vector2i(-1,-1), 0)
-					%ColorMap.set_cell(new_position, 2, Vector2i(-1,-1), 0)	
+					%ColorMap.set_cell(new_position, 2, Vector2i(-1,-1), 0)
 			else:
 				# Adjust the position based on the offset
 
@@ -562,8 +560,78 @@ func _on_save() -> String:
 				compresseddata['d'].append([[x,y], cell_to_array(curr_grid[x][y])])
 
 	var compressedstring = JSON.stringify(compresseddata)
+	#print(Marshalls.raw_to_base64(json_to_bytes(compresseddata)), " ", Marshalls.raw_to_base64(json_to_bytes(compresseddata).compress(FileAccess.COMPRESSION_DEFLATE)))
 	return Marshalls.raw_to_base64(StringHelper.gzip_encode(compressedstring))
 
+"""
+func json_to_bytes(data: Dictionary) -> PackedByteArray:
+	var packer = Global.BitPacker.new()
+	var buffer: StreamPeerBuffer = StreamPeerBuffer.new()
+	var bytes: PackedByteArray = PackedByteArray()
+	buffer.big_endian = true
+
+	# Write header
+	buffer.put_u32(0x53570001)
+	print(buffer.data_array.hex_encode())
+
+	# Reset packer for cell data
+	packer = Global.BitPacker.new()
+
+	var cells = data['d']
+	var min_x = INF
+	var max_x = -INF
+	var min_y = INF
+	var max_y = -INF
+	for cell in cells:
+		var pos = cell[1][0]
+		min_x = min(min_x, pos.x)
+		max_x = max(max_x, pos.x)
+		min_y = min(min_y, pos.y)
+		max_y = max(max_y, pos.y)
+		
+	var x_bits = min(max(Global.bits_required(abs(min_x)), Global.bits_required(abs(max_x))) + 1, 16)
+	var y_bits = min(max(Global.bits_required(abs(min_y)), Global.bits_required(abs(max_y))) + 1, 16)
+
+	# Write x_bits and y_bits (5 bits each)
+	var bits_data = (x_bits - 1) | ((y_bits - 1) << 5)
+	var bytes_needed = (bits_data + 7) / 8  # Round up to nearest byte
+	for j in range(bytes_needed):
+		buffer.put_u8(bits_data & 0xFF)
+		bits_data >>= 8
+
+	for i in len(cells):
+		var cell = cells[i]
+		var pos = cell[1][0]
+		var x = pos.x & Global.create_bitmask(x_bits)
+		var y = pos.y & Global.create_bitmask(y_bits)
+
+		packer.add_field("x", x_bits, true)
+		packer.add_field("y", y_bits, true)
+		packer.add_field("powered", 2)
+		packer.add_field("rotation", 2)
+		packer.add_field("type", 6)  
+
+
+		var cell_data = packer.pack({
+			"x": x,
+			"y": y,
+			"powered": cell[1][1] & 0b11,
+			"rotation": Global.DegToRot[cell[1][2]] & 0b11,
+			"type": cell[1][3] & 0b111111,
+
+		})
+		print(cell_data)
+		bytes_needed = (packer.total_bits + 7) / 8  # Round up to nearest byte
+		for j in range(bytes_needed):
+			buffer.put_u8(cell_data & 0xFF)
+			cell_data >>= 8
+		#bytes.append(cell_data)
+		#buffer.put_data(bytes)
+		# Reset packer for next cell
+		packer = Global.BitPacker.new()
+	print(buffer.data_array.hex_encode())
+	return buffer.data_array
+	"""
 
 
 ##File Format tool
@@ -593,9 +661,9 @@ func legacy_format_open(_str):
 		curr_grid = {}
 		#curr_grid.resize(json_size[0])
 	
-		for i in range(curr_grid.size()):
-			curr_grid[i] = []
-			curr_grid[i].resize(json_size[1])
+		#for i in range(curr_grid.size()):
+			#curr_grid[i] = []
+			#curr_grid[i].resize(json_size[1])
 			
 	
 		for i in data['d']:
@@ -626,9 +694,9 @@ func _on_open(_str) -> void:
 		curr_grid = {}
 		#curr_grid.resize(json_size[0])
 	
-		for i in range(curr_grid.size()):
-			curr_grid[i] = []
-			curr_grid[i].resize(json_size[1])
+		#for i in range(curr_grid.size()):
+			#curr_grid[i] = []
+			#curr_grid[i].resize(json_size[1])
 			
 	
 		for i in data['d']:
