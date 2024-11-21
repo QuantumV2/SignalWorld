@@ -81,9 +81,19 @@ func display_cell_preview(copypasteinvalid = false):
 	var cell_size = Vector2(128, 128)
 	var half_cell = cell_size / 2
 
-	# Position the preview
-	%PreviewTileMap.position = (event_pos / cell_size).floor() * cell_size
+	# Step 1: Calculate position without rotation
+	var target_pos = (event_pos / cell_size).floor() * cell_size
 
+	# Step 2: Apply rotation
+	var selected_rotation = Global.RotToDeg[%RotationOptions.selected]
+	%PreviewTileMap.rotation_degrees = selected_rotation
+
+	# Step 3: Calculate offset caused by rotation
+	var offset = Vector2(%PreviewTileMap.get_used_rect().size) * cell_size / 2
+	var rotated_offset = offset.rotated(deg_to_rad(selected_rotation)) - offset
+
+	# Step 4: Adjust position
+	%PreviewTileMap.position = target_pos - rotated_offset
 	# Check for clipboard data
 	var copied_data = DisplayServer.clipboard_get()
 	var isbase64 = StringHelper.is_base64(copied_data)
@@ -100,7 +110,12 @@ func display_cell_preview(copypasteinvalid = false):
 				if data['d'] == []:
 					display_cell_preview(true)
 					return
+				offset = Vector2(0,0)
+				rotated_offset =Vector2(0,0)
+				offset = Vector2(%PreviewTileMap.get_used_rect().size * (Vector2i(cell_size) * Vector2i(data['s'][0], data['s'][1])) / 2)
+				rotated_offset = offset.rotated(deg_to_rad(selected_rotation)) - offset
 
+				%PreviewTileMap.position = target_pos - rotated_offset
 				# Calculate the offset based on the first cell's position
 				var offset_x = data['d'][0][0][0]  # x-coordinate of the first cell
 				var offset_y = data['d'][0][0][1]  # y-coordinate of the first cell
@@ -121,13 +136,13 @@ func display_cell_preview(copypasteinvalid = false):
 		%PreviewTileMap.clear()
 		# If no valid clipboard data, use selected cell from UI
 		var selected_texture = %CellOptions.get_item_icon(%CellOptions.selected)
-		var selected_rotation = Global.RotToDeg[%RotationOptions.selected]
+
 		
 		%PreviewTileMap.set_cell(
 			Vector2i.ZERO,
 			2,
 			Global.CellTypesAtlCoords[%CellOptions.selected],
-			Global.RotationDict[selected_rotation]
+			0
 		)
 
 func change_tick_rate(value: float):
@@ -218,6 +233,7 @@ func is_valid_cell(x, y, grid) -> bool:
 	return true
 
 func is_cell_in_grid(x, y, grid) -> bool:
+
 	return x >= 0 and x < grid.size() and y >= 0 and y < grid[0].size()
 
 func do_generator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
@@ -519,13 +535,25 @@ func paste_copied_data(copied_data, target_position, user_placing=false, event=n
 
 	if error == OK:
 		var data = json.data
-		# Calculate the offset based on the first cell's position
+		# Get the current rotation from RotationOptions
+		var selected_rotation = Global.RotToDeg[%RotationOptions.selected]
+		
+		# Calculate the offset based on the first cell's position 
 		var offset_x = data['d'][0][0][0]  # x-coordinate of the first cell
 		var offset_y = data['d'][0][0][1]  # y-coordinate of the first cell
-		
+
 		for i in data['d']:
 			var cell = i[1]
-			var new_position = target_position + Vector2i(i[0][0] - offset_x, i[0][1] - offset_y)
+			
+			# Calculate the rotated position
+			var relative_pos = Vector2(i[0][0] - offset_x, i[0][1] - offset_y)
+			var rotated_pos = rotate_vector(relative_pos, selected_rotation)
+			var new_position = adjust_rotation_offset(target_position + Vector2i(rotated_pos), selected_rotation)
+			
+			# Rotate the cell's rotation
+			var original_rotation = int(cell[2])
+			var new_rotation = (original_rotation + selected_rotation) % 360
+
 			if user_placing:
 				if not (cell is Array):
 					tilemap.set_cell(target_position, source_id, atlas_coords, alt_tile)
@@ -533,22 +561,41 @@ func paste_copied_data(copied_data, target_position, user_placing=false, event=n
 					next_grid = curr_grid.duplicate(true)
 					return
 				if event.get("button_index")== MOUSE_BUTTON_LEFT or event.get("button_mask")== MOUSE_BUTTON_LEFT:
-					%CellMap.set_cell(new_position, 2, Global.CellTypesAtlCoords[int(cell[3])], Global.RotationDict[int(cell[2])])
+					%CellMap.set_cell(new_position, 2, Global.CellTypesAtlCoords[int(cell[3])], Global.RotationDict[new_rotation])
 					%ColorMap.set_cell(new_position, 2, Global.PowerTypesAtl[int(cell[1])], 0)
 				else:
 					%CellMap.set_cell(new_position, 2, Vector2i(-1,-1), 0)
 					%ColorMap.set_cell(new_position, 2, Vector2i(-1,-1), 0)
 			else:
-				# Adjust the position based on the offset
-
-				%CellMap.set_cell(new_position, 2, Global.CellTypesAtlCoords[int(cell[3])], Global.RotationDict[int(cell[2])])
+				%CellMap.set_cell(new_position, 2, Global.CellTypesAtlCoords[int(cell[3])], Global.RotationDict[new_rotation])
 				%ColorMap.set_cell(new_position, 2, Global.PowerTypesAtl[int(cell[1])], 0)
 
 		curr_grid = create_tilemap_array(%CellMap, %ColorMap)
 		next_grid = curr_grid.duplicate(true)
 	else:
-		print("JSON Parse Error: ", json.get_error_message(), " in ", copied_data, " at line ", json.get_error_line())
-		
+		print("Error parsing copied data")
+
+func rotate_vector(vec: Vector2, degrees: int) -> Vector2:
+	match degrees:
+		90:  # Rotated 90 degrees clockwise
+			return Vector2(-vec.y, vec.x)
+		180:  # Rotated 180 degrees
+			return -vec
+		270:  # Rotated 270 degrees (counterclockwise)
+			return Vector2(vec.y, -vec.x)
+		_:  # 0 or 360 degrees
+			return vec
+
+func adjust_rotation_offset(pos: Vector2i, degrees: int) -> Vector2i:
+	match degrees:
+		90:
+			return pos - Vector2i(1, 0)  # Adjust for left rotation
+		180:
+			return pos - Vector2i(1, 1)  # Adjust for down rotation
+		270:
+			return pos + Vector2i(0, -1)  # Adjust for right rotation
+		_:
+			return pos
 ##Save the new File Format
 func _on_save() -> String:
 	if !curr_grid:
@@ -609,7 +656,7 @@ func json_to_bytes(data: Dictionary) -> PackedByteArray:
 		packer.add_field("y", y_bits, true)
 		packer.add_field("powered", 2)
 		packer.add_field("rotation", 2)
-		packer.add_field("type", 6)  
+		packer.add_field("type", 6)
 
 
 		var cell_data = packer.pack({

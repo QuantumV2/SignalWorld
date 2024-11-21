@@ -99,6 +99,14 @@ const CellTypes : Dictionary = {
 	&"AngledWire":10,
 }
 
+func is_base64_gzip_deflated(base64_string: String) -> bool:
+	var decoded = Marshalls.base64_to_raw(base64_string)
+
+	if decoded.size() < 2:
+		return false
+
+	return decoded[0] == 0x1F and decoded[1] == 0x8B
+	
 func array_to_dict_recursive(array) -> Dictionary:
 	var dict = {}
 	for index in range(len(array)):
