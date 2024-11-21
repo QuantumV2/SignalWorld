@@ -21,11 +21,18 @@ var paused = false;
 var selection_start: Vector2i = Vector2i(-1, -1)
 var selection_end: Vector2i = Vector2i(-1, -1)
 
+var orig_tileset = preload("res://Tilesets/color_tileset.tres")
+var alt_tileset = preload("res://Tilesets/alt_color_tileset.tres")
+
+var orig_material = preload("res://Materials/normal.tres")
+var alt_material = preload("res://Materials/filled.tres")
+
+var alt_pallete = false
+
 func select_area(start: Vector2i, end: Vector2i) -> void:
 	selection_start = start
 	selection_end = end
 	
-
 
 func user_place_tile_tilemap(tilemap: TileMapLayer, event: InputEvent, atlas_coords: Vector2i, alt_tile: int, source_id: int = 2):
 	var camera_zoom = %Camera2D.zoom
@@ -45,6 +52,7 @@ func user_place_tile_tilemap(tilemap: TileMapLayer, event: InputEvent, atlas_coo
 	
 	curr_grid = create_tilemap_array(%CellMap, %ColorMap)
 	next_grid = curr_grid.duplicate(true)
+	
 func clear_tilemap():
 	curr_grid = {}
 	next_grid = {}
@@ -53,6 +61,19 @@ func clear_tilemap():
 		for y in rct.size.y:
 			%CellMap.set_cell(Vector2i(x,y)+rct.position)
 			%ColorMap.set_cell(Vector2i(x,y)+rct.position)
+			
+func toggle_colormap(is_on):
+	if is_on:
+		%ColorMap.tile_set = alt_tileset
+		%ColorMap.material = alt_material
+		RenderingServer.set_default_clear_color(Color("#440154"))
+		alt_pallete = true
+	else:
+		%ColorMap.tile_set = orig_tileset
+		%ColorMap.material = orig_material
+		RenderingServer.set_default_clear_color(Color("#ffffff"))
+		alt_pallete = false
+	return 0
 
 func display_selection():
 	var pos1 = selection_start
@@ -97,7 +118,8 @@ func display_cell_preview(copypasteinvalid = false):
 	# Check for clipboard data
 	var copied_data = DisplayServer.clipboard_get()
 	var isbase64 = StringHelper.is_base64(copied_data)
-	if copied_data != "" and isbase64 and !copypasteinvalid:
+	# TODO: replace hack and try to actually validate the date
+	if copied_data != "" and isbase64 and !copypasteinvalid and len(copied_data) >= 32:
 		%PreviewTileMap.clear()
 		copied_data = StringHelper.gzip_decode(Marshalls.base64_to_raw(copied_data)).get_string_from_utf8()
 		var json = JSON.new()
