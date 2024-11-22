@@ -22,8 +22,15 @@ var selection_start: Vector2i = Vector2i(-1, -1)
 var selection_end: Vector2i = Vector2i(-1, -1)
 
 var orig_tileset = preload("res://Tilesets/color_tileset.tres")
+var alt_tileset = preload("res://Tilesets/alt_color_tileset.tres")
+
+var orig_cell_tileset = preload("res://Tilesets/cell_tileset.tres")
+var alt_cell_tileset = preload("res://Tilesets/alt_cell_tileset.tres")
 
 var orig_material = preload("res://Materials/normal.tres")
+#var alt_material = preload("res://Materials/filled.tres")
+
+var alt_pallete = false
 
 func select_area(start: Vector2i, end: Vector2i) -> void:
 	selection_start = start
@@ -58,6 +65,24 @@ func clear_tilemap():
 			%CellMap.set_cell(Vector2i(x,y)+rct.position)
 			%ColorMap.set_cell(Vector2i(x,y)+rct.position)
 			
+func toggle_colormap(is_on):
+	if is_on:
+		%ColorMap.tile_set = alt_tileset
+		%CellMap.tile_set = alt_cell_tileset
+		%PreviewTileMap.tile_set = alt_cell_tileset
+		%ColorMap.material = orig_material
+		%Grid.grid_color = Color(0.2, 0.2, 0.2, 1)
+		RenderingServer.set_default_clear_color(Color("#000000"))
+		alt_pallete = true
+	else:
+		%ColorMap.tile_set = orig_tileset
+		%CellMap.tile_set = orig_cell_tileset
+		%PreviewTileMap.tile_set = orig_cell_tileset
+		%ColorMap.material = orig_material
+		%Grid.grid_color = Color(0.6, 0.6, 0.6, 1)
+		RenderingServer.set_default_clear_color(Color("#ffffff"))
+		alt_pallete = false
+	return 0
 
 func display_selection():
 	var pos1 = selection_start
@@ -184,6 +209,7 @@ func create_tilemap_array(tilemap: TileMapLayer, colormap: TileMapLayer) -> Arra
 				pass
 				#result[x][y] = null
 	
+	#return Global.array_to_dict_recursive(result)
 	return result
 
 

@@ -236,6 +236,16 @@ theme = ExtResource("7_mosdc")
 theme_override_font_sizes/font_size = 40
 text = "Load"
 
+[node name="CheckBox" type="CheckBox" parent="UI/Control"]
+layout_mode = 0
+offset_left = -471.0
+offset_top = 120.0
+offset_right = -353.0
+offset_bottom = 174.0
+theme = ExtResource("7_mosdc")
+text = "Alternative
+Pallete"
+
 [node name="CamOrigin" type="Node2D" parent="."]
 unique_name_in_owner = true
 script = ExtResource("2_sxy5u")
@@ -367,6 +377,7 @@ offset_bottom = 215.355
 text = "Legacy format"
 
 [node name="Grid" parent="." instance=ExtResource("9_nta1r")]
+unique_name_in_owner = true
 
 [node name="PreviewTileMap" type="TileMapLayer" parent="."]
 unique_name_in_owner = true
@@ -412,6 +423,9 @@ texture = ExtResource("11_adeqb")
 [connection signal="mouse_entered" from="UI/Control/Load" to="UI" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="UI/Control/Load" to="UI" method="_on_mouse_exited"]
 [connection signal="pressed" from="UI/Control/Load" to="UI" method="_on_load_pressed"]
+[connection signal="mouse_entered" from="UI/Control/CheckBox" to="UI" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="UI/Control/CheckBox" to="UI" method="_on_mouse_exited"]
+[connection signal="toggled" from="UI/Control/CheckBox" to="GameHandler" method="toggle_colormap"]
 [connection signal="pressed" from="SaveDialog/Control/SaveClose" to="UI" method="_on_save_close_pressed"]
 [connection signal="pressed" from="OpenDialog/Control/LoadButtonDialog" to="UI" method="_on_load_button_dialog_pressed"]
 [connection signal="pressed" from="OpenDialog/Control/LoadClose" to="UI" method="_on_load_close_pressed"]
