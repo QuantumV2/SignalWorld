@@ -102,8 +102,8 @@ func display_selection():
 	%SelectionStartSprite.position = (Vector2(pos1).floor() * cell_size) if pos1 != Vector2i(0,0) else (Vector2(pos1).floor() + cell_size)
 	%SelectionEndSprite.position = (Vector2(pos2).floor() * cell_size) + cell_size
 
-
-func display_cell_preview(copypasteinvalid = false):
+var copypasteinvalid = false
+func display_cell_preview():
 	var camera_zoom = %Camera2D.zoom
 	var origin_pos = %CamOrigin.position
 	var event_pos = get_viewport().get_mouse_position() / camera_zoom + origin_pos - get_viewport().get_visible_rect().size / (2 * camera_zoom)
@@ -139,7 +139,7 @@ func display_cell_preview(copypasteinvalid = false):
 			# Verify it's a valid circuit data
 			if "s" in data and "d" in data:
 				if data['d'] == []:
-					display_cell_preview(true)
+					copypasteinvalid = true
 					return
 				offset = Vector2(0,0)
 				rotated_offset =Vector2(0,0)
