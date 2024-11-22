@@ -22,12 +22,8 @@ var selection_start: Vector2i = Vector2i(-1, -1)
 var selection_end: Vector2i = Vector2i(-1, -1)
 
 var orig_tileset = preload("res://Tilesets/color_tileset.tres")
-var alt_tileset = preload("res://Tilesets/alt_color_tileset.tres")
 
 var orig_material = preload("res://Materials/normal.tres")
-var alt_material = preload("res://Materials/filled.tres")
-
-var alt_pallete = false
 
 func select_area(start: Vector2i, end: Vector2i) -> void:
 	selection_start = start
@@ -54,26 +50,14 @@ func user_place_tile_tilemap(tilemap: TileMapLayer, event: InputEvent, atlas_coo
 	next_grid = curr_grid.duplicate(true)
 	
 func clear_tilemap():
-	curr_grid = {}
-	next_grid = {}
+	curr_grid = []
+	next_grid = []
 	var rct = %CellMap.get_used_rect()
 	for x in rct.size.x:
 		for y in rct.size.y:
 			%CellMap.set_cell(Vector2i(x,y)+rct.position)
 			%ColorMap.set_cell(Vector2i(x,y)+rct.position)
 			
-func toggle_colormap(is_on):
-	if is_on:
-		%ColorMap.tile_set = alt_tileset
-		%ColorMap.material = alt_material
-		RenderingServer.set_default_clear_color(Color("#440154"))
-		alt_pallete = true
-	else:
-		%ColorMap.tile_set = orig_tileset
-		%ColorMap.material = orig_material
-		RenderingServer.set_default_clear_color(Color("#ffffff"))
-		alt_pallete = false
-	return 0
 
 func display_selection():
 	var pos1 = selection_start
@@ -171,7 +155,7 @@ func change_tick_rate(value: float):
 	Global.tick_speed = value*60
 
 ## Create a cell array, inneficient, use only when needed
-func create_tilemap_array(tilemap: TileMapLayer, colormap: TileMapLayer) -> Dictionary:
+func create_tilemap_array(tilemap: TileMapLayer, colormap: TileMapLayer) -> Array:
 	var used_rect: Rect2i = tilemap.get_used_rect()
 	var result = Array()
 	result.resize(used_rect.size.x)
@@ -200,13 +184,13 @@ func create_tilemap_array(tilemap: TileMapLayer, colormap: TileMapLayer) -> Dict
 				pass
 				#result[x][y] = null
 	
-	return Global.array_to_dict_recursive(result)
+	return result
 
 
 ## Current state of the grid
-@onready var curr_grid: Dictionary = create_tilemap_array(%CellMap, %ColorMap)
+@onready var curr_grid := create_tilemap_array(%CellMap, %ColorMap)
 ## Next state of the grid
-@onready var next_grid: Dictionary = curr_grid.duplicate(true)
+@onready var next_grid: = curr_grid.duplicate(true)
 
 func do_angledwire_cell(curr_cell, x, y) -> void:
 	if not curr_cell['powered']:
@@ -336,7 +320,7 @@ func do_randgenerator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 	if turn_off_if_invalid(x,y):
 		return
 
-func set_grid_cell_power(grid: Dictionary, x:int,y:int, power:int) -> void:
+func set_grid_cell_power(grid: Array, x:int,y:int, power:int) -> void:
 	if grid[x][y]['powered'] != 2:
 		grid[x][y]['powered'] = power
 
@@ -403,21 +387,21 @@ func do_switch_cell(curr_cell, _x, _y) -> void:
 	if not curr_cell['powered']:
 		return
 			
-func replace_temp_energy(grid: Dictionary) -> void:
+func replace_temp_energy(grid: Array) -> void:
 	for x in range(grid.size()):
 		for y in range(grid[0].size()):
 			if grid[x][y] != null:
 				if grid[x][y]['powered'] == 3:
 					grid[x][y]['powered'] = 1
 
-func process_cell(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Dictionary, x: int, y: int) -> void:
+func process_cell(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Array, x: int, y: int) -> void:
 	var curr_cell = arr[x][y]
 	if curr_cell != null:
 		var atlas_coords = Global.CellTypesAtlCoords[int(curr_cell["type"])]
 		tilemap.set_cell(curr_cell['position'], 2, atlas_coords, Global.RotationDict[int(curr_cell['rotation'])])
 		colormap.set_cell(curr_cell['position'], 0, Global.PowerTypesAtl[int(curr_cell['powered'])])
 
-func update_tiles(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Dictionary) -> void:
+func update_tiles(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Array) -> void:
 	var width = arr.size()
 	var height = arr[0].size()
 
@@ -727,7 +711,7 @@ func legacy_format_open(_str):
 		var data = json.data
 		var json_size = data['s']
 		clear_tilemap()
-		curr_grid = {}
+		curr_grid = []
 		#curr_grid.resize(json_size[0])
 	
 		#for i in range(curr_grid.size()):
@@ -760,7 +744,7 @@ func _on_open(_str) -> void:
 		var data = json.data
 		var json_size = data['s']
 		clear_tilemap()
-		curr_grid = {}
+		curr_grid = []
 		#curr_grid.resize(json_size[0])
 	
 		#for i in range(curr_grid.size()):
