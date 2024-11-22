@@ -18,6 +18,8 @@ var CellFuncs : Dictionary = {
 
 var paused = false;
 
+var DIRECTIONS = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
+
 var selection_start: Vector2i = Vector2i(-1, -1)
 var selection_end: Vector2i = Vector2i(-1, -1)
 
@@ -237,8 +239,8 @@ func do_wire_cell(curr_cell, x, y) -> void:
 	if not curr_cell['powered']:
 		return
 
-	var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
-	var dir = dirs[curr_cell['rotation'] / 90]
+	
+	var dir = DIRECTIONS[curr_cell['rotation'] / 90]
 	var nx = x + dir.x
 	var ny = y + dir.y
 
@@ -249,17 +251,16 @@ func do_wire_cell(curr_cell, x, y) -> void:
 		next_grid[x][y]['powered'] = 0
 
 func is_valid_cell(x, y, grid) -> bool:
-	if x < 0 or x >= grid.size() or y < 0 or y >= grid[0].size():
+	if x < 0 or x >= grid.size() or y < 0 or y >= grid[0].size() or grid[x][y] == null:
 		return false
-	if grid[x][y] == null:
-		return false
+
 	# Check for active blockers
-	var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
-	for dir in dirs:
+	
+	for dir in DIRECTIONS:
 		var bx = x + dir.x
 		var by = y + dir.y
 		if is_cell_in_grid(bx, by, grid) and grid[bx][by] != null and grid[bx][by]['type'] == Global.CellTypes.Blocker:
-			var blocker_dir = dirs[grid[bx][by]['rotation'] / 90]
+			var blocker_dir = DIRECTIONS[grid[bx][by]['rotation'] / 90]
 			if blocker_dir == -dir and grid[bx][by]['powered']:
 				return false
 	return true
@@ -280,11 +281,11 @@ func do_generator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 
 func do_AND_cell(curr_cell, x, y) -> void:
 	var powered_neighbors = 0
-	var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
+
 	var total_neighbors = 0
 
-	for i in range(dirs.size()):
-		var dir = dirs[i]
+	for i in range(DIRECTIONS.size()):
+		var dir = DIRECTIONS[i]
 		var nx = x + dir.x
 		var ny = y + dir.y
 		if is_valid_cell(nx, ny, curr_grid) and curr_grid[nx][ny]['rotation'] == (i * 90 + 180) % 360:
@@ -292,7 +293,7 @@ func do_AND_cell(curr_cell, x, y) -> void:
 			if curr_grid[nx][ny]['powered'] == 1:
 				powered_neighbors += 1
 
-	var output_dir = dirs[int(curr_cell['rotation'] / 90)]
+	var output_dir = DIRECTIONS[int(curr_cell['rotation'] / 90)]
 	var ox = x + output_dir.x
 	var oy = y + output_dir.y
 
@@ -306,20 +307,19 @@ func do_AND_cell(curr_cell, x, y) -> void:
 
 func do_XOR_cell(curr_cell, x, y) -> void:
 	var powered_neighbors = 0
-	var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
 
-	for i in range(dirs.size()):
-		var dir = dirs[i]
+	for i in range(DIRECTIONS.size()):
+		var dir = DIRECTIONS[i]
 		var nx = x + dir.x
 		var ny = y + dir.y
 
 		# Only consider cells pointing towards this cell
-		#var input_dir = dirs[(curr_cell['rotation'] / 90 + 2) % 4]  # Opposite of output direction
+		#var input_dir = DIRECTIONS[(curr_cell['rotation'] / 90 + 2) % 4]  # Opposite of output direction
 		if is_valid_cell(nx, ny, curr_grid) and curr_grid[nx][ny]['rotation'] == (i * 90 + 180) % 360:
 			if curr_grid[nx][ny]['powered'] == 1:
 				powered_neighbors += 1
 
-	var output_dir = dirs[int(curr_cell['rotation'] / 90)]
+	var output_dir = DIRECTIONS[int(curr_cell['rotation'] / 90)]
 	var ox = x + output_dir.x
 	var oy = y + output_dir.y
 
@@ -336,7 +336,7 @@ func do_randgenerator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 		return
 	if turn_off_if_invalid(x,y):
 		return
-	for dir in [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]:
+	for dir in DIRECTIONS:
 		var nx = x + dir.x
 		var ny = y + dir.y
 
@@ -357,8 +357,7 @@ func do_buffer_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 
 	if curr_cell['powered'] == 2:
 		next_grid[x][y]['powered'] = 0;
-		var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
-		var dir = dirs[curr_cell['rotation'] / 90]
+		var dir = DIRECTIONS[curr_cell['rotation'] / 90]
 		var nx = x + (dir.x)
 		var ny = y + (dir.y)
 		if is_valid_cell(nx,ny,curr_grid):
@@ -374,8 +373,7 @@ func do_jumppad_cell(curr_cell, x, y) -> void:
 
 	
 	next_grid[x][y]['powered'] = 0 if next_grid[x][y]['powered'] != 3 else next_grid[x][y]['powered'];
-	var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
-	var dir = dirs[curr_cell['rotation'] / 90]
+	var dir = DIRECTIONS[curr_cell['rotation'] / 90]
 	var nx = x + (dir.x*2)
 	var ny = y + (dir.y*2)
 	if is_valid_cell(nx,ny,curr_grid):
@@ -387,8 +385,7 @@ func do_detector_cell(curr_cell, x, y) -> void:
 		do_wire_cell(curr_cell, x, y)
 	
 	#next_grid[x][y]['powered'] = 0;
-	var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
-	var dir = dirs[curr_cell['rotation'] / 90]
+	var dir = DIRECTIONS[curr_cell['rotation'] / 90]
 	var bx = x - (dir.x)
 	var by = y - (dir.y)
 	if is_valid_cell(bx,by,curr_grid):
@@ -401,8 +398,7 @@ func do_blocker_cell(curr_cell, x, y) -> void:
 	if not curr_cell['powered']:
 		return
 	next_grid[x][y]['powered'] = 0 if next_grid[x][y]['powered'] != 3 else next_grid[x][y]['powered'];
-	var dirs = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
-	var dir = dirs[curr_cell['rotation'] / 90]
+	var dir = DIRECTIONS[curr_cell['rotation'] / 90]
 	var nx = x + dir.x
 	var ny = y + dir.y
 	if is_valid_cell(nx, ny, curr_grid):
@@ -433,8 +429,11 @@ func update_tiles(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Array) -> 
 
 	for x in range(width):
 		for y in range(height):
-			if arr[x][y] != null:
-				process_cell(tilemap, colormap, arr, x, y)
+			var curr_cell = arr[x][y]
+			if curr_cell!= null:
+				var atlas_coords = Global.CellTypesAtlCoords[int(curr_cell["type"])]
+				tilemap.set_cell(curr_cell['position'], 2, atlas_coords, Global.RotationDict[int(curr_cell['rotation'])])
+				colormap.set_cell(curr_cell['position'], 0, Global.PowerTypesAtl[int(curr_cell['powered'])])
 
 func update_gamestate() -> void:
 	if paused or curr_grid.size() < 1:
