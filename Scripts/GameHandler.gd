@@ -132,7 +132,7 @@ func display_cell_preview():
 	var copied_data = DisplayServer.clipboard_get()
 	var isbase64 = StringHelper.is_base64(copied_data)
 	# TODO: replace hack and try to actually validate the date
-	if copied_data != "" and isbase64 and !copypasteinvalid and copied_data:
+	if copied_data != "" and isbase64 and copied_data:
 
 		%PreviewTileMap.clear()
 		copied_data = StringHelper.gzip_decode(Marshalls.base64_to_raw(copied_data)).get_string_from_utf8()
@@ -144,7 +144,6 @@ func display_cell_preview():
 			# Verify it's a valid circuit data
 			if "s" in data and "d" in data:
 				if data['d'] == []:
-					copypasteinvalid = true
 					return
 				offset = Vector2(0,0)
 				rotated_offset =Vector2(0,0)
