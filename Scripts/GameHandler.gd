@@ -38,7 +38,7 @@ func select_area(start: Vector2i, end: Vector2i) -> void:
 	selection_start = start
 	selection_end = end
 	
-
+var prev_clipboard = ""
 func user_place_tile_tilemap(tilemap: TileMapLayer, event: InputEvent, atlas_coords: Vector2i, alt_tile: int, source_id: int = 2):
 	var camera_zoom = %Camera2D.zoom
 	var event_position = event.position / camera_zoom + %CamOrigin.position - get_viewport().get_visible_rect().size / (2 * camera_zoom)
@@ -105,6 +105,7 @@ func display_selection():
 	%SelectionEndSprite.position = (Vector2(pos2).floor() * cell_size) + cell_size
 
 var copypasteinvalid = false
+var prev_rot = 0
 func display_cell_preview():
 	var camera_zoom = %Camera2D.zoom
 	var origin_pos = %CamOrigin.position
@@ -118,6 +119,7 @@ func display_cell_preview():
 
 	# Step 2: Apply rotation
 	var selected_rotation = Global.RotToDeg[%RotationOptions.selected]
+
 	%PreviewTileMap.rotation_degrees = selected_rotation
 
 	# Step 3: Calculate offset caused by rotation
@@ -130,7 +132,8 @@ func display_cell_preview():
 	var copied_data = DisplayServer.clipboard_get()
 	var isbase64 = StringHelper.is_base64(copied_data)
 	# TODO: replace hack and try to actually validate the date
-	if copied_data != "" and isbase64 and !copypasteinvalid and len(copied_data) >= 32:
+	if copied_data != "" and isbase64 and !copypasteinvalid and copied_data:
+
 		%PreviewTileMap.clear()
 		copied_data = StringHelper.gzip_decode(Marshalls.base64_to_raw(copied_data)).get_string_from_utf8()
 		var json = JSON.new()
@@ -152,7 +155,6 @@ func display_cell_preview():
 				# Calculate the offset based on the first cell's position
 				var offset_x = data['d'][0][0][0]  # x-coordinate of the first cell
 				var offset_y = data['d'][0][0][1]  # y-coordinate of the first cell
-
 				for i in data['d']:
 					if not (i[1] is Array):
 						return
@@ -219,13 +221,13 @@ func create_tilemap_array(tilemap: TileMapLayer, colormap: TileMapLayer) -> Arra
 @onready var curr_grid := create_tilemap_array(%CellMap, %ColorMap)
 ## Next state of the grid
 @onready var next_grid: = curr_grid.duplicate(true)
-
+var angle_dirs := [Vector2i.UP + Vector2i.RIGHT, Vector2i.RIGHT + Vector2i.DOWN, Vector2i.LEFT + Vector2i.DOWN, Vector2i.LEFT + Vector2i.UP]
 func do_angledwire_cell(curr_cell, x, y) -> void:
 	if not curr_cell['powered']:
 		return
 
-	var dirs := [Vector2i.UP + Vector2i.RIGHT, Vector2i.RIGHT + Vector2i.DOWN, Vector2i.LEFT + Vector2i.DOWN, Vector2i.LEFT + Vector2i.UP]
-	var dir = dirs[curr_cell['rotation'] / 90]
+	
+	var dir = angle_dirs[curr_cell['rotation'] / 90]
 	var nx = x + dir.x
 	var ny = y + dir.y
 
@@ -465,7 +467,8 @@ func turn_off_if_invalid(x,y) -> bool:
 
 func process_game_cell(x: int, y: int) -> void:
 	var curr_cell = curr_grid[x][y]
-	if curr_cell['powered'] == -1 :
+	if curr_cell['powered'] in [-1,0] and curr_cell['type'] not in [Global.CellTypes.Generator, Global.CellTypes.Randomizer
+	, Global.CellTypes.AND, Global.CellTypes.XOR, Global.CellTypes.Blocker, Global.CellTypes.Detector]:
 		return
 
 
