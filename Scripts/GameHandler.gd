@@ -18,7 +18,7 @@ var CellFuncs : Dictionary = {
 
 var paused = false;
 
-var DIRECTIONS = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
+const DIRECTIONS = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
 
 var selection_start: Vector2i = Vector2i(-1, -1)
 var selection_end: Vector2i = Vector2i(-1, -1)
@@ -221,7 +221,7 @@ func create_tilemap_array(tilemap: TileMapLayer, colormap: TileMapLayer) -> Arra
 @onready var curr_grid := create_tilemap_array(%CellMap, %ColorMap)
 ## Next state of the grid
 @onready var next_grid: = curr_grid.duplicate(true)
-var angle_dirs := [Vector2i.UP + Vector2i.RIGHT, Vector2i.RIGHT + Vector2i.DOWN, Vector2i.LEFT + Vector2i.DOWN, Vector2i.LEFT + Vector2i.UP]
+const angle_dirs := [Vector2i.UP + Vector2i.RIGHT, Vector2i.RIGHT + Vector2i.DOWN, Vector2i.LEFT + Vector2i.DOWN, Vector2i.LEFT + Vector2i.UP]
 func do_angledwire_cell(curr_cell, x, y) -> void:
 	if not curr_cell['powered']:
 		return
