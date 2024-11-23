@@ -295,19 +295,21 @@ func do_AND_cell(curr_cell, x, y) -> void:
 			if curr_grid[nx][ny]['powered'] == 1:
 				powered_neighbors += 1
 
-	var output_dir = DIRECTIONS[int(curr_cell['rotation'] / 90)]
-	var ox = x + output_dir.x
-	var oy = y + output_dir.y
-
-	if is_valid_cell(ox, oy, curr_grid) and powered_neighbors == total_neighbors:
-		set_grid_cell_power(next_grid, x, y, 3)
-		set_grid_cell_power(next_grid, ox, oy, 3)
+	if powered_neighbors == total_neighbors:
+		var output_dir = DIRECTIONS[int(curr_cell['rotation'] / 90)]
+		var ox = x + output_dir.x
+		var oy = y + output_dir.y
+		if is_valid_cell(ox, oy, curr_grid):
+			set_grid_cell_power(next_grid, x, y, 3)
+			set_grid_cell_power(next_grid, ox, oy, 3)
+		else:
+			next_grid[x][y]['powered'] = 0
 	else:
 		next_grid[x][y]['powered'] = 0
 
 
 
-func do_XOR_cell(curr_cell, x, y) -> void:
+func do_XOR_cell(curr_cell, x, y):
 	var powered_neighbors = 0
 
 	for i in range(DIRECTIONS.size()):
@@ -320,16 +322,22 @@ func do_XOR_cell(curr_cell, x, y) -> void:
 		if is_valid_cell(nx, ny, curr_grid) and curr_grid[nx][ny]['rotation'] == (i * 90 + 180) % 360:
 			if curr_grid[nx][ny]['powered'] == 1:
 				powered_neighbors += 1
+				if powered_neighbors >= 2:
+					next_grid[x][y]['powered'] = 0
+					return null;
 
-	var output_dir = DIRECTIONS[int(curr_cell['rotation'] / 90)]
-	var ox = x + output_dir.x
-	var oy = y + output_dir.y
-
-	if is_valid_cell(ox, oy, curr_grid) and powered_neighbors == 1:
-		set_grid_cell_power(next_grid, x, y, 3)
-		set_grid_cell_power(next_grid, ox, oy, 3)
+	if powered_neighbors == 1:
+		var output_dir = DIRECTIONS[int(curr_cell['rotation'] / 90)]
+		var ox = x + output_dir.x
+		var oy = y + output_dir.y
+		if is_valid_cell(ox, oy, curr_grid):
+			set_grid_cell_power(next_grid, x, y, 3)
+			set_grid_cell_power(next_grid, ox, oy, 3)
+		else:
+			next_grid[x][y]['powered'] = 0
 	else:
 		next_grid[x][y]['powered'] = 0
+
 
 
 			

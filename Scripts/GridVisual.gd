@@ -21,7 +21,7 @@ func _draw():
 		return
 
 	var viewport_rect = get_viewport_rect()
-	var top_left = (camera.get_screen_center_position() - viewport_rect.size / (camera.zoom))
+	var top_left = (camera.get_screen_center_position() - viewport_rect.size / (camera.zoom)) 
 	var bottom_right = (camera.get_screen_center_position() + viewport_rect.size / (camera.zoom))  
 
 	var start_cell = tilemap.local_to_map(top_left )
