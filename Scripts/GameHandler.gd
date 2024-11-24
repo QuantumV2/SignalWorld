@@ -55,6 +55,7 @@ func user_place_tile_tilemap(tilemap: TileMapLayer, event: InputEvent, atlas_coo
 	else:
 		tilemap.set_cell(pos, source_id, atlas_coords, alt_tile)
 	
+	#%CellMap/PlaceCellSound.play()
 	curr_grid = create_tilemap_array(%CellMap, %ColorMap)
 	next_grid = curr_grid.duplicate(true)
 	
@@ -358,6 +359,7 @@ func do_randgenerator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 func set_grid_cell_power(grid: Array, x:int,y:int, power:int) -> void:
 	if grid[x][y]['powered'] != 2:
 		grid[x][y]['powered'] = power
+	#%CellMap/ChangeStateSound.play()
 
 func do_buffer_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 	if not curr_cell['powered']:

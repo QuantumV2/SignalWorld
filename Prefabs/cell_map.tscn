@@ -1,7 +1,15 @@
-[gd_scene load_steps=2 format=3 uid="uid://ckq1uhkvol4c1"]
+[gd_scene load_steps=4 format=3 uid="uid://ckq1uhkvol4c1"]
 
 [ext_resource type="TileSet" uid="uid://bknk4bw1ekaa6" path="res://Tilesets/cell_tileset.tres" id="1_gchxe"]
+[ext_resource type="AudioStream" uid="uid://biw2hjf8jy7y" path="res://Sounds/click.wav" id="2_7yoem"]
+[ext_resource type="AudioStream" uid="uid://0qbc37o287ev" path="res://Sounds/click (1).wav" id="3_0aayp"]
 
 [node name="CellMap" type="TileMapLayer"]
 position = Vector2(1, 0)
 tile_set = ExtResource("1_gchxe")
+
+[node name="ChangeStateSound" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("2_7yoem")
+
+[node name="PlaceCellSound" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("3_0aayp")
