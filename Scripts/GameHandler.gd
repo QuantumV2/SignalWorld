@@ -491,6 +491,7 @@ func process_game_cell(x: int, y: int) -> void:
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	randomize()
 	Global.connect("tick", update_gamestate)
 	pass # Replace with function body.
 
@@ -513,6 +514,8 @@ func _input(event: InputEvent) -> void:
 		copy_selection()
 	elif event.is_action_pressed("del"):
 		del_selection()
+	elif event.is_action_pressed("randomize"):
+		RAND_selection()
 	elif event.is_action_pressed("remove_selection"):
 		selection_start = Vector2i(-1,-1)
 		selection_end = Vector2i(-1,-1)
@@ -558,8 +561,20 @@ func del_selection() -> void:
 		var ysize = abs(selection_end.y - selection_start.y) + 1
 		for x in range(selection_start.x, selection_end.x+1):
 			for y in range(selection_start.y, selection_end.y+1):
-				%CellMap.set_cell(Vector2i(x,y), 2, Vector2i(-1,-1), 0)
-				%ColorMap.set_cell(Vector2i(x,y), 2, Vector2i(-1,-1), 0)
+				if %CellMap.get_cell_atlas_coords(Vector2i(x,y)) != Vector2i(-1,-1):
+					%CellMap.set_cell(Vector2i(x,y), 2, Vector2i(-1,-1), 0)
+					%ColorMap.set_cell(Vector2i(x,y), 2, Vector2i(-1,-1), 0)
+				curr_grid = create_tilemap_array(%CellMap, %ColorMap)
+				next_grid = curr_grid.duplicate(true)
+func RAND_selection() -> void:
+
+	if !(selection_start == Vector2i(-1, -1) and selection_end == Vector2i(-1, -1)):
+		var xsize = abs(selection_end.x - selection_start.x) + 1
+		var ysize = abs(selection_end.y - selection_start.y) + 1
+		for x in range(selection_start.x, selection_end.x+1):
+			for y in range(selection_start.y, selection_end.y+1):
+				%CellMap.set_cell(Vector2i(x,y), 2, Global.CellTypesAtlCoords[randi_range(-1,10) ], Global.RotationInd[randi_range(0,3)])
+				%ColorMap.set_cell(Vector2i(x,y), 2, Vector2i(randi_range(0,1),0), 0)
 				curr_grid = create_tilemap_array(%CellMap, %ColorMap)
 				next_grid = curr_grid.duplicate(true)
 				
