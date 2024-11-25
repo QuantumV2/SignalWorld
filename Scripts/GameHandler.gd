@@ -494,6 +494,7 @@ func process_game_cell(x: int, y: int) -> void:
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	randomize()
+	#Global.load_custom_cells("res://ModTest/Cells/")
 	Global.connect("tick", update_gamestate)
 	pass # Replace with function body.
 

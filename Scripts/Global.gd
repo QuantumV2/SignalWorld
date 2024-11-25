@@ -2,6 +2,9 @@ extends Node
 ## A thing to handle everything
 
 
+var mod_count = 0; 
+var source_offset = 2;
+
 ## The rate at which the cells get updated, default 900
 var tick_speed := 15*60
 var _tick_counter := 0
@@ -162,15 +165,17 @@ func get_tile_data_rotation(alt_tile : int)->int:
 			return -1  # invalid or non-90 degree rotation
 
 
-
-	
 ## @experimental
 func load_custom_cells(path) -> void :
 	var folder = DirAccess.open(path)
 	var dirnames = folder.get_directories()
 	for _name in dirnames:
 		pass
-		#var cellinfo = FileAccess.open(path + _name + "/" + _name + ".json", FileAccess.READ)
+		print(path + _name + "/" + _name + ".json")
+		var cellinfofile = FileAccess.open(path + _name + "/" + _name + ".json", FileAccess.READ)
+		var cellinfostr = cellinfofile.get_as_text()
+		var cellinfo = JSON.parse_string(cellinfostr)
+		
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("fullscreen"):
