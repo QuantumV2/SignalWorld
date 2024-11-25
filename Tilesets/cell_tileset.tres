@@ -1,6 +1,13 @@
-[gd_resource type="TileSet" load_steps=3 format=3 uid="uid://bknk4bw1ekaa6"]
+[gd_resource type="TileSet" load_steps=5 format=3 uid="uid://bknk4bw1ekaa6"]
 
+[ext_resource type="Texture2D" uid="uid://b3ixu4377lxeu" path="res://icon.svg" id="1_8sy2w"]
 [ext_resource type="Texture2D" uid="uid://dnxyf2sdaijof" path="res://Images/tileset.svg" id="1_wmod7"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_k3dae"]
+texture = ExtResource("1_8sy2w")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/custom_data_0 = &"Godot"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_p8tvf"]
 texture = ExtResource("1_wmod7")
@@ -33,3 +40,4 @@ tile_size = Vector2i(128, 128)
 custom_data_layer_0/name = "CellTypes"
 custom_data_layer_0/type = 21
 sources/2 = SubResource("TileSetAtlasSource_p8tvf")
+sources/0 = SubResource("TileSetAtlasSource_k3dae")
