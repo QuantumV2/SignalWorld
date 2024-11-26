@@ -164,6 +164,9 @@ func get_tile_data_rotation(alt_tile : int)->int:
 		_:
 			return -1  # invalid or non-90 degree rotation
 
+func add_custom_cell(name:String, image:Image, behavior: String):
+	pass
+	
 
 ## @experimental
 func load_custom_cells(path) -> void :
@@ -175,6 +178,12 @@ func load_custom_cells(path) -> void :
 		var cellinfofile = FileAccess.open(path + _name + "/" + _name + ".json", FileAccess.READ)
 		var cellinfostr = cellinfofile.get_as_text()
 		var cellinfo = JSON.parse_string(cellinfostr)
+		cellinfofile.close()
+		var behaviorfile = FileAccess.open(path + _name + "/behavior.gd", FileAccess.READ)
+		var behaviorstr = behaviorfile.get_as_text()
+		behaviorfile.close()
+		add_custom_cell(cellinfo['name'], cellinfo['image'], behaviorstr)
+		print(cellinfo, behaviorstr)
 		
 
 func _input(event: InputEvent) -> void:
