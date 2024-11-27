@@ -5,11 +5,16 @@ extends Node
 var mod_count = 0; 
 var source_offset = 2;
 
-## The rate at which the cells get updated, default 900
-var tick_speed := 15*60
+## The rate at which the cells get updated, default 10
+var tick_speed := 10.0: 
+	set(value):
+		if tick_timer:
+			tick_timer.set_wait_time(value)
 var _tick_counter := 0
 ## The tick signal, activates when cells get updated
 signal tick
+
+
 
 func create_bitmask(num_bits: int) -> int:
 	return (1 << num_bits) - 1
@@ -195,9 +200,21 @@ func swap_fullscreen_mode() -> void:
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 	else:
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+var tick_timer: Timer
 
-func _physics_process(_delta: float) -> void:
-	_tick_counter += 1*60
+func _ready():
+	tick_timer = Timer.new()
+	add_child(tick_timer)
+	tick_timer.connect("timeout", on_tick)
+	tick_timer.set_wait_time(1.0 / tick_speed)
+	tick_timer.set_one_shot(false)
+	tick_timer.start()
+
+func on_tick():
+	tick.emit()
+"""func _physics_process(_delta: float) -> void:
+	_tick_counter += 60
 	if _tick_counter >= tick_speed:
 		tick.emit()
 		_tick_counter = 0
+"""

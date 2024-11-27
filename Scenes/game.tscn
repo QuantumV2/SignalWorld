@@ -93,7 +93,7 @@ grow_horizontal = 0
 [node name="ColorRect" type="ColorRect" parent="UI/Control"]
 layout_mode = 0
 offset_left = -472.0
-offset_right = 40.0
+offset_right = 194.0
 offset_bottom = 480.0
 color = Color(0, 0, 0, 0.658824)
 
@@ -177,34 +177,59 @@ popup/item_3/text = "Left"
 popup/item_3/id = 3
 
 [node name="ClearGrid" type="Button" parent="UI/Control"]
+modulate = Color(0.912271, 4.71681e-06, 6.73831e-07, 1)
 layout_mode = 0
 offset_left = -471.0
 offset_right = -353.0
 offset_bottom = 120.0
+scale = Vector2(0.45, 0.45)
 theme = ExtResource("7_mosdc")
 theme_override_font_sizes/font_size = 40
-text = "Clear 
-Grid"
+text = "! Clear 
+Grid !"
 
 [node name="HSlider" type="HSlider" parent="UI/Control"]
 layout_mode = 0
 offset_left = -472.0
-offset_top = 234.0
+offset_top = 211.0
 offset_right = 40.0
-offset_bottom = 250.0
+offset_bottom = 227.0
+min_value = 1.0
 max_value = 60.0
 value = 15.0
 
 [node name="Label" type="Label" parent="UI/Control"]
 layout_mode = 0
 offset_left = -472.0
-offset_top = 206.0
+offset_top = 183.0
 offset_right = -218.0
-offset_bottom = 284.0
+offset_bottom = 261.0
 scale = Vector2(0.4, 0.4)
 theme = ExtResource("7_mosdc")
 theme_override_font_sizes/font_size = 55
 text = "Tick Rate"
+
+[node name="Label2" type="Label" parent="UI/Control"]
+layout_mode = 0
+offset_left = -472.0
+offset_top = 222.0
+offset_right = -341.0
+offset_bottom = 300.0
+scale = Vector2(0.4, 0.4)
+theme = ExtResource("7_mosdc")
+theme_override_font_sizes/font_size = 55
+text = "Slow"
+
+[node name="Label3" type="Label" parent="UI/Control"]
+layout_mode = 0
+offset_left = -12.0
+offset_top = 222.0
+offset_right = 119.0
+offset_bottom = 300.0
+scale = Vector2(0.4, 0.4)
+theme = ExtResource("7_mosdc")
+theme_override_font_sizes/font_size = 55
+text = "Fast"
 
 [node name="Save" type="Button" parent="UI/Control"]
 layout_mode = 0
@@ -260,7 +285,6 @@ color = Color(0.486275, 0.486275, 0.486275, 0.0941176)
 
 [node name="Camera2D" type="Camera2D" parent="CamOrigin"]
 unique_name_in_owner = true
-position = Vector2(0, -1)
 zoom = Vector2(0.3, 0.3)
 
 [node name="SaveDialog" type="PopupPanel" parent="."]

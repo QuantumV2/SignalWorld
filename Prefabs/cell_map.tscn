@@ -10,6 +10,7 @@ tile_set = ExtResource("1_gchxe")
 
 [node name="ChangeStateSound" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("2_7yoem")
+bus = &"ChangeStateBus"
 
 [node name="PlaceCellSound" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("3_0aayp")

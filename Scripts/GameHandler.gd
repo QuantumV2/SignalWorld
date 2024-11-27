@@ -185,7 +185,7 @@ func display_cell_preview():
 		)
 
 func change_tick_rate(value: float):
-	Global.tick_speed = value*60
+	Global.tick_speed = 1.0/value
 
 ## Create a cell array, inneficient, use only when needed
 func create_tilemap_array(tilemap: TileMapLayer, colormap: TileMapLayer) -> Array:
@@ -361,6 +361,8 @@ func do_randgenerator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 func set_grid_cell_power(grid: Array, x:int,y:int, power:int) -> void:
 	if grid[x][y]['powered'] != 2:
 		grid[x][y]['powered'] = power
+	#var effect = AudioServer.get_bus_effect(1, 0)
+	#effect.pitch_scale = (grid[x][y]['type'] + 1) / 5
 	#%CellMap/ChangeStateSound.play()
 
 func do_buffer_cell(curr_cell: Dictionary, x: int, y: int) -> void:
@@ -483,7 +485,7 @@ func process_game_cell(x: int, y: int) -> void:
 	var curr_cell = curr_grid[x][y]
 	var next_cell = next_grid[x][y]
 	if curr_cell['powered'] in [-1,0] and curr_cell['type'] not in [Global.CellTypes.Generator, Global.CellTypes.Randomizer
-	, Global.CellTypes.AND, Global.CellTypes.XOR, Global.CellTypes.Blocker, Global.CellTypes.Detector]:# and curr_cell['powered'] == (next_cell['powered'] if next_cell['powered'] != 3 else 1):
+	, Global.CellTypes.AND, Global.CellTypes.XOR, Global.CellTypes.Blocker, Global.CellTypes.Detector] and curr_cell['powered'] == (next_cell['powered'] if next_cell['powered'] != 3 else 1):
 		return
 
 
