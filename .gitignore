@@ -1,4 +1,7 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
+SignalWorldCA.pck
+SignalWorldCA.x86_64
+export_presets.cfg
 .vscode

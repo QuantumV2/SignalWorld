@@ -1,0 +1,6 @@
+[gd_resource type="Theme" load_steps=2 format=3 uid="uid://dnixri72mn2bw"]
+
+[ext_resource type="FontFile" uid="uid://3hx07086u800" path="res://Fonts/Poppins-SemiBold.ttf" id="1_tpyxo"]
+
+[resource]
+default_font = ExtResource("1_tpyxo")

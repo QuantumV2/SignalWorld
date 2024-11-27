@@ -1,0 +1,35 @@
+[gd_resource type="TileSet" load_steps=3 format=3 uid="uid://cit2ccifrhmwc"]
+
+[ext_resource type="Texture2D" uid="uid://dp6ens22mnwt3" path="res://Images/tileset_alt.svg" id="1_6tjvb"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_p8tvf"]
+texture = ExtResource("1_6tjvb")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/custom_data_0 = &"Wire"
+1:0/0 = 0
+1:0/0/custom_data_0 = &"Generator"
+2:0/0 = 0
+2:0/0/custom_data_0 = &"AND"
+3:0/0 = 0
+3:0/0/custom_data_0 = &"Buffer"
+3:1/0 = 0
+3:1/0/custom_data_0 = &"JumpPad"
+2:1/0 = 0
+2:1/0/custom_data_0 = &"XOR"
+1:1/0 = 0
+1:1/0/custom_data_0 = &"Switch"
+0:1/0 = 0
+0:1/0/custom_data_0 = &"Detector"
+0:2/0 = 0
+0:2/0/custom_data_0 = &"Blocker"
+1:2/0 = 0
+1:2/0/custom_data_0 = &"Randomizer"
+2:2/0 = 0
+2:2/0/custom_data_0 = &"AngledWire"
+
+[resource]
+tile_size = Vector2i(128, 128)
+custom_data_layer_0/name = "CellTypes"
+custom_data_layer_0/type = 21
+sources/2 = SubResource("TileSetAtlasSource_p8tvf")

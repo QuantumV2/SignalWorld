@@ -1,7 +1,7 @@
 extends Node2D
 
 var _target_zoom: float = 1.0
-const MIN_ZOOM: float = 0.1
+const MIN_ZOOM: float = 0.05
 const MAX_ZOOM: float = 1.0
 const ZOOM_INCREMENT: float = 0.1
 const ZOOM_RATE: float = 8.0
@@ -14,6 +14,7 @@ func zoom_out():
 	_target_zoom = min(_target_zoom + ZOOM_INCREMENT, MAX_ZOOM);
 	set_physics_process(true)
 
+# Handle Mouse Movement and Tile Placement
 func _input(event: InputEvent) -> void:
 
 	if event is InputEventMouseMotion:
