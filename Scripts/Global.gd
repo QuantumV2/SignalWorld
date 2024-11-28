@@ -105,6 +105,7 @@ const CellTypes : Dictionary = {
 	&"Blocker":8,
 	&"Randomizer":9,
 	&"AngledWire":10,
+	&"Flow":11,
 }
 
 func is_base64_gzip_deflated(base64_string: String) -> bool:
@@ -138,6 +139,7 @@ const CellTypesAtlCoords : Dictionary = {
 	8:Vector2i(0,2),
 	9:Vector2i(1,2),
 	10:Vector2i(2,2),
+	11:Vector2i(5,1),
 }
 
 const PowerTypes : Dictionary = {

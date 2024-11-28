@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3 uid="uid://dpl015ydoxgno"]
+[gd_scene load_steps=26 format=3 uid="uid://dpl015ydoxgno"]
 
 [ext_resource type="Script" path="res://Scripts/cam_origin.gd" id="2_sxy5u"]
 [ext_resource type="PackedScene" uid="uid://b7j2071weldx4" path="res://Prefabs/color_map.tscn" id="3_li8la"]
@@ -57,6 +57,10 @@ region = Rect2(128, 256, 128, 128)
 atlas = ExtResource("6_4k7gr")
 region = Rect2(256, 256, 128, 128)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_m7y3w"]
+atlas = ExtResource("6_4k7gr")
+region = Rect2(640, 128, 128, 128)
+
 [sub_resource type="AtlasTexture" id="AtlasTexture_bel8f"]
 atlas = ExtResource("6_58r07")
 region = Rect2(0, 0, 16, 16)
@@ -107,7 +111,7 @@ offset_bottom = 135.0
 theme = ExtResource("7_mosdc")
 theme_override_font_sizes/font_size = 37
 selected = 0
-item_count = 11
+item_count = 12
 popup/item_0/text = "Wire"
 popup/item_0/icon = SubResource("AtlasTexture_8bnvh")
 popup/item_1/text = "Generator"
@@ -140,6 +144,9 @@ popup/item_9/id = 3
 popup/item_10/text = "Angled Wire"
 popup/item_10/icon = SubResource("AtlasTexture_c4ma4")
 popup/item_10/id = 10
+popup/item_11/text = "Flow"
+popup/item_11/icon = SubResource("AtlasTexture_m7y3w")
+popup/item_11/id = 11
 
 [node name="ColorOptions" type="OptionButton" parent="UI/Control"]
 unique_name_in_owner = true

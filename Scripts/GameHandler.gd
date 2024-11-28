@@ -14,6 +14,8 @@ var CellFuncs : Dictionary = {
 	Global.CellTypes.AND: do_AND_cell,
 	Global.CellTypes.XOR: do_XOR_cell,
 	Global.CellTypes.AngledWire: do_angledwire_cell,
+	
+	Global.CellTypes.Flow: do_wire_cell,
 }
 
 var paused = false;
@@ -236,7 +238,7 @@ func do_angledwire_cell(curr_cell, x, y) -> void:
 	var ny = y + dir.y
 
 	if is_valid_cell(nx, ny, curr_grid):
-		set_grid_cell_power(next_grid, nx, ny, 3)
+		set_grid_cell_power(next_grid, nx, ny, 3, curr_cell['rotation'])
 
 	if next_grid[x][y]['powered'] != 3:
 		next_grid[x][y]['powered'] = 0
@@ -251,10 +253,11 @@ func do_wire_cell(curr_cell, x, y) -> void:
 	var ny = y + dir.y
 
 	if is_valid_cell(nx, ny, curr_grid):
-		set_grid_cell_power(next_grid, nx, ny, 3)
+		set_grid_cell_power(next_grid, nx, ny, 3,curr_cell['rotation'] )
 
 	if next_grid[x][y]['powered'] != 3:
 		next_grid[x][y]['powered'] = 0
+
 
 func is_valid_cell(x, y, grid) -> bool:
 	if x < 0 or x >= grid.size() or y < 0 or y >= grid[0].size() or grid[x][y] == null:
@@ -276,7 +279,7 @@ func is_cell_in_grid(x, y, grid) -> bool:
 func do_generator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 	if not curr_cell['powered']:
 		return
-	for dir in [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]:
+	for dir in DIRECTIONS:
 		var nx = x + dir.x
 		var ny = y + dir.y
 
@@ -285,7 +288,7 @@ func do_generator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 
 func do_AND_cell(curr_cell, x, y) -> void:
 	var powered_neighbors = 0
-
+	var rot = curr_cell['rotation']
 	var total_neighbors = 0
 
 	for i in range(DIRECTIONS.size()):
@@ -298,12 +301,12 @@ func do_AND_cell(curr_cell, x, y) -> void:
 				powered_neighbors += 1
 
 	if powered_neighbors == total_neighbors:
-		var output_dir = DIRECTIONS[int(curr_cell['rotation'] / 90)]
+		var output_dir = DIRECTIONS[int(rot / 90)]
 		var ox = x + output_dir.x
 		var oy = y + output_dir.y
 		if is_valid_cell(ox, oy, curr_grid):
 			set_grid_cell_power(next_grid, x, y, 3)
-			set_grid_cell_power(next_grid, ox, oy, 3)
+			set_grid_cell_power(next_grid, ox, oy, 3, rot)
 		else:
 			next_grid[x][y]['powered'] = 0
 	else:
@@ -313,7 +316,7 @@ func do_AND_cell(curr_cell, x, y) -> void:
 
 func do_XOR_cell(curr_cell, x, y):
 	var powered_neighbors = 0
-
+	var rot = curr_cell['rotation']
 	for i in range(DIRECTIONS.size()):
 		var dir = DIRECTIONS[i]
 		var nx = x + dir.x
@@ -329,12 +332,12 @@ func do_XOR_cell(curr_cell, x, y):
 					return null;
 
 	if powered_neighbors == 1:
-		var output_dir = DIRECTIONS[int(curr_cell['rotation'] / 90)]
+		var output_dir = DIRECTIONS[int(rot / 90)]
 		var ox = x + output_dir.x
 		var oy = y + output_dir.y
 		if is_valid_cell(ox, oy, curr_grid):
 			set_grid_cell_power(next_grid, x, y, 3)
-			set_grid_cell_power(next_grid, ox, oy, 3)
+			set_grid_cell_power(next_grid, ox, oy, 3, rot)
 		else:
 			next_grid[x][y]['powered'] = 0
 	else:
@@ -358,9 +361,11 @@ func do_randgenerator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 	if turn_off_if_invalid(x,y):
 		return
 
-func set_grid_cell_power(grid: Array, x:int,y:int, power:int) -> void:
+func set_grid_cell_power(grid: Array, x:int,y:int, power:int, rotation:int=0) -> void:
 	if grid[x][y]['powered'] != 2:
 		grid[x][y]['powered'] = power
+	if grid[x][y]['type'] == Global.CellTypes.Flow:
+		grid[x][y]['rotation'] = rotation
 	#var effect = AudioServer.get_bus_effect(1, 0)
 	#effect.pitch_scale = (grid[x][y]['type'] + 1) / 5
 	#%CellMap/ChangeStateSound.play()
@@ -376,7 +381,7 @@ func do_buffer_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 		var nx = x + (dir.x)
 		var ny = y + (dir.y)
 		if is_valid_cell(nx,ny,curr_grid):
-			set_grid_cell_power(next_grid, nx, ny, 3)
+			set_grid_cell_power(next_grid, nx, ny, 3, curr_cell['rotation'])
 	if curr_cell['powered'] == 1:
 		next_grid[x][y]['powered'] = 2
 		
@@ -392,7 +397,7 @@ func do_jumppad_cell(curr_cell, x, y) -> void:
 	var nx = x + (dir.x*2)
 	var ny = y + (dir.y*2)
 	if is_valid_cell(nx,ny,curr_grid):
-		set_grid_cell_power(next_grid, nx, ny, 3)
+		set_grid_cell_power(next_grid, nx, ny, 3, curr_cell['rotation'])
 		
 func do_detector_cell(curr_cell, x, y) -> void:
 	
@@ -405,7 +410,7 @@ func do_detector_cell(curr_cell, x, y) -> void:
 	var by = y - (dir.y)
 	if is_valid_cell(bx,by,curr_grid):
 		if curr_grid[bx][by]['powered']:
-			set_grid_cell_power(next_grid, x, y, 3)
+			set_grid_cell_power(next_grid, x, y, 3, curr_cell['rotation'])
 			
 			#next_grid[bx][by]['powered'] = 0
 			#next_grid[nx][ny]['powered'] = 1
