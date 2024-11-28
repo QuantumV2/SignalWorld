@@ -279,12 +279,13 @@ func is_cell_in_grid(x, y, grid) -> bool:
 func do_generator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 	if not curr_cell['powered']:
 		return
-	for dir in DIRECTIONS:
+	for i in range(len(DIRECTIONS)):
+		var dir = DIRECTIONS[i]
 		var nx = x + dir.x
 		var ny = y + dir.y
 
 		if is_valid_cell(nx, ny, curr_grid):
-			set_grid_cell_power(next_grid, nx, ny, 3)
+			set_grid_cell_power(next_grid, nx, ny, 3, i * 90 )
 
 func do_AND_cell(curr_cell, x, y) -> void:
 	var powered_neighbors = 0
@@ -351,13 +352,14 @@ func do_randgenerator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 		return
 	if turn_off_if_invalid(x,y):
 		return
-	for dir in DIRECTIONS:
+	for i in range(len(DIRECTIONS)):
+		var dir = DIRECTIONS[i]
 		var nx = x + dir.x
 		var ny = y + dir.y
 
 		if is_valid_cell(nx, ny, curr_grid) :
 			var rand = randi_range(0,1)
-			set_grid_cell_power(next_grid, nx, ny, 3) if rand else set_grid_cell_power(next_grid, nx, ny, 0)
+			set_grid_cell_power(next_grid, nx, ny, 3, i * 90) if rand else set_grid_cell_power(next_grid, nx, ny, 0)
 	if turn_off_if_invalid(x,y):
 		return
 
