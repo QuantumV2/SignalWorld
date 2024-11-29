@@ -96,8 +96,8 @@ grow_horizontal = 0
 
 [node name="ColorRect" type="ColorRect" parent="UI/Control"]
 layout_mode = 0
-offset_left = -472.0
-offset_right = 194.0
+offset_left = -471.0
+offset_right = 195.0
 offset_bottom = 480.0
 color = Color(0, 0, 0, 0.658824)
 
@@ -195,7 +195,8 @@ theme_override_font_sizes/font_size = 40
 text = "! Clear 
 Grid !"
 
-[node name="HSlider" type="HSlider" parent="UI/Control"]
+[node name="TickSlider" type="HSlider" parent="UI/Control"]
+unique_name_in_owner = true
 layout_mode = 0
 offset_left = -472.0
 offset_top = 211.0
@@ -442,9 +443,9 @@ texture = ExtResource("11_adeqb")
 [connection signal="mouse_entered" from="UI/Control/ClearGrid" to="UI" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="UI/Control/ClearGrid" to="UI" method="_on_mouse_exited"]
 [connection signal="pressed" from="UI/Control/ClearGrid" to="GameHandler" method="clear_tilemap"]
-[connection signal="mouse_entered" from="UI/Control/HSlider" to="UI" method="_on_mouse_entered"]
-[connection signal="mouse_exited" from="UI/Control/HSlider" to="UI" method="_on_mouse_exited"]
-[connection signal="value_changed" from="UI/Control/HSlider" to="GameHandler" method="change_tick_rate"]
+[connection signal="mouse_entered" from="UI/Control/TickSlider" to="UI" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="UI/Control/TickSlider" to="UI" method="_on_mouse_exited"]
+[connection signal="value_changed" from="UI/Control/TickSlider" to="GameHandler" method="change_tick_rate"]
 [connection signal="mouse_entered" from="UI/Control/Save" to="UI" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="UI/Control/Save" to="UI" method="_on_mouse_exited"]
 [connection signal="pressed" from="UI/Control/Save" to="UI" method="_on_save_pressed"]
