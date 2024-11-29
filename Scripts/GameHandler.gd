@@ -671,9 +671,9 @@ func adjust_rotation_offset(pos: Vector2i, degrees: int) -> Vector2i:
 		_:
 			return pos
 ##Save the new File Format
-func _on_save() -> String:
+func _on_save() -> Array:
 	if !curr_grid:
-		return ""
+		return ["",""]
 	var compresseddata = {"s":[curr_grid.size(), curr_grid[0].size()],"d":[]}
 	for x in range(curr_grid.size()):
 		for y in range(curr_grid[0].size()):
@@ -681,8 +681,8 @@ func _on_save() -> String:
 				compresseddata['d'].append([[x,y], cell_to_array(curr_grid[x][y])])
 
 	var compressedstring = JSON.stringify(compresseddata)
-	#print(Marshalls.raw_to_base64(json_to_bytes(compresseddata)), " ", Marshalls.raw_to_base64(json_to_bytes(compresseddata).compress(FileAccess.COMPRESSION_DEFLATE)))
-	return Marshalls.raw_to_base64(StringHelper.gzip_encode(compressedstring))
+	#print(compresseddata, " | END | ", Global.BitReader.decompress(Global.BitReader.compress(compresseddata)), " | END | ", Marshalls.raw_to_base64(Global.BitReader.compress(compresseddata)), " | END | ", Marshalls.raw_to_base64(Global.BitReader.compress(compresseddata).compress(FileAccess.COMPRESSION_DEFLATE)))
+	return [Marshalls.raw_to_base64(StringHelper.gzip_encode(compressedstring)), Marshalls.raw_to_base64(Global.BitReader.compress(compresseddata).compress(FileAccess.COMPRESSION_DEFLATE)) ]
 
 """
 func json_to_bytes(data: Dictionary) -> PackedByteArray:
@@ -804,7 +804,13 @@ func _on_open(_str) -> void:
 		legacy_format_open(_str)
 		return
 	var content = StringHelper.gzip_decode(Marshalls.base64_to_raw(_str)).get_string_from_utf8()
+	var content_raw = StringHelper.gzip_decode(Marshalls.base64_to_raw(_str))
+	var reader = Global.BitReader.new(content_raw)
 
+	# Check header (big-endian)
+	var header = (reader.read_bits(8) << 24) | (reader.read_bits(8) << 16) | (reader.read_bits(8) << 8) | reader.read_bits(8)
+	if header == Global.HEADER:
+		content = JSON.stringify(reader.decompress(content_raw))
 	var json = JSON.new()
 	var error = json.parse(content)
 
@@ -829,6 +835,7 @@ func _on_open(_str) -> void:
 		next_grid = curr_grid.duplicate(true)
 		update_tiles(%CellMap, %ColorMap, next_grid)
 	else:
+		print(content)
 		print("JSON Parse Error: ", json.get_error_message(), " in ", content, " at line ", json.get_error_line())
 
 

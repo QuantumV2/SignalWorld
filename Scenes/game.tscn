@@ -325,14 +325,13 @@ theme_override_font_sizes/font_size = 40
 editable = false
 
 [node name="Label2" type="Label" parent="SaveDialog/Control"]
-visible = false
 layout_mode = 0
 offset_left = 4.0
 offset_top = 95.23
 offset_right = 214.0
 offset_bottom = 125.23
 theme_override_font_sizes/font_size = 21
-text = "Logic Arrows scheme:"
+text = "Binary SW scheme (experimental):"
 
 [node name="TextEdit" type="TextEdit" parent="SaveDialog/Control/Label2"]
 layout_mode = 0
