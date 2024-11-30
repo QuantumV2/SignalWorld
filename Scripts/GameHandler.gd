@@ -52,11 +52,18 @@ func user_place_tile_tilemap(tilemap: TileMapLayer, event: InputEvent, atlas_coo
 	var copied_data = DisplayServer.clipboard_get()
 	var isbase64 = StringHelper.is_base64(copied_data)
 	if copied_data != "" and isbase64:
-		copied_data = StringHelper.gzip_decode(Marshalls.base64_to_raw(copied_data)).get_string_from_utf8()
-		var json = JSON.new()
-		var error = json.parse(copied_data)
+		var copied_data_decode = StringHelper.gzip_decode(Marshalls.base64_to_raw(copied_data)).get_string_from_utf8()
+		var content_raw = StringHelper.gzip_decode(Marshalls.base64_to_raw(copied_data))
+		var reader = Global.BitReader.new(content_raw)
 
-		paste_copied_data(copied_data, pos, true, event, tilemap, source_id, atlas_coords, alt_tile)
+		# Check header (big-endian)
+		var header = (reader.read_bits(8) << 24) | (reader.read_bits(8) << 16) | (reader.read_bits(8) << 8) | reader.read_bits(8)
+		if header == Global.HEADER:
+			copied_data_decode = JSON.stringify(reader.decompress(content_raw))
+		var json = JSON.new()
+		var error = json.parse(copied_data_decode)
+
+		paste_copied_data(copied_data_decode, pos, true, event, tilemap, source_id, atlas_coords, alt_tile)
 			
 	else:
 		tilemap.set_cell(pos, source_id, atlas_coords, alt_tile)
@@ -142,9 +149,19 @@ func display_cell_preview():
 	if copied_data != "" and isbase64 and copied_data:
 
 		%PreviewTileMap.clear()
-		copied_data = StringHelper.gzip_decode(Marshalls.base64_to_raw(copied_data)).get_string_from_utf8()
+		var copied_data_decode = StringHelper.gzip_decode(Marshalls.base64_to_raw(copied_data)).get_string_from_utf8()
+
+
+		var content_raw = StringHelper.gzip_decode(Marshalls.base64_to_raw(copied_data))
+		var reader = Global.BitReader.new(content_raw)
+
+		# Check header (big-endian)
+		var header = (reader.read_bits(8) << 24) | (reader.read_bits(8) << 16) | (reader.read_bits(8) << 8) | reader.read_bits(8)
+		if header == Global.HEADER:
+			copied_data_decode = JSON.stringify(reader.decompress(content_raw))
+
 		var json = JSON.new()
-		var error = json.parse(copied_data)
+		var error = json.parse(copied_data_decode)
 
 		if error == OK:
 			var data = json.data
@@ -598,11 +615,20 @@ func RAND_selection() -> void:
 				
 func paste_selection(target_position: Vector2i) -> void:
 	var copied_data = DisplayServer.clipboard_get()
-	copied_data = StringHelper.gzip_decode(Marshalls.base64_to_raw(copied_data)).get_string_from_utf8()
 	if copied_data == "":
 		return
+	var copied_data_decode = StringHelper.gzip_decode(Marshalls.base64_to_raw(copied_data)).get_string_from_utf8()
 
-	paste_copied_data(copied_data, target_position)
+
+	var content_raw = StringHelper.gzip_decode(Marshalls.base64_to_raw(copied_data))
+	var reader = Global.BitReader.new(content_raw)
+
+	# Check header (big-endian)
+	var header = (reader.read_bits(8) << 24) | (reader.read_bits(8) << 16) | (reader.read_bits(8) << 8) | reader.read_bits(8)
+	if header == Global.HEADER:
+		copied_data_decode = JSON.stringify(reader.decompress(content_raw))
+
+	paste_copied_data(copied_data_decode, target_position)
 func paste_copied_data(copied_data, target_position, user_placing=false, event=null, tilemap=null, source_id=null, atlas_coords=null, alt_tile=null):
 	var json = JSON.new()
 	var error = json.parse(copied_data)
@@ -681,6 +707,7 @@ func _on_save() -> Array:
 				compresseddata['d'].append([[x,y], cell_to_array(curr_grid[x][y])])
 
 	var compressedstring = JSON.stringify(compresseddata)
+	#print(compressedstring)
 	#print(compresseddata, " | END | ", Global.BitReader.decompress(Global.BitReader.compress(compresseddata)), " | END | ", Marshalls.raw_to_base64(Global.BitReader.compress(compresseddata)), " | END | ", Marshalls.raw_to_base64(Global.BitReader.compress(compresseddata).compress(FileAccess.COMPRESSION_DEFLATE)))
 	return [Marshalls.raw_to_base64(StringHelper.gzip_encode(compressedstring)), Marshalls.raw_to_base64(Global.BitReader.compress(compresseddata).compress(FileAccess.COMPRESSION_DEFLATE)) ]
 
@@ -835,7 +862,7 @@ func _on_open(_str) -> void:
 		next_grid = curr_grid.duplicate(true)
 		update_tiles(%CellMap, %ColorMap, next_grid)
 	else:
-		print(content)
+		#print(content)
 		print("JSON Parse Error: ", json.get_error_message(), " in ", content, " at line ", json.get_error_line())
 
 

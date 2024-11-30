@@ -90,8 +90,8 @@ class BitReader:
 		packer.add_bits(HEADER & 0xFF, 8)
 
 		# Add grid size
-		packer.add_bits(grid_size[0] - 1, 6)
-		packer.add_bits(grid_size[1] - 1, 6)
+		encode_varint(packer, grid_size[0])
+		encode_varint(packer, grid_size[1])
 		cells.sort_custom(sort_cells)
 
 		var prev_x = 0
@@ -125,7 +125,7 @@ class BitReader:
 			encode_varint(packer, real_dy)
 
 		# Encode other properties
-			packer.add_bits(powered, 1)
+			packer.add_bits(powered, 4)
 			packer.add_bits(rotation / 90, 2)
 			encode_varint(packer, cell_type)
 
@@ -147,7 +147,7 @@ class BitReader:
 			return result
 
 		# Read grid size
-		result["s"] = [reader.read_bits(6) + 1, reader.read_bits(6) + 1]
+		result["s"] = [decode_varint(reader), decode_varint(reader)]
 
 		var prev_x = 0
 		var prev_y = 0
@@ -167,7 +167,8 @@ class BitReader:
 			var real_y = prev_real_y + real_dy
 
 	# Decode other properties
-			var powered = reader.read_bits(1)
+			var powered = reader.read_bits(4)
+			#print(powered)
 			var rotation = reader.read_bits(2) * 90
 			var cell_type = decode_varint(reader)
 
