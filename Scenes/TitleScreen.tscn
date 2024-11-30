@@ -77,6 +77,23 @@ theme_override_font_sizes/normal_font_size = 45
 bbcode_enabled = true
 text = "[center] By QuantumV [/center]"
 
+[node name="RichTextLabel3" type="RichTextLabel" parent="."]
+modulate = Color(0.439049, 0.439049, 0.439049, 1)
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = 2096.0
+offset_top = 889.0
+offset_right = 2502.0
+offset_bottom = 1020.0
+grow_horizontal = 2
+scale = Vector2(3, 3)
+theme = ExtResource("5_yr8hq")
+theme_override_font_sizes/normal_font_size = 45
+bbcode_enabled = true
+text = "Special Thanks:
+cachewave"
+
 [node name="Node" type="Node" parent="."]
 script = ExtResource("5_ml48p")
 
