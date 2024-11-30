@@ -46,7 +46,7 @@ class BitPacker:
 			if bit_position == 8:
 				data.append(current_byte)
 				current_byte = 0
-				bit_position = 0
+				bit_position = 0 
 
 	func get_bytes() -> PackedByteArray:
 		var result = PackedByteArray(data)
@@ -125,8 +125,11 @@ class BitReader:
 			encode_varint(packer, real_dy)
 
 		# Encode other properties
-			packer.add_bits(powered, 4)
-			packer.add_bits(rotation / 90, 2)
+			#packer.add_bits( ((powered & 0b1111) << 4) | (( (rotation / 90) & 0b00000011 ) << 2)  , 8)
+			packer.add_bits(powered & 0b00001111, 4)
+			#print("Encoding: ", rotation / 90 & 0b11 )
+			packer.add_bits(rotation / 90 & 0b00000011, 2)
+			packer.add_bits(0, 2)
 			encode_varint(packer, cell_type)
 
 			prev_x = x
@@ -170,6 +173,8 @@ class BitReader:
 			var powered = reader.read_bits(4)
 			#print(powered)
 			var rotation = reader.read_bits(2) * 90
+			reader.read_bits(2)
+			#print("Decoding: ", rotation)
 			var cell_type = decode_varint(reader)
 
 	# Construct cell data

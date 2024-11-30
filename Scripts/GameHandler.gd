@@ -186,8 +186,8 @@ func display_cell_preview():
 					%PreviewTileMap.set_cell(
 						relative_pos,
 						2,
-						Global.CellTypesAtlCoords[int(cell['type'])],
-						Global.RotationDict[int(cell['rotation'])]
+						Global.CellTypesAtlCoords.get(int(cell['type']), Vector2i(0,0)),
+						Global.RotationDict.get(int(cell['rotation']), 0)
 					)
 				return
 	else:
@@ -459,9 +459,9 @@ func replace_temp_energy(grid: Array) -> void:
 func process_cell(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Array, x: int, y: int) -> void:
 	var curr_cell = arr[x][y]
 	if curr_cell != null:
-		var atlas_coords = Global.CellTypesAtlCoords[int(curr_cell["type"])]
+		var atlas_coords = Global.CellTypesAtlCoords.get(int(curr_cell['type']), Vector2i(0,0))
 		tilemap.set_cell(curr_cell['position'], 2, atlas_coords, Global.RotationDict[int(curr_cell['rotation'])])
-		colormap.set_cell(curr_cell['position'], 0, Global.PowerTypesAtl[int(curr_cell['powered'])])
+		colormap.set_cell(curr_cell['position'], 0, Global.PowerTypesAtl.get(int(curr_cell['powered']),Vector2i(-1,-1)))
 
 func update_tiles(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Array) -> void:
 	var width = arr.size()
@@ -471,9 +471,9 @@ func update_tiles(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Array) -> 
 		for y in range(height):
 			var curr_cell = arr[x][y]
 			if curr_cell!= null:
-				var atlas_coords = Global.CellTypesAtlCoords[int(curr_cell["type"])]
+				var atlas_coords = Global.CellTypesAtlCoords.get(int(curr_cell['type']), Vector2i(0,0))
 				tilemap.set_cell(curr_cell['position'], 2, atlas_coords, Global.RotationDict[int(curr_cell['rotation'])])
-				colormap.set_cell(curr_cell['position'], 0, Global.PowerTypesAtl[int(curr_cell['powered'])])
+				colormap.set_cell(curr_cell['position'], 0, Global.PowerTypesAtl.get(int(curr_cell['powered']),Vector2i(-1,-1)))
 
 func update_gamestate() -> void:
 	if paused or curr_grid.size() < 1:
@@ -661,14 +661,14 @@ func paste_copied_data(copied_data, target_position, user_placing=false, event=n
 					next_grid = curr_grid.duplicate(true)
 					return
 				if event.get("button_index")== MOUSE_BUTTON_LEFT or event.get("button_mask")== MOUSE_BUTTON_LEFT:
-					%CellMap.set_cell(new_position, 2, Global.CellTypesAtlCoords[int(cell[3])], Global.RotationDict[new_rotation])
-					%ColorMap.set_cell(new_position, 2, Global.PowerTypesAtl[int(cell[1])], 0)
+					%CellMap.set_cell(new_position, 2, Global.CellTypesAtlCoords.get(int(cell[3]), Vector2i(0,0)), Global.RotationDict[new_rotation])
+					%ColorMap.set_cell(new_position, 2, Global.PowerTypesAtl.get(int(cell[1]),Vector2i(-1,-1)), 0)
 				else:
 					%CellMap.set_cell(new_position, 2, Vector2i(-1,-1), 0)
 					%ColorMap.set_cell(new_position, 2, Vector2i(-1,-1), 0)
 			else:
-				%CellMap.set_cell(new_position, 2, Global.CellTypesAtlCoords[int(cell[3])], Global.RotationDict[new_rotation])
-				%ColorMap.set_cell(new_position, 2, Global.PowerTypesAtl[int(cell[1])], 0)
+				%CellMap.set_cell(new_position, 2, Global.CellTypesAtlCoords.get(int(cell[3]), Vector2i(0,0)), Global.RotationDict[new_rotation])
+				%ColorMap.set_cell(new_position, 2, Global.PowerTypesAtl.get(int(cell[1]),Vector2i(0,0)), 0)
 
 		curr_grid = create_tilemap_array(%CellMap, %ColorMap)
 		next_grid = curr_grid.duplicate(true)
@@ -817,8 +817,8 @@ func legacy_format_open(_str):
 		for i in data['d']:
 			var cell = i[1]
 			cell['position'] = StringHelper.string_to_vector2i(cell['position'])
-			%CellMap.set_cell(cell['position'], 2, Global.CellTypesAtlCoords[int(cell['type'])], Global.RotationDict[int(cell['rotation'])])
-			%ColorMap.set_cell(cell['position'], 2, Global.PowerTypesAtl[int(cell['powered'])], 0)
+			%CellMap.set_cell(cell['position'], 2, Global.CellTypesAtlCoords.get(int(cell['type']), Vector2i(0,0)), Global.RotationDict[int(cell['rotation'])])
+			%ColorMap.set_cell(cell['position'], 2,Global.PowerTypesAtl.get(int(cell['powered']),Vector2i(-1,-1)), 0)
 
 		curr_grid = create_tilemap_array(%CellMap, %ColorMap)
 		next_grid = curr_grid.duplicate(true)
@@ -855,8 +855,8 @@ func _on_open(_str) -> void:
 	
 		for i in data['d']:
 			var cell = array_to_cell(i[1])
-			%CellMap.set_cell(cell['position'], 2, Global.CellTypesAtlCoords[int(cell['type'])], Global.RotationDict[int(cell['rotation'])])
-			%ColorMap.set_cell(cell['position'], 2, Global.PowerTypesAtl[int(cell['powered'])], 0)
+			%CellMap.set_cell(cell['position'], 2, Global.CellTypesAtlCoords.get(int(cell['type']), Vector2i(0,0)), Global.RotationDict[int(cell['rotation'])])
+			%ColorMap.set_cell(cell['position'], 2, Global.PowerTypesAtl.get(int(cell['powered']),Vector2i(-1,-1)), 0)
 
 		curr_grid = create_tilemap_array(%CellMap, %ColorMap)
 		next_grid = curr_grid.duplicate(true)
