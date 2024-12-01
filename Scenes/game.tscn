@@ -283,9 +283,9 @@ Pallete"
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = -469.0
-offset_top = 255.0
+offset_top = 252.0
 offset_right = -82.0
-offset_bottom = 286.0
+offset_bottom = 283.0
 theme = ExtResource("7_mosdc")
 text = "Use Json instead Of Byte Format for copying"
 
