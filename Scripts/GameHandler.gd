@@ -22,8 +22,8 @@ var paused = false;
 
 const DIRECTIONS = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
 
-var selection_start: Vector2i = Vector2i(-1, -1)
-var selection_end: Vector2i = Vector2i(-1, -1)
+var selection_start= null
+var selection_end= null
 
 var orig_tileset = preload("res://Tilesets/color_tileset.tres")
 var alt_tileset = preload("res://Tilesets/alt_color_tileset.tres")
@@ -45,6 +45,18 @@ func select_area(start: Vector2i, end: Vector2i) -> void:
 	selection_end = end
 	
 var prev_clipboard = ""
+enum DataType {
+	Json,
+	Byte
+}
+var preferred_type: DataType = DataType.Byte
+
+func toggle_preferred_format(is_on):
+	if is_on:
+		preferred_type = DataType.Json
+	else:
+		preferred_type = DataType.Byte
+	
 func user_place_tile_tilemap(tilemap: TileMapLayer, event: InputEvent, atlas_coords: Vector2i, alt_tile: int, source_id: int = 2):
 	var camera_zoom = %Camera2D.zoom
 	var event_position = event.position / camera_zoom + %CamOrigin.position - get_viewport().get_visible_rect().size / (2 * camera_zoom)
@@ -103,17 +115,18 @@ func toggle_colormap(is_on):
 func display_selection():
 	var pos1 = selection_start
 	var pos2 = selection_end
-	if pos1 == Vector2i(-1,-1):
+	if pos1 == null:
 		%SelectionStartSprite.visible = false
 
 	else:
 		%SelectionStartSprite.visible = true
-	if pos2 == Vector2i(-1,-1):
+	if pos2 == null:
 		%SelectionEndSprite.visible = false
 	else:
 		%SelectionEndSprite.visible = true
 	var cell_size = Vector2(128, 128)
-
+	if pos1 == null and pos2 == null:
+		return;
 	# Position the preview
 	%SelectionStartSprite.position = (Vector2(pos1).floor() * cell_size) if pos1 != Vector2i(0,0) else (Vector2(pos1).floor() + cell_size)
 	%SelectionEndSprite.position = (Vector2(pos2).floor() * cell_size) + cell_size
@@ -534,14 +547,14 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("selection_start"):
 		var mouse_position = get_global_mouse_position()
 		selection_start = %CellMap.local_to_map(mouse_position)
-		if selection_end == Vector2i(-1,-1):
+		if selection_end == null:
 			selection_end = Vector2i(0,0)
 		display_selection()
 
 	elif event.is_action_pressed("selection_end"):
 		var mouse_position = get_global_mouse_position()
 		selection_end = %CellMap.local_to_map(mouse_position)
-		if selection_start == Vector2i(-1,-1):
+		if selection_start == null:
 			selection_start = Vector2i(0,0)
 		display_selection()
 
@@ -552,8 +565,8 @@ func _input(event: InputEvent) -> void:
 	elif event.is_action_pressed("randomize"):
 		RAND_selection()
 	elif event.is_action_pressed("remove_selection"):
-		selection_start = Vector2i(-1,-1)
-		selection_end = Vector2i(-1,-1)
+		selection_start = null
+		selection_end = null
 		display_selection()
 	elif event.is_action_pressed("clear_clipboard"):
 		DisplayServer.clipboard_set("")
@@ -587,11 +600,14 @@ func copy_selection() -> void:
 				var cell = {"powered":is_powered, "position":Vector2i(x,y), "rotation":Global.get_tile_data_rotation(tile_alt), "type":cell_type}
 				data_to_copy['d'].append([[x, y], cell_to_array(cell)])
 		var compressedstring = JSON.stringify(data_to_copy)
-		compressedstring = Marshalls.raw_to_base64(StringHelper.gzip_encode(compressedstring))
+		if preferred_type == DataType.Json:
+			compressedstring = Marshalls.raw_to_base64(StringHelper.gzip_encode(compressedstring))
+		else:
+			compressedstring = Marshalls.raw_to_base64(Global.BitReader.compress(data_to_copy).compress(FileAccess.COMPRESSION_DEFLATE))
 		DisplayServer.clipboard_set(compressedstring)
 func del_selection() -> void:
 
-	if !(selection_start == Vector2i(-1, -1) and selection_end == Vector2i(-1, -1)):
+	if !(selection_start == null and selection_end == null):
 		var xsize = abs(selection_end.x - selection_start.x) + 1
 		var ysize = abs(selection_end.y - selection_start.y) + 1
 		for x in range(selection_start.x, selection_end.x+1):
@@ -603,7 +619,7 @@ func del_selection() -> void:
 				next_grid = curr_grid.duplicate(true)
 func RAND_selection() -> void:
 
-	if !(selection_start == Vector2i(-1, -1) and selection_end == Vector2i(-1, -1)):
+	if !(selection_start == null and selection_end == null):
 		var xsize = abs(selection_end.x - selection_start.x) + 1
 		var ysize = abs(selection_end.y - selection_start.y) + 1
 		for x in range(selection_start.x, selection_end.x+1):
