@@ -16,6 +16,8 @@ var CellFuncs : Dictionary = {
 	Global.CellTypes.AngledWire: do_angledwire_cell,
 	
 	Global.CellTypes.Flow: do_wire_cell,
+	
+	Global.CellTypes.Input: do_wire_cell,
 }
 
 var paused = false;

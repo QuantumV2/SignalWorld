@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3 uid="uid://dpl015ydoxgno"]
+[gd_scene load_steps=28 format=3 uid="uid://dpl015ydoxgno"]
 
 [ext_resource type="Script" path="res://Scripts/cam_origin.gd" id="2_sxy5u"]
 [ext_resource type="PackedScene" uid="uid://b7j2071weldx4" path="res://Prefabs/color_map.tscn" id="3_li8la"]
@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" uid="uid://b0pjv63xsnn1v" path="res://Prefabs/grid.tscn" id="9_nta1r"]
 [ext_resource type="TileSet" uid="uid://bknk4bw1ekaa6" path="res://Tilesets/cell_tileset.tres" id="10_jwree"]
 [ext_resource type="Texture2D" uid="uid://tg4qnge641eg" path="res://Images/circle.svg" id="11_adeqb"]
+[ext_resource type="Script" path="res://Scenes/network_cells.gd" id="13_gmqgh"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_8bnvh"]
 atlas = ExtResource("6_4k7gr")
@@ -60,6 +61,10 @@ region = Rect2(256, 256, 128, 128)
 [sub_resource type="AtlasTexture" id="AtlasTexture_m7y3w"]
 atlas = ExtResource("6_4k7gr")
 region = Rect2(640, 128, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5lb20"]
+atlas = ExtResource("6_4k7gr")
+region = Rect2(768, 128, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_bel8f"]
 atlas = ExtResource("6_58r07")
@@ -111,7 +116,7 @@ offset_bottom = 135.0
 theme = ExtResource("7_mosdc")
 theme_override_font_sizes/font_size = 37
 selected = 0
-item_count = 12
+item_count = 13
 popup/item_0/text = "Wire"
 popup/item_0/icon = SubResource("AtlasTexture_8bnvh")
 popup/item_1/text = "Generator"
@@ -147,6 +152,9 @@ popup/item_10/id = 10
 popup/item_11/text = "Flow"
 popup/item_11/icon = SubResource("AtlasTexture_m7y3w")
 popup/item_11/id = 11
+popup/item_12/text = "Input"
+popup/item_12/icon = SubResource("AtlasTexture_5lb20")
+popup/item_12/id = 12
 
 [node name="ColorOptions" type="OptionButton" parent="UI/Control"]
 unique_name_in_owner = true
@@ -440,6 +448,9 @@ visible = false
 modulate = Color(1, 0.788235, 0, 1)
 scale = Vector2(0.03, 0.03)
 texture = ExtResource("11_adeqb")
+
+[node name="NetworkCells" type="Node2D" parent="."]
+script = ExtResource("13_gmqgh")
 
 [connection signal="mouse_entered" from="UI/Control/ColorRect" to="UI" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="UI/Control/ColorRect" to="UI" method="_on_mouse_exited"]
