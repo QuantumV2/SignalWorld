@@ -308,7 +308,7 @@ const CellTypesAtlCoords : Dictionary = {
 	9:Vector2i(1,2),
 	10:Vector2i(2,2),
 	11:Vector2i(5,1),
-	12:Vector2i(6,1),
+	12:Vector2i(5,0),
 }
 
 const PowerTypes : Dictionary = {
