@@ -38,9 +38,6 @@ var orig_material = preload("res://Materials/normal.tres")
 
 var alt_pallete = false
 
-# [blocker_coords, blocked_cell_coords]
-var blocked_cells = []
-var next_blocked_cells = []
 
 func select_area(start: Vector2i, end: Vector2i) -> void:
 	selection_start = start
@@ -297,10 +294,13 @@ func is_valid_cell(x, y, grid) -> bool:
 
 	# Check for active blockers
 	
-	for blocked in blocked_cells:
-		if blocked[1] == Vector2i(x,y) and curr_grid[blocked[0].x][blocked[0].y]['powered']:
-			next_blocked_cells.append(blocked)
-			return false
+	for dir in DIRECTIONS:
+		var bx = x + dir.x
+		var by = y + dir.y
+		if is_cell_in_grid(bx, by, grid) and grid[bx][by] != null and grid[bx][by]['type'] == Global.CellTypes.Blocker:
+			var blocker_dir = DIRECTIONS[grid[bx][by]['rotation'] / 90]
+			if blocker_dir == -dir and grid[bx][by]['powered']:
+				return false
 			
 	return true
 
@@ -456,7 +456,6 @@ func do_blocker_cell(curr_cell, x, y) -> void:
 	var nx = x + dir.x
 	var ny = y + dir.y
 	if is_valid_cell(nx, ny, curr_grid):
-		blocked_cells.append([Vector2i(x,y), Vector2i(nx,ny)])
 		curr_grid[nx][ny]['powered'] = 0
 		next_grid[nx][ny]['powered'] = 0
 			
@@ -506,8 +505,6 @@ func update_gamestate() -> void:
 			if curr_grid[x][y] != null:
 				process_game_cell(x, y)
 	replace_temp_energy(next_grid)
-	blocked_cells = next_blocked_cells
-	next_blocked_cells.clear()
 	curr_grid = next_grid.duplicate(true)
 
 ## Returns true if is invalid and turns off the cell, else returns false
