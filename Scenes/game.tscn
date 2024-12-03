@@ -155,6 +155,7 @@ popup/item_11/id = 11
 popup/item_12/text = "Input"
 popup/item_12/icon = SubResource("AtlasTexture_5lb20")
 popup/item_12/id = 12
+popup/item_12/disabled = true
 
 [node name="ColorOptions" type="OptionButton" parent="UI/Control"]
 unique_name_in_owner = true
