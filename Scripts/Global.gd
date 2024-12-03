@@ -215,14 +215,7 @@ class BitReader:
 			return a[0][0] < b[0][0]
 		return a[0][1] < b[0][1]
 
-# Usage
-# var json_data = parse_json(json_string)
-# var compressed_data = Compressor.compress(json_data)
-# var decompressed_data = Compressor.decompress(compressed_data)
 
-# Usage
-# var json_data = parse_json(json_string)
-# var compressed_data = Compressor.compress(json_data)
 
 ## Tile Rotations
 enum TileTransform {
