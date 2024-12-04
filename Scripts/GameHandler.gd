@@ -129,6 +129,7 @@ func display_selection():
 	# Position the preview
 	%SelectionStartSprite.position = (Vector2(pos1).floor() * cell_size) if pos1 != Vector2i(0,0) else (Vector2(pos1).floor() + cell_size)
 	%SelectionEndSprite.position = (Vector2(pos2).floor() * cell_size) + cell_size
+	%Grid.queue_redraw()
 
 var copypasteinvalid = false
 var prev_rot = 0
@@ -548,6 +549,7 @@ func _input(event: InputEvent) -> void:
 		selection_start = %CellMap.local_to_map(mouse_position)
 		if selection_end == null:
 			selection_end = Vector2i(0,0)
+
 		display_selection()
 
 	elif event.is_action_pressed("selection_end"):
@@ -555,6 +557,7 @@ func _input(event: InputEvent) -> void:
 		selection_end = %CellMap.local_to_map(mouse_position)
 		if selection_start == null:
 			selection_start = Vector2i(0,0)
+
 		display_selection()
 
 	elif event.is_action_pressed("copy"):
