@@ -290,6 +290,7 @@ Pallete"
 
 [node name="JsonToggle" type="CheckBox" parent="UI/Control"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 0
 offset_left = -469.0
 offset_top = 252.0
@@ -316,7 +317,7 @@ zoom = Vector2(0.3, 0.3)
 
 [node name="SaveDialog" type="PopupPanel" parent="."]
 unique_name_in_owner = true
-size = Vector2i(785, 280)
+size = Vector2i(785, 205)
 
 [node name="Control" type="Control" parent="SaveDialog"]
 layout_mode = 3
@@ -324,39 +325,22 @@ anchors_preset = 0
 offset_left = 4.0
 offset_top = 4.0
 offset_right = 781.0
-offset_bottom = 276.0
-
-[node name="Label" type="Label" parent="SaveDialog/Control"]
-layout_mode = 0
-offset_left = 4.0
-offset_top = -2.0
-offset_right = 214.0
-offset_bottom = 28.0
-theme_override_font_sizes/font_size = 21
-text = "Signal Word scheme:"
-
-[node name="TextEdit" type="TextEdit" parent="SaveDialog/Control/Label"]
-layout_mode = 0
-offset_top = 28.78
-offset_right = 777.0
-offset_bottom = 96.625
-theme_override_font_sizes/font_size = 40
-editable = false
+offset_bottom = 201.0
 
 [node name="Label2" type="Label" parent="SaveDialog/Control"]
 layout_mode = 0
 offset_left = 4.0
-offset_top = 95.23
-offset_right = 214.0
-offset_bottom = 125.23
+offset_top = 3.365
+offset_right = 220.0
+offset_bottom = 33.365
 theme_override_font_sizes/font_size = 21
-text = "Binary SW scheme (experimental):"
+text = "Signal World scheme:"
 
 [node name="TextEdit" type="TextEdit" parent="SaveDialog/Control/Label2"]
 layout_mode = 0
 offset_top = 28.78
-offset_right = 777.0
-offset_bottom = 96.625
+offset_right = 766.33
+offset_bottom = 102.575
 theme_override_font_sizes/font_size = 40
 editable = false
 

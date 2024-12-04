@@ -17,7 +17,7 @@ var CellFuncs : Dictionary = {
 	
 	Global.CellTypes.Flow: do_wire_cell,
 	
-	Global.CellTypes.Input: do_wire_cell,
+	#Global.CellTypes.Input: do_wire_cell,
 }
 
 var paused = false;
@@ -715,9 +715,9 @@ func adjust_rotation_offset(pos: Vector2i, degrees: int) -> Vector2i:
 		_:
 			return pos
 ##Save the new File Format
-func _on_save() -> Array:
+func _on_save() -> String:
 	if !curr_grid:
-		return ["",""]
+		return ""
 	var compresseddata = {"s":[curr_grid.size(), curr_grid[0].size()],"d":[]}
 	for x in range(curr_grid.size()):
 		for y in range(curr_grid[0].size()):
@@ -727,7 +727,7 @@ func _on_save() -> Array:
 	var compressedstring = JSON.stringify(compresseddata)
 	#print(compressedstring)
 	#print(compresseddata, " | END | ", Global.BitReader.decompress(Global.BitReader.compress(compresseddata)), " | END | ", Marshalls.raw_to_base64(Global.BitReader.compress(compresseddata)), " | END | ", Marshalls.raw_to_base64(Global.BitReader.compress(compresseddata).compress(FileAccess.COMPRESSION_DEFLATE)))
-	return [Marshalls.raw_to_base64(StringHelper.gzip_encode(compressedstring)), Marshalls.raw_to_base64(Global.BitReader.compress(compresseddata).compress(FileAccess.COMPRESSION_DEFLATE)) ]
+	return Marshalls.raw_to_base64(Global.BitReader.compress(compresseddata).compress(FileAccess.COMPRESSION_DEFLATE))
 
 """
 func json_to_bytes(data: Dictionary) -> PackedByteArray:
