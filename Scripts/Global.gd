@@ -10,7 +10,7 @@ var tick_speed := 10.0:
 	set(value):
 		if tick_timer:
 			tick_timer.set_wait_time(value)
-var _tick_counter := 0
+#var _tick_counter := 0
 ## The tick signal, activates when cells get updated
 signal tick
 
@@ -252,6 +252,7 @@ const RotationInd:Dictionary  ={
 	3: TileTransform.ROTATE_270,
 }
 
+
 ## Cell Types, <[StringName], [int]>
 const CellTypes : Dictionary = {
 	&"Wire":0,
@@ -259,14 +260,14 @@ const CellTypes : Dictionary = {
 	&"AND":2,
 	&"Buffer":3,
 	&"Detector":4,
-	&"Switch":5,
+	&"DFlipFlop":5,
 	&"XOR":6,
 	&"JumpPad":7,
 	&"Blocker":8,
 	&"Randomizer":9,
 	&"AngledWire":10,
 	&"Flow":11,
-	#&"Input":12,
+	&"TFlipFlop":12,
 }
 
 func is_base64_gzip_deflated(base64_string: String) -> bool:
@@ -301,7 +302,7 @@ const CellTypesAtlCoords : Dictionary = {
 	9:Vector2i(1,2),
 	10:Vector2i(2,2),
 	11:Vector2i(5,1),
-	#12:Vector2i(5,0),
+	12:Vector2i(3,2),
 }
 
 const PowerTypes : Dictionary = {
@@ -333,7 +334,7 @@ func get_tile_data_rotation(alt_tile : int)->int:
 		_:
 			return -1  # invalid or non-90 degree rotation
 
-func add_custom_cell(name:String, image:Image, behavior: String):
+func add_custom_cell(_cellname:String, _image:Image, _behavior: String):
 	pass
 	
 

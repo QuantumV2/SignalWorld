@@ -10,18 +10,18 @@ var CellFuncs : Dictionary = {
 	Global.CellTypes.Detector: do_detector_cell,
 	Global.CellTypes.Randomizer: do_randgenerator_cell,
 	Global.CellTypes.Blocker: do_blocker_cell,
-	Global.CellTypes.Switch: do_switch_cell,
+	Global.CellTypes.DFlipFlop: do_dflipflop_cell,
 	Global.CellTypes.AND: do_AND_cell,
 	Global.CellTypes.XOR: do_XOR_cell,
 	Global.CellTypes.AngledWire: do_angledwire_cell,
 	
 	Global.CellTypes.Flow: do_wire_cell,
 	
-	#Global.CellTypes.Input: do_wire_cell,
+	Global.CellTypes.TFlipFlop: do_tflipflop_cell,
 }
 
 var paused = false;
-
+var cell_size = Vector2(128, 128)
 const DIRECTIONS = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
 
 var selection_start= null
@@ -36,7 +36,7 @@ var alt_cell_tileset = preload("res://Tilesets/alt_cell_tileset.tres")
 var orig_material = preload("res://Materials/normal.tres")
 #var alt_material = preload("res://Materials/filled.tres")
 
-var alt_pallete = false
+var alt_palette = false
 
 
 func select_area(start: Vector2i, end: Vector2i) -> void:
@@ -70,9 +70,9 @@ func user_place_tile_tilemap(tilemap: TileMapLayer, event: InputEvent, atlas_coo
 		# Check header (big-endian)
 		var header = (reader.read_bits(8) << 24) | (reader.read_bits(8) << 16) | (reader.read_bits(8) << 8) | reader.read_bits(8)
 		if header == Global.HEADER:
-			copied_data_decode = JSON.stringify(reader.decompress(content_raw))
-		var json = JSON.new()
-		var error = json.parse(copied_data_decode)
+			copied_data_decode = JSON.stringify(Global.BitReader.decompress(content_raw))
+		#var json = JSON.new()
+		#var error = json.parse(copied_data_decode)
 
 		paste_copied_data(copied_data_decode, pos, true, event, tilemap, source_id, atlas_coords, alt_tile)
 			
@@ -98,9 +98,9 @@ func toggle_colormap(is_on):
 		%CellMap.tile_set = alt_cell_tileset
 		%PreviewTileMap.tile_set = alt_cell_tileset
 		%ColorMap.material = orig_material
-		%Grid.grid_color = Color(0.2, 0.2, 0.2, 1)
-		RenderingServer.set_default_clear_color(Color("#000000"))
-		alt_pallete = true
+		%Grid.grid_color = Color(0.2, 0.2, 0.3, 1)
+		RenderingServer.set_default_clear_color(Color("#131521"))
+		alt_palette = true
 	else:
 		%ColorMap.tile_set = orig_tileset
 		%CellMap.tile_set = orig_cell_tileset
@@ -108,7 +108,7 @@ func toggle_colormap(is_on):
 		%ColorMap.material = orig_material
 		%Grid.grid_color = Color(0.6, 0.6, 0.6, 1)
 		RenderingServer.set_default_clear_color(Color("#ffffff"))
-		alt_pallete = false
+		alt_palette = false
 	return 0
 
 func display_selection():
@@ -123,7 +123,7 @@ func display_selection():
 		%SelectionEndSprite.visible = false
 	else:
 		%SelectionEndSprite.visible = true
-	var cell_size = Vector2(128, 128)
+
 	if pos1 == null and pos2 == null:
 		return;
 	# Position the preview
@@ -138,8 +138,7 @@ func display_cell_preview():
 	var origin_pos = %CamOrigin.position
 	var event_pos = get_viewport().get_mouse_position() / camera_zoom + origin_pos - get_viewport().get_visible_rect().size / (2 * camera_zoom)
 	
-	var cell_size = Vector2(128, 128)
-	var half_cell = cell_size / 2
+	#var half_cell = cell_size / 2
 
 	# Step 1: Calculate position without rotation
 	var target_pos = (event_pos / cell_size).floor() * cell_size
@@ -171,7 +170,7 @@ func display_cell_preview():
 		# Check header (big-endian)
 		var header = (reader.read_bits(8) << 24) | (reader.read_bits(8) << 16) | (reader.read_bits(8) << 8) | reader.read_bits(8)
 		if header == Global.HEADER:
-			copied_data_decode = JSON.stringify(reader.decompress(content_raw))
+			copied_data_decode = JSON.stringify(Global.BitReader.decompress(content_raw))
 
 		var json = JSON.new()
 		var error = json.parse(copied_data_decode)
@@ -206,13 +205,13 @@ func display_cell_preview():
 	else:
 		%PreviewTileMap.clear()
 		# If no valid clipboard data, use selected cell from UI
-		var selected_texture = %CellOptions.get_item_icon(%CellOptions.selected)
+		#var selected_texture = %CellOptions.get_item_icon(%CellOptions.selected)
 
 		
 		%PreviewTileMap.set_cell(
 			Vector2i.ZERO,
 			2,
-			Global.CellTypesAtlCoords[%CellOptions.selected],
+			Global.CellTypesAtlCoords[%CellOptions.get_item_id(%CellOptions.selected)],
 			0
 		)
 
@@ -396,11 +395,17 @@ func do_randgenerator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 	if turn_off_if_invalid(x,y):
 		return
 
-func set_grid_cell_power(grid: Array, x:int,y:int, power:int, rotation:int=0) -> void:
+func set_grid_cell_power(grid: Array, x:int,y:int, power:int, rot:int=0) -> void:
 	if grid[x][y]['powered'] != 2:
 		grid[x][y]['powered'] = power
 	if grid[x][y]['type'] == Global.CellTypes.Flow:
-		grid[x][y]['rotation'] = rotation
+		grid[x][y]['rotation'] = rot
+		
+	# FIXME: find a better way to do this
+	if grid[x][y]['type'] == Global.CellTypes.TFlipFlop and power and curr_grid[x][y]['powered'] :
+		grid[x][y]['powered'] = 0
+
+		
 	#var effect = AudioServer.get_bus_effect(1, 0)
 	#effect.pitch_scale = (grid[x][y]['type'] + 1) / 5
 	#%CellMap/ChangeStateSound.play()
@@ -460,10 +465,12 @@ func do_blocker_cell(curr_cell, x, y) -> void:
 		curr_grid[nx][ny]['powered'] = 0
 		next_grid[nx][ny]['powered'] = 0
 			
-func do_switch_cell(curr_cell, _x, _y) -> void:
+func do_dflipflop_cell(curr_cell, _x, _y) -> void:
 	if not curr_cell['powered']:
 		return
-			
+func do_tflipflop_cell(curr_cell, _x, _y) -> void:
+	if not curr_cell['powered']:
+		return
 func replace_temp_energy(grid: Array) -> void:
 	for x in range(grid.size()):
 		for y in range(grid[0].size()):
@@ -522,7 +529,7 @@ func process_game_cell(x: int, y: int) -> void:
 	var curr_cell = curr_grid[x][y]
 	var next_cell = next_grid[x][y]
 	if curr_cell['powered'] in [-1,0] and curr_cell['type'] not in [Global.CellTypes.Generator, Global.CellTypes.Randomizer
-	, Global.CellTypes.AND, Global.CellTypes.XOR, Global.CellTypes.Blocker, Global.CellTypes.Detector] and curr_cell['powered'] == (next_cell['powered'] if next_cell['powered'] != 3 else 1):
+	, Global.CellTypes.AND, Global.CellTypes.XOR, Global.CellTypes.Blocker, Global.CellTypes.Detector, Global.CellTypes.TFlipFlop] and curr_cell['powered'] == (next_cell['powered'] if next_cell['powered'] != 3 else 1):
 		return
 
 
@@ -549,6 +556,11 @@ func _input(event: InputEvent) -> void:
 		selection_start = %CellMap.local_to_map(mouse_position)
 		if selection_end == null:
 			selection_end = Vector2i(0,0)
+		if selection_start > selection_end:
+			var temp1 = selection_start
+			var temp2 = selection_end
+			selection_end = temp1 - Vector2i(1,1)
+			selection_start = temp2 + Vector2i(1,1)
 
 		display_selection()
 
@@ -557,6 +569,11 @@ func _input(event: InputEvent) -> void:
 		selection_end = %CellMap.local_to_map(mouse_position)
 		if selection_start == null:
 			selection_start = Vector2i(0,0)
+		if selection_end < selection_start:
+			var temp1 = selection_start
+			var temp2 = selection_end
+			selection_end = temp1 - Vector2i(1,1)
+			selection_start = temp2 + Vector2i(1,1)
 
 		display_selection()
 
@@ -610,8 +627,8 @@ func copy_selection() -> void:
 func del_selection() -> void:
 
 	if !(selection_start == null and selection_end == null):
-		var xsize = abs(selection_end.x - selection_start.x) + 1
-		var ysize = abs(selection_end.y - selection_start.y) + 1
+		#var xsize = abs(selection_end.x - selection_start.x) + 1
+		#var ysize = abs(selection_end.y - selection_start.y) + 1
 		for x in range(selection_start.x, selection_end.x+1):
 			for y in range(selection_start.y, selection_end.y+1):
 				if %CellMap.get_cell_atlas_coords(Vector2i(x,y)) != Vector2i(-1,-1):
@@ -622,8 +639,8 @@ func del_selection() -> void:
 func RAND_selection() -> void:
 
 	if !(selection_start == null and selection_end == null):
-		var xsize = abs(selection_end.x - selection_start.x) + 1
-		var ysize = abs(selection_end.y - selection_start.y) + 1
+		#var xsize = abs(selection_end.x - selection_start.x) + 1
+		#var ysize = abs(selection_end.y - selection_start.y) + 1
 		for x in range(selection_start.x, selection_end.x+1):
 			for y in range(selection_start.y, selection_end.y+1):
 				%CellMap.set_cell(Vector2i(x,y), 2, Global.CellTypesAtlCoords[randi_range(-1,10) ], Global.RotationInd[randi_range(0,3)])
@@ -644,7 +661,7 @@ func paste_selection(target_position: Vector2i) -> void:
 	# Check header (big-endian)
 	var header = (reader.read_bits(8) << 24) | (reader.read_bits(8) << 16) | (reader.read_bits(8) << 8) | reader.read_bits(8)
 	if header == Global.HEADER:
-		copied_data_decode = JSON.stringify(reader.decompress(content_raw))
+		copied_data_decode = JSON.stringify(Global.BitReader.decompress(content_raw))
 
 	paste_copied_data(copied_data_decode, target_position)
 func paste_copied_data(copied_data, target_position, user_placing=false, event=null, tilemap=null, source_id=null, atlas_coords=null, alt_tile=null):
@@ -724,7 +741,7 @@ func _on_save() -> String:
 			if curr_grid[x][y] != null and curr_grid[x][y]['type'] != -1:
 				compresseddata['d'].append([[x,y], cell_to_array(curr_grid[x][y])])
 
-	var compressedstring = JSON.stringify(compresseddata)
+	#var compressedstring = JSON.stringify(compresseddata)
 	#print(compressedstring)
 	#print(compresseddata, " | END | ", Global.BitReader.decompress(Global.BitReader.compress(compresseddata)), " | END | ", Marshalls.raw_to_base64(Global.BitReader.compress(compresseddata)), " | END | ", Marshalls.raw_to_base64(Global.BitReader.compress(compresseddata).compress(FileAccess.COMPRESSION_DEFLATE)))
 	return Marshalls.raw_to_base64(Global.BitReader.compress(compresseddata).compress(FileAccess.COMPRESSION_DEFLATE))
@@ -822,7 +839,7 @@ func legacy_format_open(_str):
 
 	if error == OK:
 		var data = json.data
-		var json_size = data['s']
+		#var json_size = data['s']
 		clear_tilemap()
 		curr_grid = []
 		#curr_grid.resize(json_size[0])
@@ -855,13 +872,13 @@ func _on_open(_str) -> void:
 	# Check header (big-endian)
 	var header = (reader.read_bits(8) << 24) | (reader.read_bits(8) << 16) | (reader.read_bits(8) << 8) | reader.read_bits(8)
 	if header == Global.HEADER:
-		content = JSON.stringify(reader.decompress(content_raw))
+		content = JSON.stringify(Global.BitReader.decompress(content_raw))
 	var json = JSON.new()
 	var error = json.parse(content)
 
 	if error == OK:
 		var data = json.data
-		var json_size = data['s']
+		#var json_size = data['s']
 		clear_tilemap()
 		curr_grid = []
 		#curr_grid.resize(json_size[0])

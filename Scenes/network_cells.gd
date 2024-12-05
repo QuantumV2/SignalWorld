@@ -7,7 +7,7 @@ var peers = []
 func _ready():
 	server.listen(5357)
 	
-func _process(delta):
+func _process(_delta):
 	server.poll() # Important!
 	if server.is_connection_available():
 		var peer: PacketPeerUDP = server.take_connection()
