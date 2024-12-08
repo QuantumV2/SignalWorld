@@ -586,6 +586,7 @@ func _input(event: InputEvent) -> void:
 	elif event.is_action_pressed("remove_selection"):
 		selection_start = null
 		selection_end = null
+		%Grid.queue_redraw()
 		display_selection()
 	elif event.is_action_pressed("clear_clipboard"):
 		DisplayServer.clipboard_set("")
