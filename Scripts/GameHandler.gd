@@ -398,12 +398,12 @@ func do_randgenerator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 func set_grid_cell_power(grid: Array, x:int,y:int, power:int, rot:int=0) -> void:
 	if grid[x][y]['powered'] != 2:
 		grid[x][y]['powered'] = power
-	if grid[x][y]['type'] == Global.CellTypes.Flow:
-		grid[x][y]['rotation'] = rot
-		
-	# FIXME: find a better way to do this
-	if grid[x][y]['type'] == Global.CellTypes.TFlipFlop and power and curr_grid[x][y]['powered'] :
-		grid[x][y]['powered'] = 0
+	match grid[x][y]['type']:
+		Global.CellTypes.Flow:
+			grid[x][y]['rotation'] = rot
+		# FIXME: find a better way to do this
+		Global.CellTypes.TFlipFlop when power and curr_grid[x][y]['powered']:
+			grid[x][y]['powered'] = 0
 
 		
 	#var effect = AudioServer.get_bus_effect(1, 0)
