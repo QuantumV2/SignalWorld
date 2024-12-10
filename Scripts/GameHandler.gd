@@ -635,8 +635,8 @@ func del_selection() -> void:
 				if %CellMap.get_cell_atlas_coords(Vector2i(x,y)) != Vector2i(-1,-1):
 					%CellMap.set_cell(Vector2i(x,y), 2, Vector2i(-1,-1), 0)
 					%ColorMap.set_cell(Vector2i(x,y), 2, Vector2i(-1,-1), 0)
-				curr_grid = create_tilemap_array(%CellMap, %ColorMap)
-				next_grid = curr_grid.duplicate(true)
+		curr_grid = create_tilemap_array(%CellMap, %ColorMap)
+		next_grid = curr_grid.duplicate(true)
 func RAND_selection() -> void:
 
 	if !(selection_start == null and selection_end == null):
@@ -646,9 +646,9 @@ func RAND_selection() -> void:
 			for y in range(selection_start.y, selection_end.y+1):
 				%CellMap.set_cell(Vector2i(x,y), 2, Global.CellTypesAtlCoords[randi_range(-1,10) ], Global.RotationInd[randi_range(0,3)])
 				%ColorMap.set_cell(Vector2i(x,y), 2, Vector2i(randi_range(0,1),0), 0)
-				curr_grid = create_tilemap_array(%CellMap, %ColorMap)
-				next_grid = curr_grid.duplicate(true)
-				
+		curr_grid = create_tilemap_array(%CellMap, %ColorMap)
+		next_grid = curr_grid.duplicate(true)
+		
 func paste_selection(target_position: Vector2i) -> void:
 	var copied_data = DisplayServer.clipboard_get()
 	if copied_data == "":
