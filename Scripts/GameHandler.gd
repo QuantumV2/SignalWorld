@@ -10,18 +10,22 @@ var CellFuncs : Dictionary = {
 	Global.CellTypes.Detector: do_detector_cell,
 	Global.CellTypes.Randomizer: do_randgenerator_cell,
 	Global.CellTypes.Blocker: do_blocker_cell,
-	Global.CellTypes.Switch: do_switch_cell,
+	Global.CellTypes.DFlipFlop: do_dflipflop_cell,
 	Global.CellTypes.AND: do_AND_cell,
 	Global.CellTypes.XOR: do_XOR_cell,
 	Global.CellTypes.AngledWire: do_angledwire_cell,
+	
+	Global.CellTypes.Flow: do_wire_cell,
+	
+	Global.CellTypes.TFlipFlop: do_tflipflop_cell,
 }
 
 var paused = false;
-
+var cell_size = Vector2(128, 128)
 const DIRECTIONS = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
 
-var selection_start: Vector2i = Vector2i(-1, -1)
-var selection_end: Vector2i = Vector2i(-1, -1)
+var selection_start= null
+var selection_end= null
 
 var orig_tileset = preload("res://Tilesets/color_tileset.tres")
 var alt_tileset = preload("res://Tilesets/alt_color_tileset.tres")
@@ -32,17 +36,26 @@ var alt_cell_tileset = preload("res://Tilesets/alt_cell_tileset.tres")
 var orig_material = preload("res://Materials/normal.tres")
 #var alt_material = preload("res://Materials/filled.tres")
 
-var alt_pallete = false
+var alt_palette = false
 
-# [blocker_coords, blocked_cell_coords]
-var blocked_cells = []
-var next_blocked_cells = []
 
 func select_area(start: Vector2i, end: Vector2i) -> void:
 	selection_start = start
 	selection_end = end
 	
 var prev_clipboard = ""
+enum DataType {
+	Json,
+	Byte
+}
+var preferred_type: DataType = DataType.Byte
+
+func toggle_preferred_format(is_on):
+	if is_on:
+		preferred_type = DataType.Json
+	else:
+		preferred_type = DataType.Byte
+	
 func user_place_tile_tilemap(tilemap: TileMapLayer, event: InputEvent, atlas_coords: Vector2i, alt_tile: int, source_id: int = 2):
 	var camera_zoom = %Camera2D.zoom
 	var event_position = event.position / camera_zoom + %CamOrigin.position - get_viewport().get_visible_rect().size / (2 * camera_zoom)
@@ -50,11 +63,18 @@ func user_place_tile_tilemap(tilemap: TileMapLayer, event: InputEvent, atlas_coo
 	var copied_data = DisplayServer.clipboard_get()
 	var isbase64 = StringHelper.is_base64(copied_data)
 	if copied_data != "" and isbase64:
-		copied_data = StringHelper.gzip_decode(Marshalls.base64_to_raw(copied_data)).get_string_from_utf8()
-		var json = JSON.new()
-		var error = json.parse(copied_data)
+		var copied_data_decode = StringHelper.gzip_decode(Marshalls.base64_to_raw(copied_data)).get_string_from_utf8()
+		var content_raw = StringHelper.gzip_decode(Marshalls.base64_to_raw(copied_data))
+		var reader = Global.BitReader.new(content_raw)
 
-		paste_copied_data(copied_data, pos, true, event, tilemap, source_id, atlas_coords, alt_tile)
+		# Check header (big-endian)
+		var header = (reader.read_bits(8) << 24) | (reader.read_bits(8) << 16) | (reader.read_bits(8) << 8) | reader.read_bits(8)
+		if header == Global.HEADER:
+			copied_data_decode = JSON.stringify(Global.BitReader.decompress(content_raw))
+		#var json = JSON.new()
+		#var error = json.parse(copied_data_decode)
+
+		paste_copied_data(copied_data_decode, pos, true, event, tilemap, source_id, atlas_coords, alt_tile)
 			
 	else:
 		tilemap.set_cell(pos, source_id, atlas_coords, alt_tile)
@@ -78,9 +98,9 @@ func toggle_colormap(is_on):
 		%CellMap.tile_set = alt_cell_tileset
 		%PreviewTileMap.tile_set = alt_cell_tileset
 		%ColorMap.material = orig_material
-		%Grid.grid_color = Color(0.2, 0.2, 0.2, 1)
-		RenderingServer.set_default_clear_color(Color("#000000"))
-		alt_pallete = true
+		%Grid.grid_color = Color(0.2, 0.2, 0.3, 1)
+		RenderingServer.set_default_clear_color(Color("#131521"))
+		alt_palette = true
 	else:
 		%ColorMap.tile_set = orig_tileset
 		%CellMap.tile_set = orig_cell_tileset
@@ -88,26 +108,28 @@ func toggle_colormap(is_on):
 		%ColorMap.material = orig_material
 		%Grid.grid_color = Color(0.6, 0.6, 0.6, 1)
 		RenderingServer.set_default_clear_color(Color("#ffffff"))
-		alt_pallete = false
+		alt_palette = false
 	return 0
 
 func display_selection():
 	var pos1 = selection_start
 	var pos2 = selection_end
-	if pos1 == Vector2i(-1,-1):
+	if pos1 == null:
 		%SelectionStartSprite.visible = false
 
 	else:
 		%SelectionStartSprite.visible = true
-	if pos2 == Vector2i(-1,-1):
+	if pos2 == null:
 		%SelectionEndSprite.visible = false
 	else:
 		%SelectionEndSprite.visible = true
-	var cell_size = Vector2(128, 128)
 
+	if pos1 == null and pos2 == null:
+		return;
 	# Position the preview
 	%SelectionStartSprite.position = (Vector2(pos1).floor() * cell_size) if pos1 != Vector2i(0,0) else (Vector2(pos1).floor() + cell_size)
 	%SelectionEndSprite.position = (Vector2(pos2).floor() * cell_size) + cell_size
+	%Grid.queue_redraw()
 
 var copypasteinvalid = false
 var prev_rot = 0
@@ -116,8 +138,7 @@ func display_cell_preview():
 	var origin_pos = %CamOrigin.position
 	var event_pos = get_viewport().get_mouse_position() / camera_zoom + origin_pos - get_viewport().get_visible_rect().size / (2 * camera_zoom)
 	
-	var cell_size = Vector2(128, 128)
-	var half_cell = cell_size / 2
+	#var half_cell = cell_size / 2
 
 	# Step 1: Calculate position without rotation
 	var target_pos = (event_pos / cell_size).floor() * cell_size
@@ -140,9 +161,19 @@ func display_cell_preview():
 	if copied_data != "" and isbase64 and copied_data:
 
 		%PreviewTileMap.clear()
-		copied_data = StringHelper.gzip_decode(Marshalls.base64_to_raw(copied_data)).get_string_from_utf8()
+		var copied_data_decode = StringHelper.gzip_decode(Marshalls.base64_to_raw(copied_data)).get_string_from_utf8()
+
+
+		var content_raw = StringHelper.gzip_decode(Marshalls.base64_to_raw(copied_data))
+		var reader = Global.BitReader.new(content_raw)
+
+		# Check header (big-endian)
+		var header = (reader.read_bits(8) << 24) | (reader.read_bits(8) << 16) | (reader.read_bits(8) << 8) | reader.read_bits(8)
+		if header == Global.HEADER:
+			copied_data_decode = JSON.stringify(Global.BitReader.decompress(content_raw))
+
 		var json = JSON.new()
-		var error = json.parse(copied_data)
+		var error = json.parse(copied_data_decode)
 
 		if error == OK:
 			var data = json.data
@@ -167,20 +198,20 @@ func display_cell_preview():
 					%PreviewTileMap.set_cell(
 						relative_pos,
 						2,
-						Global.CellTypesAtlCoords[int(cell['type'])],
-						Global.RotationDict[int(cell['rotation'])]
+						Global.CellTypesAtlCoords.get(int(cell['type']), Vector2i(0,0)),
+						Global.RotationDict.get(int(cell['rotation']), 0)
 					)
 				return
 	else:
 		%PreviewTileMap.clear()
 		# If no valid clipboard data, use selected cell from UI
-		var selected_texture = %CellOptions.get_item_icon(%CellOptions.selected)
+		#var selected_texture = %CellOptions.get_item_icon(%CellOptions.selected)
 
 		
 		%PreviewTileMap.set_cell(
 			Vector2i.ZERO,
 			2,
-			Global.CellTypesAtlCoords[%CellOptions.selected],
+			Global.CellTypesAtlCoords[%CellOptions.get_item_id(%CellOptions.selected)],
 			0
 		)
 
@@ -236,7 +267,7 @@ func do_angledwire_cell(curr_cell, x, y) -> void:
 	var ny = y + dir.y
 
 	if is_valid_cell(nx, ny, curr_grid):
-		set_grid_cell_power(next_grid, nx, ny, 3)
+		set_grid_cell_power(next_grid, nx, ny, 3, curr_cell['rotation'])
 
 	if next_grid[x][y]['powered'] != 3:
 		next_grid[x][y]['powered'] = 0
@@ -251,10 +282,11 @@ func do_wire_cell(curr_cell, x, y) -> void:
 	var ny = y + dir.y
 
 	if is_valid_cell(nx, ny, curr_grid):
-		set_grid_cell_power(next_grid, nx, ny, 3)
+		set_grid_cell_power(next_grid, nx, ny, 3,curr_cell['rotation'] )
 
 	if next_grid[x][y]['powered'] != 3:
 		next_grid[x][y]['powered'] = 0
+
 
 func is_valid_cell(x, y, grid) -> bool:
 	if x < 0 or x >= grid.size() or y < 0 or y >= grid[0].size() or grid[x][y] == null:
@@ -262,10 +294,13 @@ func is_valid_cell(x, y, grid) -> bool:
 
 	# Check for active blockers
 	
-	for blocked in blocked_cells:
-		if blocked[1] == Vector2i(x,y) and curr_grid[blocked[0].x][blocked[0].y]['powered']:
-			next_blocked_cells.append(blocked)
-			return false
+	for dir in DIRECTIONS:
+		var bx = x + dir.x
+		var by = y + dir.y
+		if is_cell_in_grid(bx, by, grid) and grid[bx][by] != null and grid[bx][by]['type'] == Global.CellTypes.Blocker:
+			var blocker_dir = DIRECTIONS[grid[bx][by]['rotation'] / 90]
+			if blocker_dir == -dir and grid[bx][by]['powered']:
+				return false
 			
 	return true
 
@@ -276,16 +311,17 @@ func is_cell_in_grid(x, y, grid) -> bool:
 func do_generator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 	if not curr_cell['powered']:
 		return
-	for dir in [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]:
+	for i in range(len(DIRECTIONS)):
+		var dir = DIRECTIONS[i]
 		var nx = x + dir.x
 		var ny = y + dir.y
 
 		if is_valid_cell(nx, ny, curr_grid):
-			set_grid_cell_power(next_grid, nx, ny, 3)
+			set_grid_cell_power(next_grid, nx, ny, 3, i * 90 )
 
 func do_AND_cell(curr_cell, x, y) -> void:
 	var powered_neighbors = 0
-
+	var rot = curr_cell['rotation']
 	var total_neighbors = 0
 
 	for i in range(DIRECTIONS.size()):
@@ -298,12 +334,12 @@ func do_AND_cell(curr_cell, x, y) -> void:
 				powered_neighbors += 1
 
 	if powered_neighbors == total_neighbors:
-		var output_dir = DIRECTIONS[int(curr_cell['rotation'] / 90)]
+		var output_dir = DIRECTIONS[int(rot / 90)]
 		var ox = x + output_dir.x
 		var oy = y + output_dir.y
 		if is_valid_cell(ox, oy, curr_grid):
 			set_grid_cell_power(next_grid, x, y, 3)
-			set_grid_cell_power(next_grid, ox, oy, 3)
+			set_grid_cell_power(next_grid, ox, oy, 3, rot)
 		else:
 			next_grid[x][y]['powered'] = 0
 	else:
@@ -313,7 +349,7 @@ func do_AND_cell(curr_cell, x, y) -> void:
 
 func do_XOR_cell(curr_cell, x, y):
 	var powered_neighbors = 0
-
+	var rot = curr_cell['rotation']
 	for i in range(DIRECTIONS.size()):
 		var dir = DIRECTIONS[i]
 		var nx = x + dir.x
@@ -329,12 +365,12 @@ func do_XOR_cell(curr_cell, x, y):
 					return null;
 
 	if powered_neighbors == 1:
-		var output_dir = DIRECTIONS[int(curr_cell['rotation'] / 90)]
+		var output_dir = DIRECTIONS[int(rot / 90)]
 		var ox = x + output_dir.x
 		var oy = y + output_dir.y
 		if is_valid_cell(ox, oy, curr_grid):
 			set_grid_cell_power(next_grid, x, y, 3)
-			set_grid_cell_power(next_grid, ox, oy, 3)
+			set_grid_cell_power(next_grid, ox, oy, 3, rot)
 		else:
 			next_grid[x][y]['powered'] = 0
 	else:
@@ -348,19 +384,28 @@ func do_randgenerator_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 		return
 	if turn_off_if_invalid(x,y):
 		return
-	for dir in DIRECTIONS:
+	for i in range(len(DIRECTIONS)):
+		var dir = DIRECTIONS[i]
 		var nx = x + dir.x
 		var ny = y + dir.y
 
 		if is_valid_cell(nx, ny, curr_grid) :
 			var rand = randi_range(0,1)
-			set_grid_cell_power(next_grid, nx, ny, 3) if rand else set_grid_cell_power(next_grid, nx, ny, 0)
+			set_grid_cell_power(next_grid, nx, ny, 3, i * 90) if rand else set_grid_cell_power(next_grid, nx, ny, 0)
 	if turn_off_if_invalid(x,y):
 		return
 
-func set_grid_cell_power(grid: Array, x:int,y:int, power:int) -> void:
+func set_grid_cell_power(grid: Array, x:int,y:int, power:int, rot:int=0) -> void:
 	if grid[x][y]['powered'] != 2:
 		grid[x][y]['powered'] = power
+	match grid[x][y]['type']:
+		Global.CellTypes.Flow:
+			grid[x][y]['rotation'] = rot
+		# FIXME: find a better way to do this
+		Global.CellTypes.TFlipFlop when power and curr_grid[x][y]['powered']:
+			grid[x][y]['powered'] = 0
+
+		
 	#var effect = AudioServer.get_bus_effect(1, 0)
 	#effect.pitch_scale = (grid[x][y]['type'] + 1) / 5
 	#%CellMap/ChangeStateSound.play()
@@ -376,7 +421,7 @@ func do_buffer_cell(curr_cell: Dictionary, x: int, y: int) -> void:
 		var nx = x + (dir.x)
 		var ny = y + (dir.y)
 		if is_valid_cell(nx,ny,curr_grid):
-			set_grid_cell_power(next_grid, nx, ny, 3)
+			set_grid_cell_power(next_grid, nx, ny, 3, curr_cell['rotation'])
 	if curr_cell['powered'] == 1:
 		next_grid[x][y]['powered'] = 2
 		
@@ -392,7 +437,7 @@ func do_jumppad_cell(curr_cell, x, y) -> void:
 	var nx = x + (dir.x*2)
 	var ny = y + (dir.y*2)
 	if is_valid_cell(nx,ny,curr_grid):
-		set_grid_cell_power(next_grid, nx, ny, 3)
+		set_grid_cell_power(next_grid, nx, ny, 3, curr_cell['rotation'])
 		
 func do_detector_cell(curr_cell, x, y) -> void:
 	
@@ -405,7 +450,7 @@ func do_detector_cell(curr_cell, x, y) -> void:
 	var by = y - (dir.y)
 	if is_valid_cell(bx,by,curr_grid):
 		if curr_grid[bx][by]['powered']:
-			set_grid_cell_power(next_grid, x, y, 3)
+			set_grid_cell_power(next_grid, x, y, 3, curr_cell['rotation'])
 			
 			#next_grid[bx][by]['powered'] = 0
 			#next_grid[nx][ny]['powered'] = 1
@@ -417,14 +462,15 @@ func do_blocker_cell(curr_cell, x, y) -> void:
 	var nx = x + dir.x
 	var ny = y + dir.y
 	if is_valid_cell(nx, ny, curr_grid):
-		blocked_cells.append([Vector2i(x,y), Vector2i(nx,ny)])
 		curr_grid[nx][ny]['powered'] = 0
 		next_grid[nx][ny]['powered'] = 0
 			
-func do_switch_cell(curr_cell, _x, _y) -> void:
+func do_dflipflop_cell(curr_cell, _x, _y) -> void:
 	if not curr_cell['powered']:
 		return
-			
+func do_tflipflop_cell(curr_cell, _x, _y) -> void:
+	if not curr_cell['powered']:
+		return
 func replace_temp_energy(grid: Array) -> void:
 	for x in range(grid.size()):
 		for y in range(grid[0].size()):
@@ -435,9 +481,9 @@ func replace_temp_energy(grid: Array) -> void:
 func process_cell(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Array, x: int, y: int) -> void:
 	var curr_cell = arr[x][y]
 	if curr_cell != null:
-		var atlas_coords = Global.CellTypesAtlCoords[int(curr_cell["type"])]
+		var atlas_coords = Global.CellTypesAtlCoords.get(int(curr_cell['type']), Vector2i(0,0))
 		tilemap.set_cell(curr_cell['position'], 2, atlas_coords, Global.RotationDict[int(curr_cell['rotation'])])
-		colormap.set_cell(curr_cell['position'], 0, Global.PowerTypesAtl[int(curr_cell['powered'])])
+		colormap.set_cell(curr_cell['position'], 0, Global.PowerTypesAtl.get(int(curr_cell['powered']),Vector2i(-1,-1)))
 
 func update_tiles(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Array) -> void:
 	var width = arr.size()
@@ -447,9 +493,9 @@ func update_tiles(tilemap: TileMapLayer, colormap: TileMapLayer, arr: Array) -> 
 		for y in range(height):
 			var curr_cell = arr[x][y]
 			if curr_cell!= null:
-				var atlas_coords = Global.CellTypesAtlCoords[int(curr_cell["type"])]
+				var atlas_coords = Global.CellTypesAtlCoords.get(int(curr_cell['type']), Vector2i(0,0))
 				tilemap.set_cell(curr_cell['position'], 2, atlas_coords, Global.RotationDict[int(curr_cell['rotation'])])
-				colormap.set_cell(curr_cell['position'], 0, Global.PowerTypesAtl[int(curr_cell['powered'])])
+				colormap.set_cell(curr_cell['position'], 0, Global.PowerTypesAtl.get(int(curr_cell['powered']),Vector2i(-1,-1)))
 
 func update_gamestate() -> void:
 	if paused or curr_grid.size() < 1:
@@ -467,8 +513,6 @@ func update_gamestate() -> void:
 			if curr_grid[x][y] != null:
 				process_game_cell(x, y)
 	replace_temp_energy(next_grid)
-	blocked_cells = next_blocked_cells
-	next_blocked_cells.clear()
 	curr_grid = next_grid.duplicate(true)
 
 ## Returns true if is invalid and turns off the cell, else returns false
@@ -485,7 +529,7 @@ func process_game_cell(x: int, y: int) -> void:
 	var curr_cell = curr_grid[x][y]
 	var next_cell = next_grid[x][y]
 	if curr_cell['powered'] in [-1,0] and curr_cell['type'] not in [Global.CellTypes.Generator, Global.CellTypes.Randomizer
-	, Global.CellTypes.AND, Global.CellTypes.XOR, Global.CellTypes.Blocker, Global.CellTypes.Detector] and curr_cell['powered'] == (next_cell['powered'] if next_cell['powered'] != 3 else 1):
+	, Global.CellTypes.AND, Global.CellTypes.XOR, Global.CellTypes.Blocker, Global.CellTypes.Detector, Global.CellTypes.TFlipFlop] and curr_cell['powered'] == (next_cell['powered'] if next_cell['powered'] != 3 else 1):
 		return
 
 
@@ -510,15 +554,27 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("selection_start"):
 		var mouse_position = get_global_mouse_position()
 		selection_start = %CellMap.local_to_map(mouse_position)
-		if selection_end == Vector2i(-1,-1):
+		if selection_end == null:
 			selection_end = Vector2i(0,0)
+		if selection_start > selection_end:
+			var temp1 = selection_start
+			var temp2 = selection_end
+			selection_end = temp1 - Vector2i(1,1)
+			selection_start = temp2 + Vector2i(1,1)
+
 		display_selection()
 
 	elif event.is_action_pressed("selection_end"):
 		var mouse_position = get_global_mouse_position()
 		selection_end = %CellMap.local_to_map(mouse_position)
-		if selection_start == Vector2i(-1,-1):
+		if selection_start == null:
 			selection_start = Vector2i(0,0)
+		if selection_end < selection_start:
+			var temp1 = selection_start
+			var temp2 = selection_end
+			selection_end = temp1 - Vector2i(1,1)
+			selection_start = temp2 + Vector2i(1,1)
+
 		display_selection()
 
 	elif event.is_action_pressed("copy"):
@@ -528,8 +584,9 @@ func _input(event: InputEvent) -> void:
 	elif event.is_action_pressed("randomize"):
 		RAND_selection()
 	elif event.is_action_pressed("remove_selection"):
-		selection_start = Vector2i(-1,-1)
-		selection_end = Vector2i(-1,-1)
+		selection_start = null
+		selection_end = null
+		%Grid.queue_redraw()
 		display_selection()
 	elif event.is_action_pressed("clear_clipboard"):
 		DisplayServer.clipboard_set("")
@@ -563,39 +620,51 @@ func copy_selection() -> void:
 				var cell = {"powered":is_powered, "position":Vector2i(x,y), "rotation":Global.get_tile_data_rotation(tile_alt), "type":cell_type}
 				data_to_copy['d'].append([[x, y], cell_to_array(cell)])
 		var compressedstring = JSON.stringify(data_to_copy)
-		compressedstring = Marshalls.raw_to_base64(StringHelper.gzip_encode(compressedstring))
+		if preferred_type == DataType.Json:
+			compressedstring = Marshalls.raw_to_base64(StringHelper.gzip_encode(compressedstring))
+		else:
+			compressedstring = Marshalls.raw_to_base64(Global.BitReader.compress(data_to_copy).compress(FileAccess.COMPRESSION_DEFLATE))
 		DisplayServer.clipboard_set(compressedstring)
 func del_selection() -> void:
 
-	if !(selection_start == Vector2i(-1, -1) and selection_end == Vector2i(-1, -1)):
-		var xsize = abs(selection_end.x - selection_start.x) + 1
-		var ysize = abs(selection_end.y - selection_start.y) + 1
+	if !(selection_start == null and selection_end == null):
+		#var xsize = abs(selection_end.x - selection_start.x) + 1
+		#var ysize = abs(selection_end.y - selection_start.y) + 1
 		for x in range(selection_start.x, selection_end.x+1):
 			for y in range(selection_start.y, selection_end.y+1):
 				if %CellMap.get_cell_atlas_coords(Vector2i(x,y)) != Vector2i(-1,-1):
 					%CellMap.set_cell(Vector2i(x,y), 2, Vector2i(-1,-1), 0)
 					%ColorMap.set_cell(Vector2i(x,y), 2, Vector2i(-1,-1), 0)
-				curr_grid = create_tilemap_array(%CellMap, %ColorMap)
-				next_grid = curr_grid.duplicate(true)
+		curr_grid = create_tilemap_array(%CellMap, %ColorMap)
+		next_grid = curr_grid.duplicate(true)
 func RAND_selection() -> void:
 
-	if !(selection_start == Vector2i(-1, -1) and selection_end == Vector2i(-1, -1)):
-		var xsize = abs(selection_end.x - selection_start.x) + 1
-		var ysize = abs(selection_end.y - selection_start.y) + 1
+	if !(selection_start == null and selection_end == null):
+		#var xsize = abs(selection_end.x - selection_start.x) + 1
+		#var ysize = abs(selection_end.y - selection_start.y) + 1
 		for x in range(selection_start.x, selection_end.x+1):
 			for y in range(selection_start.y, selection_end.y+1):
 				%CellMap.set_cell(Vector2i(x,y), 2, Global.CellTypesAtlCoords[randi_range(-1,10) ], Global.RotationInd[randi_range(0,3)])
 				%ColorMap.set_cell(Vector2i(x,y), 2, Vector2i(randi_range(0,1),0), 0)
-				curr_grid = create_tilemap_array(%CellMap, %ColorMap)
-				next_grid = curr_grid.duplicate(true)
-				
+		curr_grid = create_tilemap_array(%CellMap, %ColorMap)
+		next_grid = curr_grid.duplicate(true)
+		
 func paste_selection(target_position: Vector2i) -> void:
 	var copied_data = DisplayServer.clipboard_get()
-	copied_data = StringHelper.gzip_decode(Marshalls.base64_to_raw(copied_data)).get_string_from_utf8()
 	if copied_data == "":
 		return
+	var copied_data_decode = StringHelper.gzip_decode(Marshalls.base64_to_raw(copied_data)).get_string_from_utf8()
 
-	paste_copied_data(copied_data, target_position)
+
+	var content_raw = StringHelper.gzip_decode(Marshalls.base64_to_raw(copied_data))
+	var reader = Global.BitReader.new(content_raw)
+
+	# Check header (big-endian)
+	var header = (reader.read_bits(8) << 24) | (reader.read_bits(8) << 16) | (reader.read_bits(8) << 8) | reader.read_bits(8)
+	if header == Global.HEADER:
+		copied_data_decode = JSON.stringify(Global.BitReader.decompress(content_raw))
+
+	paste_copied_data(copied_data_decode, target_position)
 func paste_copied_data(copied_data, target_position, user_placing=false, event=null, tilemap=null, source_id=null, atlas_coords=null, alt_tile=null):
 	var json = JSON.new()
 	var error = json.parse(copied_data)
@@ -628,14 +697,14 @@ func paste_copied_data(copied_data, target_position, user_placing=false, event=n
 					next_grid = curr_grid.duplicate(true)
 					return
 				if event.get("button_index")== MOUSE_BUTTON_LEFT or event.get("button_mask")== MOUSE_BUTTON_LEFT:
-					%CellMap.set_cell(new_position, 2, Global.CellTypesAtlCoords[int(cell[3])], Global.RotationDict[new_rotation])
-					%ColorMap.set_cell(new_position, 2, Global.PowerTypesAtl[int(cell[1])], 0)
+					%CellMap.set_cell(new_position, 2, Global.CellTypesAtlCoords.get(int(cell[3]), Vector2i(0,0)), Global.RotationDict[new_rotation])
+					%ColorMap.set_cell(new_position, 2, Global.PowerTypesAtl.get(int(cell[1]),Vector2i(-1,-1)), 0)
 				else:
 					%CellMap.set_cell(new_position, 2, Vector2i(-1,-1), 0)
 					%ColorMap.set_cell(new_position, 2, Vector2i(-1,-1), 0)
 			else:
-				%CellMap.set_cell(new_position, 2, Global.CellTypesAtlCoords[int(cell[3])], Global.RotationDict[new_rotation])
-				%ColorMap.set_cell(new_position, 2, Global.PowerTypesAtl[int(cell[1])], 0)
+				%CellMap.set_cell(new_position, 2, Global.CellTypesAtlCoords.get(int(cell[3]), Vector2i(0,0)), Global.RotationDict[new_rotation])
+				%ColorMap.set_cell(new_position, 2, Global.PowerTypesAtl.get(int(cell[1]),Vector2i(0,0)), 0)
 
 		curr_grid = create_tilemap_array(%CellMap, %ColorMap)
 		next_grid = curr_grid.duplicate(true)
@@ -673,9 +742,10 @@ func _on_save() -> String:
 			if curr_grid[x][y] != null and curr_grid[x][y]['type'] != -1:
 				compresseddata['d'].append([[x,y], cell_to_array(curr_grid[x][y])])
 
-	var compressedstring = JSON.stringify(compresseddata)
-	#print(Marshalls.raw_to_base64(json_to_bytes(compresseddata)), " ", Marshalls.raw_to_base64(json_to_bytes(compresseddata).compress(FileAccess.COMPRESSION_DEFLATE)))
-	return Marshalls.raw_to_base64(StringHelper.gzip_encode(compressedstring))
+	#var compressedstring = JSON.stringify(compresseddata)
+	#print(compressedstring)
+	#print(compresseddata, " | END | ", Global.BitReader.decompress(Global.BitReader.compress(compresseddata)), " | END | ", Marshalls.raw_to_base64(Global.BitReader.compress(compresseddata)), " | END | ", Marshalls.raw_to_base64(Global.BitReader.compress(compresseddata).compress(FileAccess.COMPRESSION_DEFLATE)))
+	return Marshalls.raw_to_base64(Global.BitReader.compress(compresseddata).compress(FileAccess.COMPRESSION_DEFLATE))
 
 """
 func json_to_bytes(data: Dictionary) -> PackedByteArray:
@@ -770,7 +840,7 @@ func legacy_format_open(_str):
 
 	if error == OK:
 		var data = json.data
-		var json_size = data['s']
+		#var json_size = data['s']
 		clear_tilemap()
 		curr_grid = []
 		#curr_grid.resize(json_size[0])
@@ -783,8 +853,8 @@ func legacy_format_open(_str):
 		for i in data['d']:
 			var cell = i[1]
 			cell['position'] = StringHelper.string_to_vector2i(cell['position'])
-			%CellMap.set_cell(cell['position'], 2, Global.CellTypesAtlCoords[int(cell['type'])], Global.RotationDict[int(cell['rotation'])])
-			%ColorMap.set_cell(cell['position'], 2, Global.PowerTypesAtl[int(cell['powered'])], 0)
+			%CellMap.set_cell(cell['position'], 2, Global.CellTypesAtlCoords.get(int(cell['type']), Vector2i(0,0)), Global.RotationDict[int(cell['rotation'])])
+			%ColorMap.set_cell(cell['position'], 2,Global.PowerTypesAtl.get(int(cell['powered']),Vector2i(-1,-1)), 0)
 
 		curr_grid = create_tilemap_array(%CellMap, %ColorMap)
 		next_grid = curr_grid.duplicate(true)
@@ -797,13 +867,19 @@ func _on_open(_str) -> void:
 		legacy_format_open(_str)
 		return
 	var content = StringHelper.gzip_decode(Marshalls.base64_to_raw(_str)).get_string_from_utf8()
+	var content_raw = StringHelper.gzip_decode(Marshalls.base64_to_raw(_str))
+	var reader = Global.BitReader.new(content_raw)
 
+	# Check header (big-endian)
+	var header = (reader.read_bits(8) << 24) | (reader.read_bits(8) << 16) | (reader.read_bits(8) << 8) | reader.read_bits(8)
+	if header == Global.HEADER:
+		content = JSON.stringify(Global.BitReader.decompress(content_raw))
 	var json = JSON.new()
 	var error = json.parse(content)
 
 	if error == OK:
 		var data = json.data
-		var json_size = data['s']
+		#var json_size = data['s']
 		clear_tilemap()
 		curr_grid = []
 		#curr_grid.resize(json_size[0])
@@ -815,13 +891,14 @@ func _on_open(_str) -> void:
 	
 		for i in data['d']:
 			var cell = array_to_cell(i[1])
-			%CellMap.set_cell(cell['position'], 2, Global.CellTypesAtlCoords[int(cell['type'])], Global.RotationDict[int(cell['rotation'])])
-			%ColorMap.set_cell(cell['position'], 2, Global.PowerTypesAtl[int(cell['powered'])], 0)
+			%CellMap.set_cell(cell['position'], 2, Global.CellTypesAtlCoords.get(int(cell['type']), Vector2i(0,0)), Global.RotationDict[int(cell['rotation'])])
+			%ColorMap.set_cell(cell['position'], 2, Global.PowerTypesAtl.get(int(cell['powered']),Vector2i(-1,-1)), 0)
 
 		curr_grid = create_tilemap_array(%CellMap, %ColorMap)
 		next_grid = curr_grid.duplicate(true)
 		update_tiles(%CellMap, %ColorMap, next_grid)
 	else:
+		#print(content)
 		print("JSON Parse Error: ", json.get_error_message(), " in ", content, " at line ", json.get_error_line())
 
 

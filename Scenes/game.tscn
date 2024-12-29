@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3 uid="uid://dpl015ydoxgno"]
+[gd_scene load_steps=27 format=3 uid="uid://dpl015ydoxgno"]
 
 [ext_resource type="Script" path="res://Scripts/cam_origin.gd" id="2_sxy5u"]
 [ext_resource type="PackedScene" uid="uid://b7j2071weldx4" path="res://Prefabs/color_map.tscn" id="3_li8la"]
@@ -17,45 +17,53 @@
 atlas = ExtResource("6_4k7gr")
 region = Rect2(0, 0, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_pci65"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_c4ma4"]
 atlas = ExtResource("6_4k7gr")
-region = Rect2(128, 0, 128, 128)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_dyt1i"]
-atlas = ExtResource("6_4k7gr")
-region = Rect2(256, 0, 128, 128)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_no3ep"]
-atlas = ExtResource("6_4k7gr")
-region = Rect2(384, 0, 128, 128)
+region = Rect2(256, 256, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ly7sy"]
 atlas = ExtResource("6_4k7gr")
 region = Rect2(0, 128, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_k3gjb"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_pci65"]
 atlas = ExtResource("6_4k7gr")
-region = Rect2(128, 128, 128, 128)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_0j62p"]
-atlas = ExtResource("6_4k7gr")
-region = Rect2(256, 128, 128, 128)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_p8y05"]
-atlas = ExtResource("6_4k7gr")
-region = Rect2(384, 128, 128, 128)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_gsolr"]
-atlas = ExtResource("6_4k7gr")
-region = Rect2(0, 256, 128, 128)
+region = Rect2(128, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_qkdr8"]
 atlas = ExtResource("6_4k7gr")
 region = Rect2(128, 256, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_c4ma4"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_0j62p"]
 atlas = ExtResource("6_4k7gr")
-region = Rect2(256, 256, 128, 128)
+region = Rect2(256, 128, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dyt1i"]
+atlas = ExtResource("6_4k7gr")
+region = Rect2(256, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gsolr"]
+atlas = ExtResource("6_4k7gr")
+region = Rect2(0, 256, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_no3ep"]
+atlas = ExtResource("6_4k7gr")
+region = Rect2(384, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k3gjb"]
+atlas = ExtResource("6_4k7gr")
+region = Rect2(128, 128, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5lb20"]
+atlas = ExtResource("6_4k7gr")
+region = Rect2(384, 256, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p8y05"]
+atlas = ExtResource("6_4k7gr")
+region = Rect2(384, 128, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m7y3w"]
+atlas = ExtResource("6_4k7gr")
+region = Rect2(640, 128, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_bel8f"]
 atlas = ExtResource("6_58r07")
@@ -92,9 +100,9 @@ grow_horizontal = 0
 
 [node name="ColorRect" type="ColorRect" parent="UI/Control"]
 layout_mode = 0
-offset_left = -472.0
-offset_right = 194.0
-offset_bottom = 480.0
+offset_left = -471.0
+offset_right = 195.0
+offset_bottom = 502.0
 color = Color(0, 0, 0, 0.658824)
 
 [node name="CellOptions" type="OptionButton" parent="UI/Control"]
@@ -107,39 +115,45 @@ offset_bottom = 135.0
 theme = ExtResource("7_mosdc")
 theme_override_font_sizes/font_size = 37
 selected = 0
-item_count = 11
+item_count = 13
 popup/item_0/text = "Wire"
 popup/item_0/icon = SubResource("AtlasTexture_8bnvh")
-popup/item_1/text = "Generator"
-popup/item_1/icon = SubResource("AtlasTexture_pci65")
-popup/item_1/id = 2
-popup/item_2/text = "AND"
-popup/item_2/icon = SubResource("AtlasTexture_dyt1i")
+popup/item_1/text = "Angled Wire"
+popup/item_1/icon = SubResource("AtlasTexture_c4ma4")
+popup/item_1/id = 10
+popup/item_2/text = "Detector"
+popup/item_2/icon = SubResource("AtlasTexture_ly7sy")
 popup/item_2/id = 4
-popup/item_3/text = "Buffer"
-popup/item_3/icon = SubResource("AtlasTexture_no3ep")
-popup/item_3/id = 6
-popup/item_4/text = "Detector"
-popup/item_4/icon = SubResource("AtlasTexture_ly7sy")
-popup/item_4/id = 1
-popup/item_5/text = "Switch"
-popup/item_5/icon = SubResource("AtlasTexture_k3gjb")
-popup/item_5/id = 7
-popup/item_6/text = "XOR"
-popup/item_6/icon = SubResource("AtlasTexture_0j62p")
-popup/item_6/id = 5
-popup/item_7/text = "Jump Pad"
-popup/item_7/icon = SubResource("AtlasTexture_p8y05")
+popup/item_3/text = "Generator"
+popup/item_3/icon = SubResource("AtlasTexture_pci65")
+popup/item_3/id = 1
+popup/item_4/text = "RNG"
+popup/item_4/icon = SubResource("AtlasTexture_qkdr8")
+popup/item_4/id = 9
+popup/item_5/text = "XOR"
+popup/item_5/icon = SubResource("AtlasTexture_0j62p")
+popup/item_5/id = 6
+popup/item_6/text = "AND"
+popup/item_6/icon = SubResource("AtlasTexture_dyt1i")
+popup/item_6/id = 2
+popup/item_7/text = "Blocker"
+popup/item_7/icon = SubResource("AtlasTexture_gsolr")
 popup/item_7/id = 8
-popup/item_8/text = "Blocker"
-popup/item_8/icon = SubResource("AtlasTexture_gsolr")
-popup/item_8/id = 9
-popup/item_9/text = "RNG"
-popup/item_9/icon = SubResource("AtlasTexture_qkdr8")
-popup/item_9/id = 3
-popup/item_10/text = "Angled Wire"
-popup/item_10/icon = SubResource("AtlasTexture_c4ma4")
-popup/item_10/id = 10
+popup/item_8/text = "Buffer"
+popup/item_8/icon = SubResource("AtlasTexture_no3ep")
+popup/item_8/id = 3
+popup/item_9/text = "D Flip-Flop"
+popup/item_9/icon = SubResource("AtlasTexture_k3gjb")
+popup/item_9/id = 5
+popup/item_10/text = "T Flip-Flop"
+popup/item_10/icon = SubResource("AtlasTexture_5lb20")
+popup/item_10/id = 12
+popup/item_11/text = "Jump Pad"
+popup/item_11/icon = SubResource("AtlasTexture_p8y05")
+popup/item_11/id = 7
+popup/item_12/text = "Flow"
+popup/item_12/icon = SubResource("AtlasTexture_m7y3w")
+popup/item_12/id = 11
 
 [node name="ColorOptions" type="OptionButton" parent="UI/Control"]
 unique_name_in_owner = true
@@ -188,7 +202,8 @@ theme_override_font_sizes/font_size = 40
 text = "! Clear 
 Grid !"
 
-[node name="HSlider" type="HSlider" parent="UI/Control"]
+[node name="TickSlider" type="HSlider" parent="UI/Control"]
+unique_name_in_owner = true
 layout_mode = 0
 offset_left = -472.0
 offset_top = 211.0
@@ -233,30 +248,30 @@ text = "Fast"
 
 [node name="Save" type="Button" parent="UI/Control"]
 layout_mode = 0
-offset_left = -472.0
-offset_top = 265.0
-offset_right = 40.0
-offset_bottom = 329.0
+offset_left = -471.0
+offset_top = 287.0
+offset_right = 41.0
+offset_bottom = 351.0
 theme = ExtResource("7_mosdc")
 theme_override_font_sizes/font_size = 40
 text = "Save"
 
 [node name="Pause" type="Button" parent="UI/Control"]
 layout_mode = 0
-offset_left = -473.0
-offset_top = 413.0
-offset_right = 39.0
-offset_bottom = 477.0
+offset_left = -471.0
+offset_top = 435.0
+offset_right = 41.0
+offset_bottom = 499.0
 theme = ExtResource("7_mosdc")
 theme_override_font_sizes/font_size = 40
 text = "Pause"
 
 [node name="Load" type="Button" parent="UI/Control"]
 layout_mode = 0
-offset_left = -472.0
-offset_top = 338.0
-offset_right = 40.0
-offset_bottom = 402.0
+offset_left = -471.0
+offset_top = 360.0
+offset_right = 41.0
+offset_bottom = 424.0
 theme = ExtResource("7_mosdc")
 theme_override_font_sizes/font_size = 40
 text = "Load"
@@ -270,6 +285,17 @@ offset_bottom = 174.0
 theme = ExtResource("7_mosdc")
 text = "Alternative
 Pallete"
+
+[node name="JsonToggle" type="CheckBox" parent="UI/Control"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = -469.0
+offset_top = 252.0
+offset_right = -82.0
+offset_bottom = 283.0
+theme = ExtResource("7_mosdc")
+text = "Use Json instead Of Byte Format for copying"
 
 [node name="CamOrigin" type="Node2D" parent="."]
 unique_name_in_owner = true
@@ -289,7 +315,7 @@ zoom = Vector2(0.3, 0.3)
 
 [node name="SaveDialog" type="PopupPanel" parent="."]
 unique_name_in_owner = true
-size = Vector2i(785, 280)
+size = Vector2i(785, 205)
 
 [node name="Control" type="Control" parent="SaveDialog"]
 layout_mode = 3
@@ -297,40 +323,22 @@ anchors_preset = 0
 offset_left = 4.0
 offset_top = 4.0
 offset_right = 781.0
-offset_bottom = 276.0
-
-[node name="Label" type="Label" parent="SaveDialog/Control"]
-layout_mode = 0
-offset_left = 4.0
-offset_top = -2.0
-offset_right = 214.0
-offset_bottom = 28.0
-theme_override_font_sizes/font_size = 21
-text = "Signal Word scheme:"
-
-[node name="TextEdit" type="TextEdit" parent="SaveDialog/Control/Label"]
-layout_mode = 0
-offset_top = 28.78
-offset_right = 777.0
-offset_bottom = 96.625
-theme_override_font_sizes/font_size = 40
-editable = false
+offset_bottom = 201.0
 
 [node name="Label2" type="Label" parent="SaveDialog/Control"]
-visible = false
 layout_mode = 0
 offset_left = 4.0
-offset_top = 95.23
-offset_right = 214.0
-offset_bottom = 125.23
+offset_top = 3.365
+offset_right = 220.0
+offset_bottom = 33.365
 theme_override_font_sizes/font_size = 21
-text = "Logic Arrows scheme:"
+text = "Signal World scheme:"
 
 [node name="TextEdit" type="TextEdit" parent="SaveDialog/Control/Label2"]
 layout_mode = 0
 offset_top = 28.78
-offset_right = 777.0
-offset_bottom = 96.625
+offset_right = 766.33
+offset_bottom = 102.575
 theme_override_font_sizes/font_size = 40
 editable = false
 
@@ -413,14 +421,14 @@ tile_set = ExtResource("10_jwree")
 [node name="SelectionStartSprite" type="Sprite2D" parent="SelectionIcons"]
 unique_name_in_owner = true
 visible = false
-modulate = Color(0, 0.788235, 1, 1)
+modulate = Color(0, 0, 1, 1)
 scale = Vector2(0.03, 0.03)
 texture = ExtResource("11_adeqb")
 
 [node name="SelectionEndSprite" type="Sprite2D" parent="SelectionIcons"]
 unique_name_in_owner = true
 visible = false
-modulate = Color(1, 0.788235, 0, 1)
+modulate = Color(1, 0.501961, 0, 1)
 scale = Vector2(0.03, 0.03)
 texture = ExtResource("11_adeqb")
 
@@ -435,9 +443,9 @@ texture = ExtResource("11_adeqb")
 [connection signal="mouse_entered" from="UI/Control/ClearGrid" to="UI" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="UI/Control/ClearGrid" to="UI" method="_on_mouse_exited"]
 [connection signal="pressed" from="UI/Control/ClearGrid" to="GameHandler" method="clear_tilemap"]
-[connection signal="mouse_entered" from="UI/Control/HSlider" to="UI" method="_on_mouse_entered"]
-[connection signal="mouse_exited" from="UI/Control/HSlider" to="UI" method="_on_mouse_exited"]
-[connection signal="value_changed" from="UI/Control/HSlider" to="GameHandler" method="change_tick_rate"]
+[connection signal="mouse_entered" from="UI/Control/TickSlider" to="UI" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="UI/Control/TickSlider" to="UI" method="_on_mouse_exited"]
+[connection signal="value_changed" from="UI/Control/TickSlider" to="GameHandler" method="change_tick_rate"]
 [connection signal="mouse_entered" from="UI/Control/Save" to="UI" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="UI/Control/Save" to="UI" method="_on_mouse_exited"]
 [connection signal="pressed" from="UI/Control/Save" to="UI" method="_on_save_pressed"]
@@ -450,6 +458,8 @@ texture = ExtResource("11_adeqb")
 [connection signal="mouse_entered" from="UI/Control/CheckBox" to="UI" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="UI/Control/CheckBox" to="UI" method="_on_mouse_exited"]
 [connection signal="toggled" from="UI/Control/CheckBox" to="GameHandler" method="toggle_colormap"]
+[connection signal="mouse_entered" from="UI/Control/JsonToggle" to="UI" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="UI/Control/JsonToggle" to="UI" method="_on_mouse_exited"]
 [connection signal="pressed" from="SaveDialog/Control/SaveClose" to="UI" method="_on_save_close_pressed"]
 [connection signal="pressed" from="OpenDialog/Control/LoadButtonDialog" to="UI" method="_on_load_button_dialog_pressed"]
 [connection signal="pressed" from="OpenDialog/Control/LoadClose" to="UI" method="_on_load_close_pressed"]

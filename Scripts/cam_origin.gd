@@ -16,14 +16,14 @@ func zoom_out():
 
 # Handle Mouse Movement and Tile Placement
 func _input(event: InputEvent) -> void:
-
+	var selected_id = %CellOptions.get_item_id(%CellOptions.selected)
 	if event is InputEventMouseMotion:
 		
 		if event.button_mask == MOUSE_BUTTON_MASK_MIDDLE:
 			position -= event.relative / %Camera2D.zoom
 		if not %UI.mouse_over:
 			if event.button_mask == MOUSE_BUTTON_LEFT:
-				%GameHandler.user_place_tile_tilemap(%CellMap, event, Global.CellTypesAtlCoords[%CellOptions.selected], Global.RotationInd[%RotationOptions.selected])
+				%GameHandler.user_place_tile_tilemap(%CellMap, event, Global.CellTypesAtlCoords[selected_id], Global.RotationInd[%RotationOptions.selected])
 				%GameHandler.user_place_tile_tilemap(%ColorMap, event, Global.PowerTypesAtl[%ColorOptions.selected], 0,0)
 			if event.button_mask == MOUSE_BUTTON_RIGHT:
 				%GameHandler.user_place_tile_tilemap(%CellMap, event, Vector2i(-1,-1),0)
@@ -36,7 +36,7 @@ func _input(event: InputEvent) -> void:
 				zoom_in()
 			if not %UI.mouse_over:
 				if event.button_index == MOUSE_BUTTON_LEFT:
-					%GameHandler.user_place_tile_tilemap(%CellMap, event, Global.CellTypesAtlCoords[%CellOptions.selected], Global.RotationInd[%RotationOptions.selected])
+					%GameHandler.user_place_tile_tilemap(%CellMap, event, Global.CellTypesAtlCoords[selected_id], Global.RotationInd[%RotationOptions.selected])
 					%GameHandler.user_place_tile_tilemap(%ColorMap, event, Global.PowerTypesAtl[%ColorOptions.selected], 0,0)
 				if event.button_index == MOUSE_BUTTON_RIGHT:
 					%GameHandler.user_place_tile_tilemap(%CellMap, event, Vector2i(-1,-1),0)

@@ -1,4 +1,4 @@
-[gd_resource type="TileSet" load_steps=3 format=3 uid="uid://cit2ccifrhmwc"]
+[gd_resource type="TileSet" load_steps=3 format=3 uid="uid://dbobdf4a47a0a"]
 
 [ext_resource type="Texture2D" uid="uid://dp6ens22mnwt3" path="res://Images/tileset_alt.svg" id="1_6tjvb"]
 
@@ -18,7 +18,7 @@ texture_region_size = Vector2i(128, 128)
 2:1/0 = 0
 2:1/0/custom_data_0 = &"XOR"
 1:1/0 = 0
-1:1/0/custom_data_0 = &"Switch"
+1:1/0/custom_data_0 = &"DFlipFlop"
 0:1/0 = 0
 0:1/0/custom_data_0 = &"Detector"
 0:2/0 = 0
@@ -27,6 +27,10 @@ texture_region_size = Vector2i(128, 128)
 1:2/0/custom_data_0 = &"Randomizer"
 2:2/0 = 0
 2:2/0/custom_data_0 = &"AngledWire"
+5:1/0 = 0
+5:1/0/custom_data_0 = &"Flow"
+3:2/0 = 0
+3:2/0/custom_data_0 = &"TFlipFlop"
 
 [resource]
 tile_size = Vector2i(128, 128)
