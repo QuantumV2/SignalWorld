@@ -12,7 +12,7 @@ config_version=5
 
 config/name="SignalWorldCA"
 run/main_scene="res://Scenes/TitleScreen.tscn"
-config/features=PackedStringArray("4.3", "Forward Plus")
+config/features=PackedStringArray("4.4", "Forward Plus")
 run/max_fps=60
 config/icon="res://Images/arrow_empty.svg"
 
@@ -24,6 +24,7 @@ Global="*res://Scripts/Global.gd"
 
 window/size/viewport_width=1920
 window/size/viewport_height=1080
+window/size/mode=3
 window/stretch/mode="viewport"
 
 [input]
@@ -116,7 +117,7 @@ pointing/android/enable_pan_and_scale_gestures=true
 
 textures/canvas_textures/default_texture_filter=2
 renderer/rendering_method="mobile"
-environment/defaults/default_clear_color=Color(1, 1, 1, 1)
 anti_aliasing/quality/msaa_2d=1
 anti_aliasing/quality/msaa_3d=1
+environment/defaults/default_clear_color=Color(1, 1, 1, 1)
 anti_aliasing/quality/screen_space_aa=1

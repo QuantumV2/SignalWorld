@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://b7j2071weldx4" path="res://Prefabs/color_map.tscn" id="2_qbqjo"]
 [ext_resource type="PackedScene" uid="uid://br6n2l4lqswsi" path="res://Prefabs/game_handler.tscn" id="3_wvuos"]
 [ext_resource type="PackedScene" uid="uid://b0pjv63xsnn1v" path="res://Prefabs/grid.tscn" id="4_hmpok"]
-[ext_resource type="Script" path="res://Scripts/TitleScreen.gd" id="5_ml48p"]
+[ext_resource type="Script" uid="uid://d284y60b88pbt" path="res://Scripts/TitleScreen.gd" id="5_ml48p"]
 [ext_resource type="Theme" uid="uid://dnixri72mn2bw" path="res://UI/gui_theme.tres" id="5_yr8hq"]
 
 [node name="TitleScreen" type="Node2D"]

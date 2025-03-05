@@ -1,11 +1,11 @@
 [gd_scene load_steps=27 format=3 uid="uid://dpl015ydoxgno"]
 
-[ext_resource type="Script" path="res://Scripts/cam_origin.gd" id="2_sxy5u"]
+[ext_resource type="Script" uid="uid://cqatlws0rxgdc" path="res://Scripts/cam_origin.gd" id="2_sxy5u"]
 [ext_resource type="PackedScene" uid="uid://b7j2071weldx4" path="res://Prefabs/color_map.tscn" id="3_li8la"]
 [ext_resource type="Material" uid="uid://7qeooo1f6kpq" path="res://Materials/normal.tres" id="3_s661c"]
 [ext_resource type="PackedScene" uid="uid://br6n2l4lqswsi" path="res://Prefabs/game_handler.tscn" id="3_uuw4e"]
 [ext_resource type="PackedScene" uid="uid://ckq1uhkvol4c1" path="res://Prefabs/cell_map.tscn" id="4_1x3vp"]
-[ext_resource type="Script" path="res://Scripts/ui.gd" id="5_n4cru"]
+[ext_resource type="Script" uid="uid://bj62is2hpiw8d" path="res://Scripts/ui.gd" id="5_n4cru"]
 [ext_resource type="Texture2D" uid="uid://dnxyf2sdaijof" path="res://Images/tileset.svg" id="6_4k7gr"]
 [ext_resource type="Texture2D" uid="uid://b5sg0v8mg8dnk" path="res://Images/colors.png" id="6_58r07"]
 [ext_resource type="Theme" uid="uid://dnixri72mn2bw" path="res://UI/gui_theme.tres" id="7_mosdc"]
@@ -118,6 +118,7 @@ selected = 0
 item_count = 13
 popup/item_0/text = "Wire"
 popup/item_0/icon = SubResource("AtlasTexture_8bnvh")
+popup/item_0/id = 0
 popup/item_1/text = "Angled Wire"
 popup/item_1/icon = SubResource("AtlasTexture_c4ma4")
 popup/item_1/id = 10
@@ -167,6 +168,7 @@ theme_override_font_sizes/font_size = 39
 selected = 0
 item_count = 2
 popup/item_0/text = "No Signal"
+popup/item_0/id = 0
 popup/item_1/text = "Signal"
 popup/item_1/icon = SubResource("AtlasTexture_bel8f")
 popup/item_1/id = 1
@@ -183,6 +185,7 @@ theme_override_font_sizes/font_size = 37
 selected = 0
 item_count = 4
 popup/item_0/text = "Up"
+popup/item_0/id = 0
 popup/item_1/text = "Right"
 popup/item_1/id = 1
 popup/item_2/text = "Down"
