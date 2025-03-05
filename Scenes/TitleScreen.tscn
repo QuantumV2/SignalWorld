@@ -82,17 +82,16 @@ modulate = Color(0.439049, 0.439049, 0.439049, 1)
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = 2107.0
-offset_top = 1343.0
-offset_right = 2513.0
-offset_bottom = 1474.0
+offset_left = 2786.0
+offset_top = 1604.0
+offset_right = 2924.0
+offset_bottom = 1669.0
 grow_horizontal = 2
 scale = Vector2(3, 3)
 theme = ExtResource("5_yr8hq")
 theme_override_font_sizes/normal_font_size = 45
 bbcode_enabled = true
-text = "Special Thanks:
-cachewave"
+text = "[center] v0.6 [/center]"
 
 [node name="Node" type="Node" parent="."]
 script = ExtResource("5_ml48p")
